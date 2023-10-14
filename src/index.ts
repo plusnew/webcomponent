@@ -1,4 +1,5 @@
-import {Signal, batch, effect, signal} from  "@preact/signals-core"
+import { Signal, batch, effect, signal } from "@preact/signals-core";
+import { jsx } from "./jsx-runtime.js";
 
 type JSXElement = string | false | JSXElement[];
 
@@ -13,21 +14,24 @@ export function mount(parent: HTMLElement, JSXElement: JSXElement) {
 }
 
 export function webcomponent<T extends { render: () => JSXElement}>(name: string, Webcomponent: Webcomponent<T>): (properties: {[K in (Exclude<keyof T, "render">)]: T[K]}) => null {
-    Webcomponent.prototype = HTMLElement;
-    Webcomponent.prototype.connectedCallback = function() {
-        const scope = this;
-
-        effect(() => {
-            batch(() => {
-                const result = scope.render();
-                reconcile(result, false, null)
+    if(Reflect.setPrototypeOf(Webcomponent, HTMLElement)) {
+        Webcomponent.prototype.connectedCallback = function() {
+            const scope = this;
+    
+            effect(() => {
+                batch(() => {
+                    const result = scope.render();
+                    reconcile(result, false, null)
+                });
             });
-        });
+        }
+    
+        customElements.define(name, Webcomponent as any);
+    
+        return jsx() as any
+    } else {
+        throw new Error("Was not able to set prototype of component")
     }
-
-    customElements.define("my-autonomous-element", Webcomponent as any);
-
-    return {} as any
 }
 
 

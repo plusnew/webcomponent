@@ -1,5 +1,5 @@
 import { expect } from '@esm-bundle/chai';
-import { mount, prop, webcomponent } from "../src/index"
+import { mount, prop, webcomponent } from "@plusnew/webcomponent"
 import { signal } from '@preact/signals-core';
 
 describe('webcomponent', () => {
