@@ -1,0 +1,37 @@
+{
+  "name": "webcomponent",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.ts",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "web-test-runner"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/plusnew/webcomponent.git"
+  },
+  "author": "Carlo Jeske",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/plusnew/webcomponent/issues"
+  },
+  "homepage": "https://github.com/plusnew/webcomponent#readme",
+  "devDependencies": {
+    "@babel/plugin-proposal-decorators": "^7.23.2",
+    "@babel/plugin-transform-react-jsx": "^7.22.15",
+    "@babel/runtime": "^7.23.2",
+    "@esm-bundle/chai": "^4.3.4-fix.0",
+    "@preact/signals-core": "^1.5.0",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@web/dev-server-esbuild": "^0.4.1",
+    "@web/test-runner": "^0.17.2"
+  },
+  "overrides": {
+    "@web/dev-server-esbuild": {
+      "esbuild": "0.19.4"
+    }
+  }
+}
