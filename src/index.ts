@@ -1,58 +1,164 @@
-import { Signal, batch, effect, signal } from "@preact/signals-core";
-import { jsx } from "./jsx-runtime.js";
+import type { Signal } from "@preact/signals-core";
+import { batch, effect, signal } from "@preact/signals-core";
 
-type JSXElement = string | false | JSXElement[];
+type ShadowHostElement = {
+  $$typeof: symbol;
+  type: string;
+  key: any;
+  props: any;
+};
 
-type Webcomponent<T extends { render: () => JSXElement }> = {
-    new ():  T
+type ShadowElement = ShadowHostElement | string | false | ShadowElement[];
+
+type Webcomponent<T extends { render: () => ShadowElement }> = {
+  new (): T;
+};
+
+export const PLUSNEW_ELEMENT_TYPE = Symbol("plusnew-element-type");
+
+export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
+  const shadowResult = {
+    value: false as const,
+    nodes: [],
+    nestedShadows: [],
+  };
+  reconcile(parent, parent.lastElementChild, shadowResult, JSXElement);
+
+  return shadowResult.nodes;
 }
 
-const dirtyFlag = Symbol("dirty")
+export function webcomponent<T extends { render: () => ShadowElement }>(
+  name: string,
+  Webcomponent: Webcomponent<T>,
+): (properties: {
+  [K in Exclude<keyof T, "render" | keyof HTMLElement>]: T[K];
+}) => null {
+  const shadowResult = {
+    value: false as const,
+    nodes: [],
+    nestedShadows: [],
+  };
 
-export function mount(parent: HTMLElement, JSXElement: JSXElement) {
+  let disconnect = () => {};
 
+  Webcomponent.prototype.connectedCallback = function (this: HTMLElement & T) {
+    const shadowRoot = this.attachShadow({ mode: "closed" });
+
+    disconnect = effect(() => {
+      batch(() => {
+        const result = this.render();
+        reconcile(shadowRoot, null, shadowResult, result);
+      });
+    });
+  };
+  Webcomponent.prototype.disconnectedCallback = () => disconnect();
+
+  customElements.define(name, Webcomponent as any);
+
+  return name as any;
 }
 
-export function webcomponent<T extends { render: () => JSXElement}>(name: string, Webcomponent: Webcomponent<T>): (properties: {[K in (Exclude<keyof T, "render">)]: T[K]}) => null {
-    if(Reflect.setPrototypeOf(Webcomponent, HTMLElement)) {
-        Webcomponent.prototype.connectedCallback = function() {
-            const scope = this;
-    
-            effect(() => {
-                batch(() => {
-                    const result = scope.render();
-                    reconcile(result, false, null)
-                });
-            });
+export function prop() {
+  return <T, U>(
+    _decoratorTarget: ClassAccessorDecoratorTarget<T, U>,
+    _accessor: ClassAccessorDecoratorContext<T, U>,
+  ): ClassAccessorDecoratorResult<T, U> => {
+    let storage: Signal<U> | null = null;
+    return {
+      set: function (value) {
+        if (storage === null) {
+          storage = signal(value);
+        } else {
+          storage.value = value;
         }
-    
-        customElements.define(name, Webcomponent as any);
-    
-        return jsx() as any
-    } else {
-        throw new Error("Was not able to set prototype of component")
-    }
+      },
+      get: function () {
+        return storage === null ? (undefined as U) : storage.value;
+      },
+    };
+  };
 }
 
+type ShadowCache = {
+  value: ShadowElement;
+  nodes: Node[];
+  nestedShadows: ShadowCache[];
+};
 
-export function prop(){
-    return <T, U>(decoratorTarget: ClassAccessorDecoratorTarget<T, U>, accessor: ClassAccessorDecoratorContext<T, U>): ClassAccessorDecoratorResult<T,U> => {
-        let storage: Signal<U> | null =null;
-        return {
-            set: function(value) {
-                if(storage === null ) {
-                    storage = signal(value)
-                } else {
-                    storage.value = value
-                }
-            },
-            get: function() {
-                return storage === null ? undefined as U : storage.value;
-            }
-        }
+const reconcilers: ((
+  parentElement: ParentNode,
+  previousSibling: Node | null,
+  shadowCache: ShadowCache,
+  shadowElement: ShadowElement,
+) => Node | null | false)[] = [
+  (parentElement, previousSibling, shadowCache, shadowElement) => {
+    function isHostElement(
+      shadowElement: ShadowElement,
+    ): shadowElement is ShadowHostElement {
+      return (
+        typeof shadowElement === "object" &&
+        "$$typeof" in shadowElement &&
+        typeof shadowElement.type === "string"
+      );
     }
+
+    // Check if new shadow is of type dom-element
+    if (isHostElement(shadowElement)) {
+      // Check if old shadow is of same shadow-type
+      if (
+        isHostElement(shadowCache.value) &&
+        shadowElement.type === shadowElement.type
+      ) {
+        throw new Error("Updating is not yet implemented");
+      } else {
+        // remove old
+        // @TODO
+
+        // create new
+        const element = document.createElement(shadowElement.type);
+
+        append(parentElement, previousSibling, element);
+
+        shadowCache.nodes = [element];
+      }
+
+      shadowCache.value = shadowElement;
+      return shadowCache.nodes[0];
+    }
+    return false;
+  },
+];
+
+function append(
+  parentElement: ParentNode,
+  previousSibling: Node | null,
+  target: Node,
+) {
+  if (previousSibling === null) {
+    parentElement.insertBefore(target, parentElement.firstChild);
+  } else {
+    parentElement.insertBefore(target, previousSibling.nextSibling);
+  }
 }
 
-function reconcile(newShadowDom: JSXElement, oldShadowDom: JSXElement, previousSibling: Node | null): Node | null {
-    return previousSibling;
+function reconcile(
+  parentElement: ParentNode,
+  previousSibling: Node | null,
+  shadowCache: ShadowCache,
+  shadowElement: ShadowElement,
+): Node | null {
+  for (const reconciler of reconcilers) {
+    const result = reconciler(
+      parentElement,
+      previousSibling,
+      shadowCache,
+      shadowElement,
+    );
+    if (result !== false) {
+      return result;
+    }
+  }
+  throw new Error(
+    "Could not find fitting reconciler for " + shadowElement.toString(),
+  );
 }
