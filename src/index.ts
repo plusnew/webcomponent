@@ -27,15 +27,15 @@ export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
   return shadowResult.node;
 }
 
+type PartialHtmlElement = Partial<HTMLElement>;
 export function webcomponent<T extends { render: () => ShadowElement }>(
   name: string,
   Webcomponent: Webcomponent<T>,
-): (properties: {
-  [K in keyof T as Exclude<
-    K,
-    "render" | "connectedCallback" | keyof HTMLElement
-  >]: T[K];
-}) => null {
+): (
+  properties: {
+    [K in keyof T as Exclude<K, "render" | keyof WebComponent>]: T[K];
+  } & PartialHtmlElement,
+) => null {
   customElements.define(name, Webcomponent as any);
 
   return name as any;
@@ -46,12 +46,12 @@ const shadowResult = Symbol("shadowResult");
 
 export abstract class WebComponent extends (HTMLElement as any as null) {
   private [disconnect] = () => {};
-  private [shadowResult] = {
+  private [shadowResult]: ShadowCache = {
     value: false as const,
-    nodes: [],
+    node: null,
     nestedShadows: [],
   };
-  connectedCallback(this: any) {
+  connectedCallback(this: WebComponent & HTMLElement) {
     const shadowRoot = this.attachShadow({ mode: "open" });
 
     this[disconnect] = effect(() => {
@@ -60,6 +60,9 @@ export abstract class WebComponent extends (HTMLElement as any as null) {
         reconcile(shadowRoot, null, this[shadowResult], result);
       });
     });
+  }
+  disconnectedCallback(this: WebComponent & HTMLElement) {
+    // @TODO remove event-listener
   }
   abstract render(): ShadowElement;
 }
@@ -94,6 +97,14 @@ type ShadowCache = {
   nestedShadows: ShadowCache[];
 };
 
+function remove(oldShadowCache: ShadowCache) {
+  if (oldShadowCache.node === null) {
+    oldShadowCache.nestedShadows.forEach(remove);
+  } else {
+    oldShadowCache.node.parentNode?.removeChild(oldShadowCache.node);
+  }
+}
+
 const reconcilers: ((
   parentElement: ParentNode,
   previousSibling: Node | null,
@@ -121,7 +132,7 @@ const reconcilers: ((
         throw new Error("Updating is not yet implemented");
       } else {
         // remove old element
-        // @TODO
+        remove(shadowCache);
 
         // create new element
         const element = document.createElement(shadowElement.type);
@@ -153,7 +164,7 @@ const reconcilers: ((
         return shadowCache.node;
       } else {
         // remove old element
-        // @TODO
+        remove(shadowCache);
 
         // create new element
         const element = document.createTextNode(shadowElement);

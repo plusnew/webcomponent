@@ -38,12 +38,13 @@ describe("webcomponent", () => {
     // @ts-expect-error component with excessive property baz, should be an error
     <Component foo="bar" baz="mep" />;
 
-    mount(container, <Component foo="mep" />);
+    mount(container, <Component foo="mep" className="some-class" />);
 
     expect(container.childNodes.length).to.equal(1);
 
     const component = container.childNodes[0] as HTMLElement;
     expect(component.tagName).to.equal("FOO-BAR");
+    expect(component.className).to.equal("some-class");
     expect(component.childNodes.length).to.equal(0);
     expect(component.shadowRoot?.innerHTML).to.equal("mep-baz");
 
