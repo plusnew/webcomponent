@@ -14,7 +14,7 @@ describe("webcomponent", () => {
     container.remove();
   });
 
-  it("creates basic component", () => {
+  it("creates basic component and updating its props", () => {
     const Component = webcomponent(
       "foo-bar",
       class Component extends WebComponent {
