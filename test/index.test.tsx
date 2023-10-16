@@ -1,12 +1,23 @@
 import { expect } from "@esm-bundle/chai";
-import { mount, prop, webcomponent } from "@plusnew/webcomponent";
+import { mount, prop, webcomponent, WebComponent } from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
 describe("webcomponent", () => {
-  it("adds two numbers together", () => {
+  let container: HTMLElement;
+
+  beforeEach(() => {
+    container = document.createElement("div");
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    container.remove();
+  });
+
+  it("creates basic component", () => {
     const Component = webcomponent(
       "foo-bar",
-      class Component extends HTMLElement {
+      class Component extends WebComponent {
         @prop()
         accessor foo: string;
 
@@ -17,8 +28,6 @@ describe("webcomponent", () => {
         }
       },
     );
-
-    const container = document.createElement("div");
 
     // @ts-expect-error component with no props given, should be an error
     <Component />;
@@ -32,8 +41,10 @@ describe("webcomponent", () => {
     mount(container, <Component foo="mep" />);
 
     expect(container.childNodes.length).to.equal(1);
-    expect((container.childNodes[0] as HTMLElement).tagName).to.equal(
-      "FOO-BAR",
-    );
+
+    const component = container.childNodes[0] as HTMLElement;
+    expect(component.tagName).to.equal("FOO-BAR");
+    expect(component.childNodes.length).to.equal(0);
+    expect(component.shadowRoot?.innerHTML).to.equal("baz");
   });
 });

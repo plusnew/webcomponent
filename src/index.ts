@@ -17,45 +17,51 @@ type Webcomponent<T extends { render: () => ShadowElement }> = {
 export const PLUSNEW_ELEMENT_TYPE = Symbol("plusnew-element-type");
 
 export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
-  const shadowResult = {
+  const shadowResult: ShadowCache = {
     value: false as const,
-    nodes: [],
+    node: null,
     nestedShadows: [],
   };
   reconcile(parent, parent.lastElementChild, shadowResult, JSXElement);
 
-  return shadowResult.nodes;
+  return shadowResult.node;
 }
 
 export function webcomponent<T extends { render: () => ShadowElement }>(
   name: string,
   Webcomponent: Webcomponent<T>,
 ): (properties: {
-  [K in Exclude<keyof T, "render" | keyof HTMLElement>]: T[K];
+  [K in keyof T as Exclude<
+    K,
+    "render" | "connectedCallback" | keyof HTMLElement
+  >]: T[K];
 }) => null {
-  const shadowResult = {
+  customElements.define(name, Webcomponent as any);
+
+  return name as any;
+}
+
+const disconnect = Symbol("disconnect");
+const shadowResult = Symbol("shadowResult");
+
+export abstract class WebComponent extends (HTMLElement as any as null) {
+  private [disconnect] = () => {};
+  private [shadowResult] = {
     value: false as const,
     nodes: [],
     nestedShadows: [],
   };
+  connectedCallback(this: any) {
+    const shadowRoot = this.attachShadow({ mode: "open" });
 
-  let disconnect = () => {};
-
-  Webcomponent.prototype.connectedCallback = function (this: HTMLElement & T) {
-    const shadowRoot = this.attachShadow({ mode: "closed" });
-
-    disconnect = effect(() => {
+    this[disconnect] = effect(() => {
       batch(() => {
         const result = this.render();
-        reconcile(shadowRoot, null, shadowResult, result);
+        reconcile(shadowRoot, null, this[shadowResult], result);
       });
     });
-  };
-  Webcomponent.prototype.disconnectedCallback = () => disconnect();
-
-  customElements.define(name, Webcomponent as any);
-
-  return name as any;
+  }
+  abstract render(): ShadowElement;
 }
 
 export function prop() {
@@ -63,6 +69,9 @@ export function prop() {
     _decoratorTarget: ClassAccessorDecoratorTarget<T, U>,
     _accessor: ClassAccessorDecoratorContext<T, U>,
   ): ClassAccessorDecoratorResult<T, U> => {
+    _decoratorTarget;
+    _accessor;
+
     let storage: Signal<U> | null = null;
     return {
       set: function (value) {
@@ -81,7 +90,7 @@ export function prop() {
 
 type ShadowCache = {
   value: ShadowElement;
-  nodes: Node[];
+  node: Node | null;
   nestedShadows: ShadowCache[];
 };
 
@@ -111,21 +120,46 @@ const reconcilers: ((
       ) {
         throw new Error("Updating is not yet implemented");
       } else {
-        // remove old
+        // remove old element
         // @TODO
 
-        // create new
+        // create new element
         const element = document.createElement(shadowElement.type);
 
         append(parentElement, previousSibling, element);
 
-        shadowCache.nodes = [element];
+        shadowCache.node = element;
       }
 
       shadowCache.value = shadowElement;
-      return shadowCache.nodes[0];
+      return shadowCache.node;
+    } else {
+      return false;
     }
-    return false;
+  },
+
+  (parentElement, previousSibling, shadowCache, shadowElement) => {
+    if (typeof shadowElement === "string") {
+      if (typeof shadowCache.value === "string") {
+        throw new Error("Updating is not yet implemented");
+
+        return shadowCache.node;
+      } else {
+        // remove old element
+        // @TODO
+
+        // create new element
+        const element = document.createTextNode(shadowElement);
+        append(parentElement, previousSibling, element);
+
+        shadowCache.node = element;
+        shadowCache.value = shadowElement;
+
+        return element;
+      }
+    } else {
+      return false;
+    }
   },
 ];
 
