@@ -24,7 +24,7 @@ describe("webcomponent", () => {
         #baz = signal("baz");
 
         render() {
-          return this.#baz.value;
+          return `${this.foo}-${this.#baz.value}`;
         }
       },
     );
@@ -45,6 +45,10 @@ describe("webcomponent", () => {
     const component = container.childNodes[0] as HTMLElement;
     expect(component.tagName).to.equal("FOO-BAR");
     expect(component.childNodes.length).to.equal(0);
-    expect(component.shadowRoot?.innerHTML).to.equal("baz");
+    expect(component.shadowRoot?.innerHTML).to.equal("mep-baz");
+
+    (component as any).foo = "sup";
+
+    expect(component.shadowRoot?.innerHTML).to.equal("sup-baz");
   });
 });

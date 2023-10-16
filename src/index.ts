@@ -126,9 +126,13 @@ const reconcilers: ((
         // create new element
         const element = document.createElement(shadowElement.type);
 
-        append(parentElement, previousSibling, element);
-
         shadowCache.node = element;
+
+        for (const propKey in shadowElement.props) {
+          (shadowCache.node as any)[propKey] = shadowElement.props[propKey];
+        }
+
+        append(parentElement, previousSibling, element);
       }
 
       shadowCache.value = shadowElement;
@@ -141,7 +145,10 @@ const reconcilers: ((
   (parentElement, previousSibling, shadowCache, shadowElement) => {
     if (typeof shadowElement === "string") {
       if (typeof shadowCache.value === "string") {
-        throw new Error("Updating is not yet implemented");
+        if (shadowElement !== shadowCache.value) {
+          (shadowCache.node as Text).textContent = shadowElement;
+          shadowCache.value = shadowElement;
+        }
 
         return shadowCache.node;
       } else {
