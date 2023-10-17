@@ -16,7 +16,7 @@ describe("webcomponent", () => {
 
   it("creates basic component and updating its props", () => {
     const Component = webcomponent(
-      "foo-bar",
+      "test-base",
       class Component extends WebComponent {
         @prop()
         accessor foo: string;
@@ -43,7 +43,7 @@ describe("webcomponent", () => {
     expect(container.childNodes.length).to.equal(1);
 
     const component = container.childNodes[0] as HTMLElement;
-    expect(component.tagName).to.equal("FOO-BAR");
+    expect(component.tagName).to.equal("TEST-BASE");
     expect(component.className).to.equal("some-class");
     expect(component.childNodes.length).to.equal(0);
     expect(component.shadowRoot?.innerHTML).to.equal("mep-baz");
@@ -51,5 +51,58 @@ describe("webcomponent", () => {
     (component as any).foo = "sup";
 
     expect(component.shadowRoot?.innerHTML).to.equal("sup-baz");
+  });
+
+  it("crates array based on given number", () => {
+    const Component = webcomponent(
+      "test-array",
+      class Component extends WebComponent {
+        @prop()
+        accessor amount: number;
+
+        render() {
+          return [...Array(this.amount).keys()].map((value) => {
+            return <div>{value.toString()}</div>;
+          });
+        }
+      },
+    );
+
+    mount(container, <Component amount={0} />);
+
+    expect(container.childNodes.length).to.equal(1);
+
+    const component = container.childNodes[0] as HTMLElement;
+
+    expect(component.tagName).to.equal("TEST-ARRAY");
+    expect(component.shadowRoot?.childNodes.length).to.equal(0);
+
+    (component as any).amount = 3;
+
+    expect(component.shadowRoot?.childNodes.length).to.equal(3);
+    expect(
+      (component.shadowRoot?.childNodes[0] as HTMLElement).tagName,
+    ).to.equal("DIV");
+    expect(
+      (component.shadowRoot?.childNodes[0] as HTMLElement).innerText,
+    ).to.equal("0");
+
+    expect(
+      (component.shadowRoot?.childNodes[1] as HTMLElement).tagName,
+    ).to.equal("DIV");
+    expect(
+      (component.shadowRoot?.childNodes[1] as HTMLElement).innerText,
+    ).to.equal("1");
+
+    expect(
+      (component.shadowRoot?.childNodes[2] as HTMLElement).tagName,
+    ).to.equal("DIV");
+    expect(
+      (component.shadowRoot?.childNodes[2] as HTMLElement).innerText,
+    ).to.equal("2");
+
+    (component as any).amount = 0;
+
+    expect(component.shadowRoot?.childNodes.length).to.equal(0);
   });
 });

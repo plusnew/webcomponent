@@ -1,6 +1,15 @@
+import type { ShadowHostElement } from "./index.js";
 import { PLUSNEW_ELEMENT_TYPE } from "./index.js";
 
-export function jsx(type: string, props: any, key: any) {
+export function jsx(type: string, props: any, key: any): ShadowHostElement {
+  const sanitizedProps = props === undefined ? {} : { ...props };
+  let children: ShadowHostElement["children"] = [];
+
+  if ("children" in sanitizedProps) {
+    children = sanitizedProps.children;
+    delete sanitizedProps.children;
+  }
+
   return {
     // This tag allows us to uniquely identify this as a React Element
     $$typeof: PLUSNEW_ELEMENT_TYPE,
@@ -8,6 +17,7 @@ export function jsx(type: string, props: any, key: any) {
     // Built-in properties that belong on the element
     type,
     key,
-    props,
+    props: sanitizedProps,
+    children,
   };
 }

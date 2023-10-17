@@ -3,14 +3,44 @@ import { batch, effect, signal } from "@preact/signals-core";
 
 export const PLUSNEW_ELEMENT_TYPE = Symbol("plusnew-element-type");
 
-type ShadowHostElement = {
+export type ShadowHostElement = {
   $$typeof: typeof PLUSNEW_ELEMENT_TYPE;
   type: string;
   key: any;
   props: any;
+  children: ShadowElement[];
 };
 
 type ShadowElement = ShadowHostElement | string | false | ShadowElement[];
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace JSX {
+    /**
+     * the JSX.Element is a abstract representation of a Component
+     */
+    type Element = ShadowElement;
+
+    interface ElementChildrenAttribute {
+      // @FIXME children are always arrays, but typescript doesn't accept that because of react
+      children: ShadowElement;
+    }
+
+    /**
+     * All the DOM Nodes are here
+     */
+    interface IntrinsicElements {
+      div: {
+        [K in keyof HTMLDivElement as Exclude<
+          K,
+          "children"
+        >]?: HTMLDivElement[K];
+      } & {
+        children: ShadowElement;
+      };
+    }
+  }
+}
 
 type Webcomponent<T extends { render: () => ShadowElement }> = {
   new (): T;
@@ -103,6 +133,8 @@ function remove(oldShadowCache: ShadowCache) {
   } else {
     oldShadowCache.node.parentNode?.removeChild(oldShadowCache.node);
   }
+  oldShadowCache.node = null;
+  oldShadowCache.nestedShadows = [];
 }
 
 const reconcilers: ((
@@ -111,6 +143,7 @@ const reconcilers: ((
   shadowCache: ShadowCache,
   shadowElement: ShadowElement,
 ) => Node | null | false)[] = [
+  // Host reconciler
   (parentElement, previousSibling, shadowCache, shadowElement) => {
     function isHostElement(
       shadowElement: ShadowElement,
@@ -144,6 +177,7 @@ const reconcilers: ((
           type: shadowElement.type,
           key: shadowElement.key,
           props: {},
+          children: [],
         };
 
         elementNeedsAppending = true;
@@ -160,6 +194,30 @@ const reconcilers: ((
 
       shadowCache.value.props = shadowElement.props;
 
+      let lastAddedSibling: Node | null = null;
+      let i = 0;
+      while (i < shadowElement.children.length) {
+        if (shadowCache.nestedShadows.length <= i) {
+          shadowCache.nestedShadows.push({
+            node: null,
+            value: false,
+            nestedShadows: [],
+          });
+        }
+        lastAddedSibling = reconcile(
+          shadowCache.node as ParentNode,
+          lastAddedSibling,
+          shadowCache.nestedShadows[i],
+          shadowElement.children[i],
+        );
+        i++;
+      }
+
+      while (i < shadowCache.nestedShadows.length) {
+        remove(shadowCache.nestedShadows[i]);
+        shadowCache.nestedShadows.splice(i, 1);
+      }
+
       if (elementNeedsAppending) {
         append(parentElement, previousSibling, shadowCache.node as Node);
       }
@@ -171,6 +229,7 @@ const reconcilers: ((
     }
   },
 
+  // Text reconciler
   (parentElement, previousSibling, shadowCache, shadowElement) => {
     if (typeof shadowElement === "string") {
       if (typeof shadowCache.value === "string") {
@@ -194,6 +253,42 @@ const reconcilers: ((
 
         return element;
       }
+    } else {
+      return false;
+    }
+  },
+
+  // Array reconciler
+  (parentElement, previousSibling, shadowCache, shadowElement) => {
+    if (Array.isArray(shadowElement)) {
+      let lastAddedSibling = previousSibling;
+      if (Array.isArray(shadowCache.value) === false) {
+        remove(shadowCache);
+      }
+      shadowCache.value = [];
+
+      let i = 0;
+      while (i < shadowElement.length) {
+        if (shadowCache.nestedShadows.length <= i) {
+          shadowCache.nestedShadows.push({
+            node: null,
+            value: false,
+            nestedShadows: [],
+          });
+        }
+        lastAddedSibling = reconcile(
+          parentElement,
+          lastAddedSibling,
+          shadowCache.nestedShadows[i],
+          shadowElement[i],
+        );
+        i++;
+      }
+      while (i < shadowCache.nestedShadows.length) {
+        remove(shadowCache.nestedShadows[i]);
+        shadowCache.nestedShadows.splice(i, 1);
+      }
+      return lastAddedSibling;
     } else {
       return false;
     }
