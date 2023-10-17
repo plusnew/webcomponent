@@ -1,5 +1,5 @@
-import type { ShadowHostElement } from "./index.js";
-import { PLUSNEW_ELEMENT_TYPE } from "./index.js";
+import type { ShadowHostElement } from "./types.js";
+import { PLUSNEW_ELEMENT_TYPE } from "./types.js";
 
 export function jsx(type: string, props: any, key: any): ShadowHostElement {
   const sanitizedProps = props === undefined ? {} : { ...props };
