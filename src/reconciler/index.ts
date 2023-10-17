@@ -1,5 +1,6 @@
 import { type ShadowElement } from "../types.js";
 import { arrayReconcile } from "./array.js";
+import { falseReconcile } from "./false.js";
 import { hostReconcile } from "./host.js";
 import { textReconcile } from "./text.js";
 
@@ -15,7 +16,12 @@ export function reconcile(
   shadowCache: ShadowCache,
   shadowElement: ShadowElement,
 ): Node | null {
-  for (const reconciler of [hostReconcile, textReconcile, arrayReconcile]) {
+  for (const reconciler of [
+    hostReconcile,
+    textReconcile,
+    arrayReconcile,
+    falseReconcile,
+  ]) {
     const result = reconciler(
       parentElement,
       previousSibling,

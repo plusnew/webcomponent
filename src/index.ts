@@ -26,7 +26,7 @@ declare global {
           "children"
         >]?: HTMLDivElement[K];
       } & {
-        children: ShadowElement;
+        children?: ShadowElement;
       };
     }
   }

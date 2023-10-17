@@ -105,4 +105,39 @@ describe("webcomponent", () => {
 
     expect(component.shadowRoot?.childNodes.length).to.equal(0);
   });
+
+  it("crates element if needed", () => {
+    const Component = webcomponent(
+      "test-placeholder",
+      class Component extends WebComponent {
+        @prop()
+        accessor show: boolean;
+
+        render() {
+          return this.show === true && <div />;
+        }
+      },
+    );
+
+    mount(container, <Component show={false} />);
+
+    expect(container.childNodes.length).to.equal(1);
+
+    const component = container.childNodes[0] as HTMLElement;
+
+    expect(component.tagName).to.equal("TEST-PLACEHOLDER");
+    expect(component.shadowRoot?.childNodes.length).to.equal(0);
+
+    (component as any).show = true;
+
+    expect(component.shadowRoot?.childNodes.length).to.equal(1);
+
+    expect(
+      (component.shadowRoot?.childNodes[0] as HTMLElement).tagName,
+    ).to.equal("DIV");
+
+    (component as any).show = false;
+
+    expect(component.shadowRoot?.childNodes.length).to.equal(0);
+  });
 });
