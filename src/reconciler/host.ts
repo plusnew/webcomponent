@@ -89,7 +89,6 @@ export function hostReconcile(
       append(parentElement, previousSibling, shadowCache.node as Node);
     }
 
-    shadowCache.value = shadowElement;
     return shadowCache.node;
   } else {
     return false;
