@@ -62,28 +62,27 @@ export function webcomponent<T extends { render: () => ShadowElement }>(
   return name as any;
 }
 
-const disconnect = Symbol("disconnect");
-const shadowResult = Symbol("shadowResult");
-
 export abstract class WebComponent extends (HTMLElement as any as null) {
-  private [disconnect] = () => {};
-  private [shadowResult]: ShadowCache = {
-    value: false as const,
-    node: null,
-    nestedShadows: [],
-  };
   connectedCallback(this: HTMLElement & WebComponent) {
     const shadowRoot = this.attachShadow({ mode: "open" });
+    const shadowCache: ShadowCache = {
+      node: null,
+      nestedShadows: [],
+      value: false,
+    };
 
-    this[disconnect] = effect(() => {
+    const disconnect = effect(() => {
       batch(() => {
         const result = this.render();
-        reconcile(shadowRoot, null, this[shadowResult], result);
+        reconcile(shadowRoot, null, shadowCache, result);
       });
     });
-  }
-  disconnectedCallback(this: HTMLElement & WebComponent) {
-    // @TODO remove event-listener
+
+    (this as any).disconnectedCallback = () => {
+      disconnect();
+
+      // @TODO remove event-listeners of nestedShadowElements
+    };
   }
   abstract render(): ShadowElement;
 }
