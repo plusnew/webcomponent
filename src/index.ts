@@ -1,49 +1,7 @@
 import type { Signal } from "@preact/signals-core";
 import { batch, effect, signal } from "@preact/signals-core";
 import { reconcile, type ShadowCache } from "./reconciler/index.js";
-import type { ShadowElement } from "./types.js";
-
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace JSX {
-    /**
-     * the JSX.Element is a abstract representation of a Component
-     */
-    type Element = ShadowElement;
-
-    interface ElementChildrenAttribute {
-      // @FIXME children are always arrays, but typescript doesn't accept that because of react
-      children: ShadowElement;
-    }
-
-    /**
-     * All the DOM Nodes are here
-     */
-    interface IntrinsicElements {
-      div: {
-        [K in keyof HTMLDivElement as Exclude<
-          K,
-          "children"
-        >]?: HTMLDivElement[K];
-      } & {
-        children?: ShadowElement;
-      };
-
-      slot: {
-        [K in keyof HTMLSlotElement as Exclude<
-          K,
-          "children"
-        >]?: HTMLSlotElement[K];
-      } & {
-        children?: ShadowElement;
-      };
-    }
-  }
-}
-
-type Webcomponent<T extends { render: () => ShadowElement }> = {
-  new (): T;
-};
+import type { ShadowElement, Webcomponent } from "./types.js";
 
 export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
   const shadowResult: ShadowCache = {
