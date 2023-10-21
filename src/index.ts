@@ -28,6 +28,15 @@ declare global {
       } & {
         children?: ShadowElement;
       };
+
+      slot: {
+        [K in keyof HTMLSlotElement as Exclude<
+          K,
+          "children"
+        >]?: HTMLSlotElement[K];
+      } & {
+        children?: ShadowElement;
+      };
     }
   }
 }
@@ -47,28 +56,62 @@ export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
   return shadowResult.node;
 }
 
-type PartialHtmlElement = Partial<HTMLElement>;
+type PartialHtmlElement = {
+  [K in keyof HTMLElement as Exclude<K, "children">]?: HTMLElement[K];
+};
 
 export function webcomponent<T extends { render: () => ShadowElement }>(
   name: string,
   Webcomponent: Webcomponent<T>,
 ): (
-  properties: {
+  properties: PartialHtmlElement & {
     [K in keyof T as Exclude<K, "render" | keyof WebComponent>]: T[K];
-  } & PartialHtmlElement,
+  },
 ) => null {
   customElements.define(name, Webcomponent as any);
 
   return name as any;
 }
 
-export abstract class WebComponent extends (HTMLElement as any as null) {
+export abstract class WebComponent extends HTMLElement {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  findParent<T>(needle: { new (): T }): T | null {
+    throw new Error("Element is not mounted and cant't find parents yet");
+  }
   connectedCallback(this: HTMLElement & WebComponent) {
     const shadowRoot = this.attachShadow({ mode: "open" });
     const shadowCache: ShadowCache = {
       node: null,
       nestedShadows: [],
       value: false,
+    };
+    const parentsCache = new Map();
+
+    const findParent = function <T>(
+      haystack: ParentNode | null,
+      needle: { new (): T },
+    ): T | null {
+      return haystack === null
+        ? null
+        : haystack instanceof needle
+        ? haystack
+        : haystack instanceof WebComponent
+        ? haystack.findParent(needle)
+        : findParent(haystack.parentNode, needle);
+    };
+
+    this.findParent = (needle) => {
+      if (parentsCache.has(needle) === false) {
+        parentsCache.set(needle, findParent(this.parentNode, needle));
+      }
+      return parentsCache.get(needle);
+    };
+
+    (this as any).disconnectedCallback = () => {
+      disconnect();
+      parentsCache.clear();
+
+      // @TODO remove event-listeners of nestedShadowElements
     };
 
     const disconnect = effect(() => {
@@ -77,12 +120,6 @@ export abstract class WebComponent extends (HTMLElement as any as null) {
         reconcile(shadowRoot, null, shadowCache, result);
       });
     });
-
-    (this as any).disconnectedCallback = () => {
-      disconnect();
-
-      // @TODO remove event-listeners of nestedShadowElements
-    };
   }
   abstract render(): ShadowElement;
 }
