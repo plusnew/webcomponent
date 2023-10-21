@@ -126,23 +126,20 @@ export abstract class WebComponent extends HTMLElement {
 
 export function prop() {
   return <T, U>(
-    _decoratorTarget: ClassAccessorDecoratorTarget<T, U>,
-    _accessor: ClassAccessorDecoratorContext<T, U>,
+    decoratorTarget: ClassAccessorDecoratorTarget<T, U>,
+    accessor: ClassAccessorDecoratorContext<T, U>,
   ): ClassAccessorDecoratorResult<T, U> => {
-    _decoratorTarget;
-    _accessor;
+    accessor;
+    const storage: Signal<number> = signal(0);
 
-    let storage: Signal<U> | null = null;
     return {
       set: function (value) {
-        if (storage === null) {
-          storage = signal(value);
-        } else {
-          storage.value = value;
-        }
+        decoratorTarget.set.call(this, value);
+        storage.value = storage.value + 1;
       },
       get: function () {
-        return storage === null ? (undefined as U) : storage.value;
+        storage.value;
+        return decoratorTarget.get.call(this);
       },
     };
   };
