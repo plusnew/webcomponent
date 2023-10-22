@@ -1,6 +1,5 @@
 import { expect } from "@esm-bundle/chai";
 import { mount, prop, webcomponent, WebComponent } from "@plusnew/webcomponent";
-import { jsx } from "@plusnew/webcomponent/jsx-runtime";
 import { signal } from "@preact/signals-core";
 
 describe("webcomponent", () => {
@@ -143,15 +142,14 @@ describe("webcomponent", () => {
   });
 
   it("finds context", () => {
-    class ProviderClass extends HTMLElement {
-      foo = signal("bar");
-      connectedCallback(this: HTMLElement & WebComponent) {
-        const shadowRoot = this.attachShadow({ mode: "open" });
-
-        shadowRoot.appendChild(document.createElement("slot"));
+    class ProviderClass extends WebComponent {
+      readonly foo = signal("bar");
+      render() {
+        return <slot />;
       }
     }
-    customElements.define("test-provider", ProviderClass);
+
+    const Provider = webcomponent("test-provider", ProviderClass);
 
     const Component = webcomponent(
       "test-consumer",
@@ -163,7 +161,12 @@ describe("webcomponent", () => {
       },
     );
 
-    mount(container, jsx("test-provider", { children: [<Component />] }, null));
+    mount(
+      container,
+      <Provider>
+        <Component />
+      </Provider>,
+    );
 
     expect(container.childNodes.length).to.equal(1);
 

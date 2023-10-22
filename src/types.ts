@@ -52,10 +52,16 @@ type checkFunctions = Expect<
   >
 >;
 
-export type RemoveUnneededProperties<T> = Pick<
+export type RemoveUnneededProperties<T, U extends string> = Pick<
   T,
-  Exclude<keyof T, ReadonlyKeys<T> | FunctionKeys<T>>
+  Exclude<keyof T, ReadonlyKeys<T> | FunctionKeys<T> | U>
 >;
+
+export type ForbiddenHTMLProperties =
+  | "innerHTML"
+  | "outerHTML"
+  | "innerText"
+  | "outerText";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -75,11 +81,14 @@ declare global {
      */
     type IntrinsicElements = {
       [Tag in keyof HTMLElementTagNameMap]: Partial<
-        RemoveUnneededProperties<HTMLElementTagNameMap[Tag]>
+        RemoveUnneededProperties<
+          HTMLElementTagNameMap[Tag],
+          ForbiddenHTMLProperties
+        >
       > & { children?: ShadowElement };
     } & {
       [Tag in keyof SVGElementTagNameMap]: Partial<
-        RemoveUnneededProperties<SVGElementTagNameMap[Tag]>
+        RemoveUnneededProperties<SVGElementTagNameMap[Tag], never>
       > & { children?: ShadowElement };
     };
   }
