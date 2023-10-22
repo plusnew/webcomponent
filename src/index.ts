@@ -1,7 +1,11 @@
 import type { Signal } from "@preact/signals-core";
 import { batch, effect, signal } from "@preact/signals-core";
 import { reconcile, type ShadowCache } from "./reconciler/index.js";
-import type { ShadowElement, Webcomponent } from "./types.js";
+import type {
+  RemoveUnneededProperties,
+  ShadowElement,
+  Webcomponent,
+} from "./types.js";
 
 export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
   const shadowResult: ShadowCache = {
@@ -14,9 +18,7 @@ export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
   return shadowResult.node;
 }
 
-type PartialHtmlElement = {
-  [K in keyof HTMLElement as Exclude<K, "children">]?: HTMLElement[K];
-};
+type PartialHtmlElement = Partial<RemoveUnneededProperties<HTMLElement>>;
 
 export function webcomponent<T extends { render: () => ShadowElement }>(
   name: string,

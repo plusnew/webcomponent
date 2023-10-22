@@ -1,24 +1,61 @@
 export const PLUSNEW_ELEMENT_TYPE = Symbol("plusnew-element-type");
 
-type IfEquals<X, Y, A, B> = (<T>() => T extends X ? 1 : 2) extends <
-  T,
->() => T extends Y ? 1 : 2
-  ? A
-  : B;
+type Expect<T extends true> = T;
 
-type AllowedKeys<T> = {
-  [P in keyof T]: IfEquals<
+type IsEqual<CheckA, CheckB, Then, Else> = (<T>() => T extends CheckA
+  ? 1
+  : 2) extends <T>() => T extends CheckB ? 1 : 2
+  ? Then
+  : Else;
+
+type ReadonlyKeys<T> = {
+  [P in keyof T]-?: IsEqual<
     { [Q in P]: T[P] },
     { -readonly [Q in P]: T[P] },
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    T[P] extends Function
-      ? never
-      : P extends "innerHTML" | "outerHTML" | "innerText" | "outerText"
-      ? never
-      : P,
-    never
+    never,
+    P
   >;
 }[keyof T];
+
+type FunctionKeys<T> = {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  [P in keyof T]: T[P] extends Function ? P : never;
+}[keyof T];
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type checkReadonly = Expect<
+  IsEqual<
+    ReadonlyKeys<{
+      foo: string;
+      readonly bar: number;
+      readonly baz: string;
+      mep: number;
+    }>,
+    "bar" | "baz",
+    true,
+    false
+  >
+>;
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type checkFunctions = Expect<
+  IsEqual<
+    FunctionKeys<{
+      foo: string;
+      bar: () => number;
+      baz: () => string;
+      mep: number;
+    }>,
+    "bar" | "baz",
+    true,
+    false
+  >
+>;
+
+export type RemoveUnneededProperties<T> = Pick<
+  T,
+  Exclude<keyof T, ReadonlyKeys<T> | FunctionKeys<T>>
+>;
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -37,12 +74,13 @@ declare global {
      * All the DOM Nodes are here
      */
     type IntrinsicElements = {
-      [Tag in keyof HTMLElementTagNameMap]: {
-        [Prop in keyof HTMLElementTagNameMap[Tag] as Extract<
-          Prop,
-          AllowedKeys<HTMLElementTagNameMap[Tag]>
-        >]?: HTMLElementTagNameMap[Tag][Prop];
-      } & { children?: ShadowElement };
+      [Tag in keyof HTMLElementTagNameMap]: Partial<
+        RemoveUnneededProperties<HTMLElementTagNameMap[Tag]>
+      > & { children?: ShadowElement };
+    } & {
+      [Tag in keyof SVGElementTagNameMap]: Partial<
+        RemoveUnneededProperties<SVGElementTagNameMap[Tag]>
+      > & { children?: ShadowElement };
     };
   }
 }
