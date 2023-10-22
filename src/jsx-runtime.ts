@@ -6,7 +6,9 @@ export function jsx(type: string, props: any, key: any): ShadowHostElement {
   let children: ShadowHostElement["children"] = [];
 
   if ("children" in sanitizedProps) {
-    children = sanitizedProps.children;
+    children = Array.isArray(sanitizedProps.children)
+      ? sanitizedProps.children
+      : [sanitizedProps.children];
     delete sanitizedProps.children;
   }
 

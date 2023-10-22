@@ -63,6 +63,7 @@ export function hostReconcile(
 
     let lastAddedSibling: Node | null = null;
     let i = 0;
+
     while (i < shadowElement.children.length) {
       if (shadowCache.nestedShadows.length <= i) {
         shadowCache.nestedShadows.push({

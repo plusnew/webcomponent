@@ -144,6 +144,7 @@ describe("webcomponent", () => {
   it("finds context", () => {
     class ProviderClass extends WebComponent {
       readonly foo = signal("bar");
+
       render() {
         return <slot />;
       }
