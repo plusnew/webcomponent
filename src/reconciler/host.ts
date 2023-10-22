@@ -1,3 +1,4 @@
+import { batch } from "@preact/signals-core";
 import {
   PLUSNEW_ELEMENT_TYPE,
   type ShadowElement,
@@ -5,6 +6,8 @@ import {
 } from "../types.js";
 import { reconcile, type ShadowCache } from "./index.js";
 import { append, remove } from "./util.js";
+
+const EVENT_PREFIX = "on";
 
 function isHostElement(
   shadowElement: ShadowElement,
@@ -53,7 +56,29 @@ export function hostReconcile(
     for (const propKey in shadowElement.props) {
       // Only set value if needed
       if (shadowCache.value.props[propKey] !== shadowElement.props[propKey]) {
-        (shadowCache.node as any)[propKey] = shadowElement.props[propKey];
+        (shadowCache.node as any)[propKey] =
+          propKey.startsWith(EVENT_PREFIX) === true
+            ? shadowElement.type === "input" && propKey === "oninput"
+              ? (evt: KeyboardEvent, ...args: any[]) => {
+                  const newValue = (evt.currentTarget as HTMLInputElement)
+                    .value;
+
+                  batch(() => {
+                    shadowElement.props[propKey](evt, ...args);
+                  });
+
+                  if (shadowElement.props.value !== newValue) {
+                    evt.preventDefault();
+                    (evt.currentTarget as HTMLInputElement).value =
+                      shadowElement.props.value;
+                  }
+                }
+              : (...args: any[]) => {
+                  batch(() => {
+                    shadowElement.props[propKey](...args);
+                  });
+                }
+            : shadowElement.props[propKey];
       }
     }
 
