@@ -45,6 +45,12 @@ export abstract class WebComponent extends HTMLElement {
     value: false,
   };
 
+  throw(error: unknown, instance: WebComponent) {
+    (
+      this.findParent(WebComponent as { new (): WebComponent }) as WebComponent
+    ).throw(error, instance);
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   findParent<T>(needle: { new (): T }): T | null {
     const findParent = function <T>(
@@ -65,16 +71,22 @@ export abstract class WebComponent extends HTMLElement {
     }
     return this.#parentsCache.get(needle);
   }
+
   connectedCallback(this: HTMLElement & WebComponent) {
     const shadowRoot = this.attachShadow({ mode: "open" });
 
     this.#disconnect = effect(() => {
       batch(() => {
-        const result = this.render();
-        reconcile(shadowRoot, null, this.#shadowCache, result);
+        try {
+          const result = this.render();
+          reconcile(shadowRoot, null, this.#shadowCache, result);
+        } catch (error) {
+          this.throw(error, this);
+        }
       });
     });
   }
+
   disconnectedCallback() {
     function removeEventListeners(shadowCache: ShadowCache) {
       if (isHostElement(shadowCache.value)) {

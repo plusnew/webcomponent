@@ -23,3 +23,5 @@ export function jsx(type: string, props: any, key: any): ShadowHostElement {
     children,
   };
 }
+
+export const jsxs = jsx;
