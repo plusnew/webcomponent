@@ -27,7 +27,7 @@ describe("webcomponent", () => {
     container.remove();
   });
 
-  xit("creates broken component and should display error", () => {
+  it("creates broken component and should display error", () => {
     const Component = webcomponent(
       "test-broken",
       class Component extends WebComponent {

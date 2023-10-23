@@ -46,10 +46,13 @@ export abstract class WebComponent extends HTMLElement {
   };
 
   throw(error: unknown, instance: WebComponent) {
-    this.disconnectedCallback();
-    (
-      this.findParent(WebComponent as { new (): WebComponent }) as WebComponent
-    ).throw(error, instance);
+    const parentComponent = this.findParent(
+      WebComponent as { new (): WebComponent },
+    ) as WebComponent;
+
+    this.remove();
+
+    parentComponent.throw(error, instance);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
