@@ -185,6 +185,21 @@ describe("webcomponent", () => {
     expect(
       (component.shadowRoot?.childNodes[0] as HTMLElement).textContent,
     ).to.equal("1");
+
+    component.remove();
+
+    (component.shadowRoot?.childNodes[0] as HTMLElement).dispatchEvent(
+      new MouseEvent("click"),
+    );
+
+    expect(component.shadowRoot?.childNodes.length).to.equal(1);
+    expect(
+      (component.shadowRoot?.childNodes[0] as HTMLElement).tagName,
+    ).to.equal("BUTTON");
+
+    expect(
+      (component.shadowRoot?.childNodes[0] as HTMLElement).textContent,
+    ).to.equal("1");
   });
 
   it("registers input event and updating", async () => {

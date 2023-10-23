@@ -4,12 +4,13 @@ import {
   type ShadowElement,
   type ShadowHostElement,
 } from "../types.js";
-import { reconcile, type ShadowCache } from "./index.js";
+import type { Reconciler } from "./index.js";
+import { reconcile } from "./index.js";
 import { append, remove } from "./util.js";
 
-const EVENT_PREFIX = "on";
+export const EVENT_PREFIX = "on";
 
-function isHostElement(
+export function isHostElement(
   shadowElement: ShadowElement,
 ): shadowElement is ShadowHostElement {
   return (
@@ -19,12 +20,12 @@ function isHostElement(
   );
 }
 
-export function hostReconcile(
-  parentElement: ParentNode,
-  previousSibling: Node | null,
-  shadowCache: ShadowCache,
-  shadowElement: ShadowElement,
-) {
+export const hostReconcile: Reconciler = (
+  parentElement,
+  previousSibling,
+  shadowCache,
+  shadowElement,
+) => {
   // Check if new shadow is of type dom-element
   if (isHostElement(shadowElement)) {
     // Check if old shadow is of same shadow-type
@@ -119,4 +120,4 @@ export function hostReconcile(
   } else {
     return false;
   }
-}
+};

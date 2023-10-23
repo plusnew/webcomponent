@@ -1,13 +1,13 @@
-import { type ShadowElement } from "../types.js";
-import { reconcile, type ShadowCache } from "./index.js";
+import type { Reconciler } from "./index.js";
+import { reconcile } from "./index.js";
 import { remove } from "./util.js";
 
-export function arrayReconcile(
-  parentElement: ParentNode,
-  previousSibling: Node | null,
-  shadowCache: ShadowCache,
-  shadowElement: ShadowElement,
-) {
+export const arrayReconcile: Reconciler = (
+  parentElement,
+  previousSibling,
+  shadowCache,
+  shadowElement,
+) => {
   if (Array.isArray(shadowElement)) {
     let lastAddedSibling = previousSibling;
     if (Array.isArray(shadowCache.value) === false) {
@@ -40,4 +40,4 @@ export function arrayReconcile(
   } else {
     return false;
   }
-}
+};

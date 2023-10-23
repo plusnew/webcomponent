@@ -1,13 +1,12 @@
-import { type ShadowElement } from "../types.js";
-import { type ShadowCache } from "./index.js";
+import type { Reconciler } from "./index.js";
 import { append, remove } from "./util.js";
 
-export function textReconcile(
-  parentElement: ParentNode,
-  previousSibling: Node | null,
-  shadowCache: ShadowCache,
-  shadowElement: ShadowElement,
-) {
+export const textReconcile: Reconciler = (
+  parentElement,
+  previousSibling,
+  shadowCache,
+  shadowElement,
+) => {
   if (typeof shadowElement === "string") {
     if (typeof shadowCache.value === "string") {
       // Only update if needed
@@ -33,4 +32,4 @@ export function textReconcile(
   } else {
     return false;
   }
-}
+};

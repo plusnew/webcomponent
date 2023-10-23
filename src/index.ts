@@ -7,6 +7,7 @@ import type {
   ShadowElement,
   Webcomponent,
 } from "./types.js";
+import { EVENT_PREFIX, isHostElement } from "./reconciler/host.js";
 
 export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
   const shadowResult: ShadowCache = {
@@ -36,19 +37,16 @@ export function webcomponent<T extends { render: () => ShadowElement }>(
 }
 
 export abstract class WebComponent extends HTMLElement {
+  #disconnect = () => {};
+  #parentsCache = new Map();
+  #shadowCache: ShadowCache = {
+    node: null,
+    nestedShadows: [],
+    value: false,
+  };
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   findParent<T>(needle: { new (): T }): T | null {
-    throw new Error("Element is not mounted and cant't find parents yet");
-  }
-  connectedCallback(this: HTMLElement & WebComponent) {
-    const shadowRoot = this.attachShadow({ mode: "open" });
-    const shadowCache: ShadowCache = {
-      node: null,
-      nestedShadows: [],
-      value: false,
-    };
-    const parentsCache = new Map();
-
     const findParent = function <T>(
       haystack: ParentNode | null,
       needle: { new (): T },
@@ -62,26 +60,36 @@ export abstract class WebComponent extends HTMLElement {
         : findParent(haystack.parentNode, needle);
     };
 
-    this.findParent = (needle) => {
-      if (parentsCache.has(needle) === false) {
-        parentsCache.set(needle, findParent(this.parentNode, needle));
-      }
-      return parentsCache.get(needle);
-    };
+    if (this.#parentsCache.has(needle) === false) {
+      this.#parentsCache.set(needle, findParent(this.parentNode, needle));
+    }
+    return this.#parentsCache.get(needle);
+  }
+  connectedCallback(this: HTMLElement & WebComponent) {
+    const shadowRoot = this.attachShadow({ mode: "open" });
 
-    (this as any).disconnectedCallback = () => {
-      disconnect();
-      parentsCache.clear();
-
-      // @TODO remove event-listeners of nestedShadowElements
-    };
-
-    const disconnect = effect(() => {
+    this.#disconnect = effect(() => {
       batch(() => {
         const result = this.render();
-        reconcile(shadowRoot, null, shadowCache, result);
+        reconcile(shadowRoot, null, this.#shadowCache, result);
       });
     });
+  }
+  disconnectedCallback() {
+    function removeEventListeners(shadowCache: ShadowCache) {
+      if (isHostElement(shadowCache.value)) {
+        for (const propKey in shadowCache.value.props) {
+          if (propKey.startsWith(EVENT_PREFIX)) {
+            (shadowCache.node as any)[propKey] = null;
+          }
+        }
+      }
+      shadowCache.nestedShadows.forEach(removeEventListeners);
+    }
+
+    this.#disconnect();
+    this.#parentsCache.clear();
+    removeEventListeners(this.#shadowCache);
   }
   abstract render(): ShadowElement;
 }

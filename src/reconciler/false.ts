@@ -1,13 +1,13 @@
-import { type ShadowElement } from "../types.js";
-import { type ShadowCache } from "./index.js";
+import type { Reconciler } from "./index.js";
 import { remove } from "./util.js";
 
-export function falseReconcile(
-  _parentElement: ParentNode,
-  previousSibling: Node | null,
-  shadowCache: ShadowCache,
-  shadowElement: ShadowElement,
-) {
+export const falseReconcile: Reconciler = (
+  parentElement,
+  previousSibling,
+  shadowCache,
+  shadowElement,
+  // abortSignal,
+) => {
   if (shadowElement === false) {
     if (shadowCache.value !== false) {
       remove(shadowCache);
@@ -19,4 +19,4 @@ export function falseReconcile(
   } else {
     return false;
   }
-}
+};

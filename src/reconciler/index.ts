@@ -10,6 +10,13 @@ export type ShadowCache = {
   nestedShadows: ShadowCache[];
 };
 
+export type Reconciler = (
+  parentElement: ParentNode,
+  previousSibling: Node | null,
+  shadowCache: ShadowCache,
+  shadowElement: ShadowElement,
+) => Node | null | false;
+
 export function reconcile(
   parentElement: ParentNode,
   previousSibling: Node | null,
