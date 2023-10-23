@@ -50,7 +50,7 @@ export abstract class WebComponent extends HTMLElement {
       WebComponent as { new (): WebComponent },
     ) as WebComponent;
 
-    this.remove();
+    this.disconnectedCallback();
 
     parentComponent.throw(error, instance);
   }
