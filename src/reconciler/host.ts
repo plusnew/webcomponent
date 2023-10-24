@@ -80,12 +80,11 @@ export const hostReconcile: Reconciler = (
                   });
                 }
             : shadowElement.props[propKey];
+        shadowCache.value.props[propKey] = shadowElement.props[propKey];
       }
     }
 
     // @TODO Remove unneded props
-
-    shadowCache.value.props = shadowElement.props;
 
     let lastAddedSibling: Node | null = null;
     let i = 0;

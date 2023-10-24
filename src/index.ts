@@ -50,8 +50,6 @@ export abstract class WebComponent extends HTMLElement {
       WebComponent as { new (): WebComponent },
     ) as WebComponent;
 
-    this.disconnectedCallback();
-
     parentComponent.throw(error, instance);
   }
 
@@ -97,6 +95,7 @@ export abstract class WebComponent extends HTMLElement {
         for (const propKey in shadowCache.value.props) {
           if (propKey.startsWith(EVENT_PREFIX)) {
             (shadowCache.node as any)[propKey] = null;
+            shadowCache.value.props[propKey] = null;
           }
         }
       }
