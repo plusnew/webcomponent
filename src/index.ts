@@ -27,10 +27,12 @@ type PartialHtmlElement = Partial<
 export function webcomponent<T extends { render: () => ShadowElement }>(
   name: string,
   Webcomponent: Webcomponent<T>,
-): (
-  properties: PartialHtmlElement &
-    RemoveUnneededProperties<T, "render" | keyof WebComponent>,
-) => null {
+): {
+  new (
+    properties: PartialHtmlElement &
+      RemoveUnneededProperties<T, "render" | keyof WebComponent>,
+  ): T;
+} {
   customElements.define(name, Webcomponent as any);
 
   return name as any;
@@ -54,15 +56,19 @@ export abstract class WebComponent extends HTMLElement {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  findParent<T>(needle: { new (): T }): T | null {
-    const findParent = function <T>(
+  findParent<T = HTMLElement>(
+    needle: { new (args: any): T } | string,
+  ): T | null {
+    const findParent = function <T = HTMLElement>(
       haystack: ParentNode | null,
-      needle: { new (): T },
+      needle: { new (args: any): T } | string,
     ): T | null {
       return haystack === null
         ? null
-        : haystack instanceof needle
-        ? haystack
+        : (typeof needle === "string" &&
+            (haystack as Element).tagName === needle.toUpperCase()) ||
+          (typeof needle === "function" && haystack instanceof needle)
+        ? (haystack as any)
         : haystack instanceof WebComponent
         ? haystack.findParent(needle)
         : findParent(haystack.parentNode, needle);

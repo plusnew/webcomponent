@@ -15,21 +15,22 @@ describe("webcomponent", () => {
   });
 
   it("finds context", () => {
-    class ProviderClass extends WebComponent {
-      readonly foo = signal("bar");
+    const Provider = webcomponent(
+      "test-provider",
+      class Component extends WebComponent {
+        readonly foo = signal("bar");
 
-      render() {
-        return <slot />;
-      }
-    }
-
-    const Provider = webcomponent("test-provider", ProviderClass);
+        render() {
+          return <slot />;
+        }
+      },
+    );
 
     const Component = webcomponent(
       "test-consumer",
       class Component extends WebComponent {
         render() {
-          const providerElement = this.findParent(ProviderClass);
+          const providerElement = this.findParent(Provider);
           return providerElement?.foo.value ?? false;
         }
       },
@@ -45,7 +46,7 @@ describe("webcomponent", () => {
     expect(container.childNodes.length).to.equal(1);
 
     const providerElement = container.childNodes[0] as InstanceType<
-      typeof ProviderClass
+      typeof Provider
     >;
 
     expect(providerElement.tagName).to.equal("TEST-PROVIDER");
