@@ -48,34 +48,38 @@ export abstract class WebComponent extends HTMLElement {
   };
 
   throw(error: unknown, instance: WebComponent) {
-    const parentComponent = this.findParent(
-      WebComponent as { new (): WebComponent },
-    ) as WebComponent;
-
-    parentComponent.throw(error, instance);
+    this.findParent(WebComponent as { new (): WebComponent }).throw(
+      error,
+      instance,
+    );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  findParent<T = HTMLElement>(
-    needle: { new (args: any): T } | string,
-  ): T | null {
+  findParent<T = HTMLElement>(needle: { new (args: any): T } | string): T {
     const findParent = function <T = HTMLElement>(
-      haystack: ParentNode | null,
+      haystack: Element,
       needle: { new (args: any): T } | string,
-    ): T | null {
-      return haystack === null
-        ? null
-        : (typeof needle === "string" &&
-            (haystack as Element).tagName === needle.toUpperCase()) ||
-          (typeof needle === "function" && haystack instanceof needle)
-        ? (haystack as any)
-        : haystack instanceof WebComponent
-        ? haystack.findParent(needle)
-        : findParent(haystack.parentNode, needle);
+    ): T {
+      if (haystack.parentElement === null) {
+        throw new Error(`Could not find parent ${needle.toString()}`);
+      }
+
+      if (
+        (typeof needle === "string" &&
+          (haystack.parentElement as Element).tagName ===
+            needle.toUpperCase()) ||
+        (typeof needle === "function" &&
+          haystack.parentElement instanceof needle)
+      ) {
+        return haystack.parentElement as T;
+      }
+      if (haystack.parentElement instanceof WebComponent) {
+        return haystack.parentElement.findParent(needle);
+      }
+      return findParent(haystack.parentElement, needle);
     };
 
     if (this.#parentsCache.has(needle) === false) {
-      this.#parentsCache.set(needle, findParent(this.parentNode, needle));
+      this.#parentsCache.set(needle, findParent(this, needle));
     }
     return this.#parentsCache.get(needle);
   }
