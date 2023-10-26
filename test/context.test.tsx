@@ -54,9 +54,7 @@ describe("webcomponent", () => {
 
     expect(providerElement.tagName).to.equal("TEST-PROVIDER");
 
-    const component = (
-      providerElement.shadowRoot?.childNodes[0] as HTMLSlotElement
-    ).assignedNodes()[0] as HTMLElement;
+    const component = providerElement.childNodes[0] as HTMLElement;
 
     expect(component.tagName).to.equal("TEST-CONSUMER");
     expect(component.shadowRoot?.childNodes.length).to.equal(1);
@@ -79,5 +77,51 @@ describe("webcomponent", () => {
     expect(
       (container.childNodes[0] as HTMLElement).shadowRoot?.textContent,
     ).to.equal("not-found");
+  });
+
+  it("no context", () => {
+    const Injection = webcomponent(
+      "test-injection",
+      class Component extends WebComponent {
+        render() {
+          return (
+            <Provider>
+              <slot />
+            </Provider>
+          );
+        }
+      },
+    );
+
+    mount(
+      container,
+      <Injection>
+        <Consumer />
+      </Injection>,
+    );
+
+    expect(container.childNodes.length).to.equal(1);
+
+    const injectionElement = container.childNodes[0] as InstanceType<
+      typeof Provider
+    >;
+
+    expect(injectionElement.tagName).to.equal("TEST-INJECTION");
+
+    const component = injectionElement.childNodes[0] as HTMLElement;
+
+    expect(component.tagName).to.equal("TEST-CONSUMER");
+    expect(component.shadowRoot?.childNodes.length).to.equal(1);
+    expect(component.shadowRoot?.textContent).to.equal("bar");
+
+    (
+      injectionElement.shadowRoot?.childNodes[0] as InstanceType<
+        typeof Provider
+      >
+    ).foo.value = "baz";
+
+    expect(component.tagName).to.equal("TEST-CONSUMER");
+    expect(component.shadowRoot?.childNodes.length).to.equal(1);
+    expect(component.shadowRoot?.textContent).to.equal("baz");
   });
 });

@@ -54,28 +54,36 @@ export abstract class WebComponent extends HTMLElement {
     );
   }
 
-  findParent<T = HTMLElement>(needle: { new (args: any): T } | string): T {
-    const findParent = function <T = HTMLElement>(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  findParent<T = Element>(needle: { new (args: any): T } | string): T {
+    const findParent = function <T = Element>(
       haystack: Element,
       needle: { new (args: any): T } | string,
     ): T {
-      if (haystack.parentElement === null) {
+      const parentNode =
+        haystack.assignedSlot === null
+          ? haystack.parentNode instanceof ShadowRoot
+            ? haystack.parentNode.host
+            : haystack.parentElement
+          : haystack.assignedSlot;
+
+      if (parentNode === null) {
         throw new Error(`Could not find parent ${needle.toString()}`);
       }
 
       if (
         (typeof needle === "string" &&
-          (haystack.parentElement as Element).tagName ===
-            needle.toUpperCase()) ||
-        (typeof needle === "function" &&
-          haystack.parentElement instanceof needle)
+          parentNode.tagName === needle.toUpperCase()) ||
+        (typeof needle === "function" && parentNode instanceof needle)
       ) {
-        return haystack.parentElement as T;
+        return parentNode as T;
       }
-      if (haystack.parentElement instanceof WebComponent) {
-        return haystack.parentElement.findParent(needle);
+
+      if (parentNode instanceof WebComponent) {
+        return parentNode.findParent(needle);
       }
-      return findParent(haystack.parentElement, needle);
+
+      return findParent(parentNode, needle);
     };
 
     if (this.#parentsCache.has(needle) === false) {
