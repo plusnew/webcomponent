@@ -5,8 +5,7 @@ import {
   type ShadowHostElement,
 } from "../types.js";
 import type { Reconciler } from "./index.js";
-import { reconcile } from "./index.js";
-import { append, remove } from "./util.js";
+import { append, arrayReconcileWithoutSorting, remove } from "./util.js";
 
 export const EVENT_PREFIX = "on";
 
@@ -86,30 +85,12 @@ export const hostReconcile: Reconciler = (
 
     // @TODO Remove unneded props
 
-    let lastAddedSibling: Node | null = null;
-    let i = 0;
-
-    while (i < shadowElement.children.length) {
-      if (shadowCache.nestedShadows.length <= i) {
-        shadowCache.nestedShadows.push({
-          node: null,
-          value: false,
-          nestedShadows: [],
-        });
-      }
-      lastAddedSibling = reconcile(
-        shadowCache.node as ParentNode,
-        lastAddedSibling,
-        shadowCache.nestedShadows[i],
-        shadowElement.children[i],
-      );
-      i++;
-    }
-
-    while (i < shadowCache.nestedShadows.length) {
-      remove(shadowCache.nestedShadows[i]);
-      shadowCache.nestedShadows.splice(i, 1);
-    }
+    arrayReconcileWithoutSorting(
+      shadowCache.node as ParentNode,
+      null,
+      shadowCache,
+      shadowElement.children,
+    );
 
     if (elementNeedsAppending) {
       append(parentElement, previousSibling, shadowCache.node as Node);
