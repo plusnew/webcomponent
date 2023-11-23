@@ -50,10 +50,10 @@ export const hostReconcile: Reconciler = (
         children: [],
       };
       shadowCache.unmount = () => {
-        for (const propKey in shadowCache.value.props) {
+        for (const propKey in (shadowCache.value as ShadowHostElement).props) {
           if (propKey.startsWith(EVENT_PREFIX)) {
             (shadowCache.node as any)[propKey] = null;
-            shadowCache.value.props[propKey] = null;
+            (shadowCache.value as ShadowHostElement).props[propKey] = null;
           }
         }
       };
