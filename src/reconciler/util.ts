@@ -1,14 +1,25 @@
 import type { ShadowElement } from "../types.js";
 import { reconcile, type ShadowCache } from "./index.js";
 
+export function unmount(oldShadowCache: ShadowCache) {
+  if (oldShadowCache.unmount !== null) {
+    oldShadowCache.unmount();
+  }
+  oldShadowCache.nestedShadows.forEach(unmount);
+}
+
 export function remove(oldShadowCache: ShadowCache) {
+  unmount(oldShadowCache);
+
   if (oldShadowCache.node === null) {
     oldShadowCache.nestedShadows.forEach(remove);
   } else {
     oldShadowCache.node.parentNode?.removeChild(oldShadowCache.node);
   }
+
   oldShadowCache.node = null;
   oldShadowCache.nestedShadows = [];
+  oldShadowCache.unmount = null;
 }
 
 export const arrayReconcileWithoutSorting = (
@@ -26,6 +37,7 @@ export const arrayReconcileWithoutSorting = (
         node: null,
         value: false,
         nestedShadows: [],
+        unmount: null,
       });
     }
     lastAddedSibling = reconcile(

@@ -7,9 +7,9 @@ import {
 import type { Reconciler } from "./index.js";
 import { append, arrayReconcileWithoutSorting, remove } from "./util.js";
 
-export const EVENT_PREFIX = "on";
+const EVENT_PREFIX = "on";
 
-export function isHostElement(
+function isHostElement(
   shadowElement: ShadowElement,
 ): shadowElement is ShadowHostElement {
   return (
@@ -48,6 +48,14 @@ export const hostReconcile: Reconciler = (
         key: shadowElement.key,
         props: {},
         children: [],
+      };
+      shadowCache.unmount = () => {
+        for (const propKey in shadowCache.value.props) {
+          if (propKey.startsWith(EVENT_PREFIX)) {
+            (shadowCache.node as any)[propKey] = null;
+            shadowCache.value.props[propKey] = null;
+          }
+        }
       };
 
       elementNeedsAppending = true;

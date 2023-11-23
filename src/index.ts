@@ -7,13 +7,16 @@ import type {
   ShadowElement,
   Webcomponent,
 } from "./types.js";
-import { EVENT_PREFIX, isHostElement } from "./reconciler/host.js";
+import { unmount } from "./reconciler/util.js";
+
+export { default as PortalEntrance } from "./components/PortalEntrance.js";
 
 export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
   const shadowResult: ShadowCache = {
     value: false as const,
     node: null,
     nestedShadows: [],
+    unmount: null,
   };
   reconcile(parent, parent.lastElementChild, shadowResult, JSXElement);
 
@@ -45,6 +48,7 @@ export abstract class WebComponent extends HTMLElement {
     node: null,
     nestedShadows: [],
     value: false,
+    unmount: null,
   };
 
   throw(error: unknown, instance: WebComponent) {
@@ -108,21 +112,9 @@ export abstract class WebComponent extends HTMLElement {
   }
 
   disconnectedCallback() {
-    function removeEventListeners(shadowCache: ShadowCache) {
-      if (isHostElement(shadowCache.value)) {
-        for (const propKey in shadowCache.value.props) {
-          if (propKey.startsWith(EVENT_PREFIX)) {
-            (shadowCache.node as any)[propKey] = null;
-            shadowCache.value.props[propKey] = null;
-          }
-        }
-      }
-      shadowCache.nestedShadows.forEach(removeEventListeners);
-    }
-
     this.#disconnect();
     this.#parentsCache.clear();
-    removeEventListeners(this.#shadowCache);
+    unmount(this.#shadowCache);
   }
   abstract render(): ShadowElement;
 }

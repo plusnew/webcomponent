@@ -1,0 +1,65 @@
+import { expect } from "@esm-bundle/chai";
+import {
+  mount,
+  PortalEntrance,
+  webcomponent,
+  WebComponent,
+} from "@plusnew/webcomponent";
+import { signal } from "@preact/signals-core";
+
+describe("webcomponent", () => {
+  let container: HTMLElement;
+  let portal: HTMLElement;
+
+  beforeEach(() => {
+    container = document.createElement("div");
+    document.body.appendChild(container);
+
+    portal = document.createElement("div");
+    portal.id = "portal-exit";
+    document.body.appendChild(portal);
+  });
+
+  afterEach(() => {
+    container.remove();
+    portal.remove();
+  });
+
+  it("moves element to portal", () => {
+    const show = signal(true);
+    const Component = webcomponent(
+      "test-base",
+      class Component extends WebComponent {
+        render() {
+          return (
+            show.value && (
+              <PortalEntrance target="portal-exit">
+                <span>foo</span>
+              </PortalEntrance>
+            )
+          );
+        }
+      },
+    );
+
+    mount(container, <Component />);
+
+    expect(container.childNodes.length).to.equal(1);
+    expect(portal.childNodes.length).to.equal(1);
+
+    const component = container.childNodes[0] as HTMLElement;
+
+    expect(component.tagName).to.equal("TEST-BASE");
+    expect(component.shadowRoot?.childNodes.length).to.equal(0);
+
+    expect(portal.childNodes.length).to.equal(1);
+
+    expect((portal.childNodes[0] as HTMLElement).tagName).to.equal("SPAN");
+    expect((portal.childNodes[0] as HTMLElement).textContent).to.equal("foo");
+
+    show.value = false;
+
+    expect(container.childNodes.length).to.equal(1);
+    expect(portal.childNodes.length).to.equal(0);
+  });
+});

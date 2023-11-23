@@ -1,3 +1,5 @@
+import type { Reconciler } from "./reconciler/index.js";
+
 export const PLUSNEW_ELEMENT_TYPE = Symbol("plusnew-element-type");
 
 type Expect<T extends true> = T;
@@ -106,8 +108,17 @@ export type ShadowHostElement = {
   children: ShadowElement[];
 };
 
+export type ShadowComponentElement = {
+  $$typeof: typeof PLUSNEW_ELEMENT_TYPE;
+  type: Reconciler;
+  key: any;
+  props: any;
+  children: ShadowElement[];
+};
+
 export type ShadowElement =
   | ShadowHostElement
+  | ShadowComponentElement
   | string
   | false
   | ShadowElement[];
