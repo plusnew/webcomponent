@@ -1,5 +1,10 @@
 import { expect } from "@esm-bundle/chai";
-import { mount, webcomponent, WebComponent } from "@plusnew/webcomponent";
+import {
+  mount,
+  webcomponent,
+  WebComponent,
+  findParent,
+} from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
 const Provider = webcomponent(
@@ -18,7 +23,7 @@ const Consumer = webcomponent(
   class Component extends WebComponent {
     render() {
       try {
-        return this.findParent(Provider).foo.value;
+        return findParent(Provider).foo.value;
       } catch (_error) {
         return "not-found";
       }

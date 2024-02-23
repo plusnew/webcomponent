@@ -41,9 +41,11 @@ export function webcomponent<T extends { render: () => ShadowElement }>(
   return name as any;
 }
 
+const parentsCache = Symbol("parentsCache");
+
 export abstract class WebComponent extends HTMLElement {
   #disconnect = () => {};
-  #parentsCache = new Map();
+  [parentsCache] = new Map();
   #shadowCache: ShadowCache = {
     node: null,
     nestedShadows: [],
@@ -52,48 +54,10 @@ export abstract class WebComponent extends HTMLElement {
   };
 
   throw(error: unknown, instance: WebComponent) {
-    this.findParent(WebComponent as { new (): WebComponent }).throw(
-      error,
-      instance,
-    );
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  findParent<T = Element>(needle: { new (args: any): T } | string): T {
-    const findParent = function <T = Element>(
-      haystack: Element,
-      needle: { new (args: any): T } | string,
-    ): T {
-      const parentNode =
-        haystack.assignedSlot === null
-          ? haystack.parentNode instanceof ShadowRoot
-            ? haystack.parentNode.host
-            : haystack.parentElement
-          : haystack.assignedSlot;
-
-      if (parentNode === null) {
-        throw new Error(`Could not find parent ${needle.toString()}`);
-      }
-
-      if (
-        (typeof needle === "string" &&
-          parentNode.tagName === needle.toUpperCase()) ||
-        (typeof needle === "function" && parentNode instanceof needle)
-      ) {
-        return parentNode as T;
-      }
-
-      if (parentNode instanceof WebComponent) {
-        return parentNode.findParent(needle);
-      }
-
-      return findParent(parentNode, needle);
-    };
-
-    if (this.#parentsCache.has(needle) === false) {
-      this.#parentsCache.set(needle, findParent(this, needle));
-    }
-    return this.#parentsCache.get(needle);
+    findParent(
+      WebComponent as { new (): WebComponent },
+      this.parentNode as Element,
+    ).throw(error, instance);
   }
 
   connectedCallback(this: HTMLElement & WebComponent) {
@@ -101,8 +65,12 @@ export abstract class WebComponent extends HTMLElement {
 
     this.#disconnect = effect(() => {
       batch(() => {
+        const previousActiveElement = activeElement;
         try {
+          // eslint-disable-next-line @typescript-eslint/no-this-alias
+          activeElement = this;
           const result = this.render();
+          activeElement = previousActiveElement;
           reconcile(shadowRoot, null, this.#shadowCache, result);
         } catch (error) {
           this.throw(error, this);
@@ -113,10 +81,59 @@ export abstract class WebComponent extends HTMLElement {
 
   disconnectedCallback() {
     this.#disconnect();
-    this.#parentsCache.clear();
+    this[parentsCache].clear();
     unmount(this.#shadowCache);
   }
   abstract render(): ShadowElement;
+}
+
+let activeElement: Element | null = null;
+
+export function findParent<T = Element>(
+  needle: { new (args: any): T } | string,
+  haystack?: Element,
+): T {
+  function getParent(element: Element) {
+    const parentNode =
+      element.assignedSlot === null
+        ? element.parentNode instanceof ShadowRoot
+          ? element.parentNode.host
+          : element.parentElement
+        : element.assignedSlot;
+
+    if (parentNode === null) {
+      throw new Error(`Could not find parent ${needle.toString()}`);
+    }
+
+    return parentNode;
+  }
+
+  let target;
+  if (haystack === undefined) {
+    if (activeElement === null) {
+      throw new Error("No element is being rendered currently");
+    } else {
+      target = activeElement;
+    }
+  } else {
+    target = haystack;
+  }
+
+  if (
+    (typeof needle === "string" && target.tagName === needle.toUpperCase()) ||
+    (typeof needle === "function" && target instanceof needle)
+  ) {
+    return target as T;
+  }
+
+  if (parentsCache in target) {
+    if (target[parentsCache].has(needle) === false) {
+      target[parentsCache].set(needle, findParent(needle, getParent(target)));
+    }
+    return target[parentsCache].get(needle);
+  } else {
+    return findParent(needle, getParent(target));
+  }
 }
 
 export function prop() {
