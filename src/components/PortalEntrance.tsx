@@ -24,7 +24,7 @@ const portalReconcile: Reconciler = (
     portalExit,
     null,
     shadowCache,
-    (shadowElement as ShadowComponentElement).children,
+    (shadowElement as ShadowComponentElement).children.map((child) => child()),
   );
   return previousSibling;
 };

@@ -45,7 +45,7 @@ export const hostReconcile: Reconciler = (
       shadowCache.value = {
         $$typeof: PLUSNEW_ELEMENT_TYPE,
         type: shadowElement.type,
-        key: shadowElement.key,
+        key: shadowElement.props.key,
         props: {},
         children: [],
       };
@@ -63,7 +63,10 @@ export const hostReconcile: Reconciler = (
 
     for (const propKey in shadowElement.props) {
       // Only set value if needed
-      if (shadowCache.value.props[propKey] !== shadowElement.props[propKey]) {
+      if (
+        (shadowCache.value as ShadowHostElement).props[propKey] !==
+        shadowElement.props[propKey]
+      ) {
         (shadowCache.node as any)[propKey] =
           propKey.startsWith(EVENT_PREFIX) === true
             ? shadowElement.type === "input" && propKey === "oninput"
@@ -87,7 +90,8 @@ export const hostReconcile: Reconciler = (
                   });
                 }
             : shadowElement.props[propKey];
-        shadowCache.value.props[propKey] = shadowElement.props[propKey];
+        (shadowCache.value as ShadowHostElement).props[propKey] =
+          shadowElement.props[propKey];
       }
     }
 
@@ -97,7 +101,7 @@ export const hostReconcile: Reconciler = (
       shadowCache.node as ParentNode,
       null,
       shadowCache,
-      shadowElement.children,
+      shadowElement.children.map((child) => child()),
     );
 
     if (elementNeedsAppending) {

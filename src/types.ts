@@ -103,9 +103,8 @@ export type Webcomponent<T extends { render: () => ShadowElement }> = {
 export type ShadowHostElement = {
   $$typeof: typeof PLUSNEW_ELEMENT_TYPE;
   type: string;
-  key: any;
   props: any;
-  children: ShadowElement[];
+  children: (() => ShadowElement)[];
 };
 
 export type ShadowComponentElement = {
@@ -113,7 +112,7 @@ export type ShadowComponentElement = {
   type: Reconciler;
   key: any;
   props: any;
-  children: ShadowElement[];
+  children: (() => ShadowElement)[];
 };
 
 export type ShadowElement =
