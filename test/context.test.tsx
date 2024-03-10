@@ -72,28 +72,32 @@ describe("webcomponent", () => {
     expect(component.shadowRoot?.textContent).to.equal("baz");
   });
 
-  xit("finds context inline", () => {
-    mount(container, <Provider>{findParent(Provider).foo.value}</Provider>);
+  it("finds context inline", () => {
+    const Component = webcomponent(
+      "test-inline",
+      class Component extends WebComponent {
+        render() {
+          return <Provider>{findParent(Provider).foo.value}</Provider>;
+        }
+      },
+    );
+
+    mount(container, <Component />);
 
     expect(container.childNodes.length).to.equal(1);
 
-    const providerElement = container.childNodes[0] as InstanceType<
+    const component = container.childNodes[0] as HTMLElement;
+    expect(component.innerHTML);
+
+    const providerElement = component.shadowRoot?.childNodes[0] as InstanceType<
       typeof Provider
     >;
 
-    expect(providerElement.tagName).to.equal("TEST-PROVIDER");
-
-    const component = providerElement.childNodes[0] as HTMLElement;
-
-    expect(component.tagName).to.equal("TEST-CONSUMER");
-    expect(component.shadowRoot?.childNodes.length).to.equal(1);
-    expect(component.shadowRoot?.textContent).to.equal("bar");
+    expect(providerElement.textContent).to.equal("bar");
 
     providerElement.foo.value = "baz";
 
-    expect(component.tagName).to.equal("TEST-CONSUMER");
-    expect(component.shadowRoot?.childNodes.length).to.equal(1);
-    expect(component.shadowRoot?.textContent).to.equal("baz");
+    expect(providerElement.textContent).to.equal("baz");
   });
 
   it("no context", () => {

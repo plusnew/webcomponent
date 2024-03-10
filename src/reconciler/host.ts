@@ -6,6 +6,7 @@ import {
 } from "../types.js";
 import type { Reconciler } from "./index.js";
 import { append, arrayReconcileWithoutSorting, remove } from "./util.js";
+import { active } from "../index.js";
 
 const EVENT_PREFIX = "on";
 
@@ -97,12 +98,17 @@ export const hostReconcile: Reconciler = (
 
     // @TODO Remove unneded props
 
+    const previousActiveElement = active.element;
+    active.element = shadowCache.node as Element;
+
     arrayReconcileWithoutSorting(
       shadowCache.node as ParentNode,
       null,
       shadowCache,
       shadowElement.children.map((child) => child()),
     );
+
+    active.element = previousActiveElement;
 
     if (elementNeedsAppending) {
       append(parentElement, previousSibling, shadowCache.node as Node);
