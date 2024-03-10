@@ -1,0 +1,22 @@
+name: Main
+
+on:
+  push:
+  pull_request:
+    branches: [ main ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v3
+
+      - name: Install nix
+        uses: cachix/install-nix-action@v22
+
+      - name: Test
+        run: nix flake check -L

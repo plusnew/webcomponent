@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/plusnew/webcomponent#readme",
   "devDependencies": {
+    "@babel/core": "^7.24.0",
     "@babel/plugin-proposal-decorators": "^7.23.2",
     "@babel/plugin-transform-react-jsx": "^7.22.15",
     "@babel/preset-typescript": "^7.23.2",
@@ -37,6 +38,7 @@
     "eslint": "^8.51.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.1",
-    "prettier": "^3.0.3"
+    "prettier": "^3.0.3",
+    "typescript": "^5.4.2"
   }
 }

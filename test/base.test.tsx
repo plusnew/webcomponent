@@ -61,9 +61,9 @@ describe("webcomponent", () => {
         accessor amount: number;
 
         render() {
-          return [...Array(this.amount).keys()].map((value) => {
-            return <div>{value.toString()}</div>;
-          });
+          return [...Array(this.amount).keys()].map((value) => (
+            <div>{value.toString()}</div>
+          ));
         }
       },
     );
@@ -84,21 +84,21 @@ describe("webcomponent", () => {
       (component.shadowRoot?.childNodes[0] as HTMLElement).tagName,
     ).to.equal("DIV");
     expect(
-      (component.shadowRoot?.childNodes[0] as HTMLElement).innerText,
+      (component.shadowRoot?.childNodes[0] as HTMLElement).textContent,
     ).to.equal("0");
 
     expect(
       (component.shadowRoot?.childNodes[1] as HTMLElement).tagName,
     ).to.equal("DIV");
     expect(
-      (component.shadowRoot?.childNodes[1] as HTMLElement).innerText,
+      (component.shadowRoot?.childNodes[1] as HTMLElement).textContent,
     ).to.equal("1");
 
     expect(
       (component.shadowRoot?.childNodes[2] as HTMLElement).tagName,
     ).to.equal("DIV");
     expect(
-      (component.shadowRoot?.childNodes[2] as HTMLElement).innerText,
+      (component.shadowRoot?.childNodes[2] as HTMLElement).textContent,
     ).to.equal("2");
 
     (component as any).amount = 0;

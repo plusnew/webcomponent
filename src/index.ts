@@ -127,10 +127,11 @@ export function findParent<T = Element>(
   }
 
   if (parentsCache in target) {
-    if (target[parentsCache].has(needle) === false) {
-      target[parentsCache].set(needle, findParent(needle, getParent(target)));
+    const parentsCacheMap = target[parentsCache] as any;
+    if (parentsCacheMap.has(needle) === false) {
+      parentsCacheMap.set(needle, findParent(needle, getParent(target)));
     }
-    return target[parentsCache].get(needle);
+    return parentsCacheMap.get(needle);
   } else {
     return findParent(needle, getParent(target));
   }
