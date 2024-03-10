@@ -27,7 +27,7 @@
     "@babel/core": "^7.24.0",
     "@babel/plugin-proposal-decorators": "^7.24.0",
     "@babel/plugin-transform-react-jsx": "^7.22.15",
-    "@babel/preset-typescript": "^7.23.2",
+    "@babel/preset-typescript": "^7.23.3",
     "@esm-bundle/chai": "^4.3.4-fix.0",
     "@preact/signals-core": "^1.5.0",
     "@rollup/plugin-babel": "^6.0.4",
