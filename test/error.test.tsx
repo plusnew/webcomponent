@@ -2,20 +2,11 @@ import { expect } from "@esm-bundle/chai";
 import { mount, webcomponent, WebComponent } from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
-const ErrorBoundary = webcomponent(
-  "test-boundary",
-  class Component extends WebComponent {
-    throw() {
-      this.#errored.value = true;
-    }
-    #errored = signal(false);
-    render() {
-      return this.#errored.value ? <slot name="errored" /> : <slot />;
-    }
-  },
-);
+function error(): never {
+  throw new Error("error!");
+}
 
-xdescribe("webcomponent", () => {
+describe("webcomponent", () => {
   let container: HTMLElement;
 
   beforeEach(() => {
@@ -31,54 +22,61 @@ xdescribe("webcomponent", () => {
     const Component = webcomponent(
       "test-broken",
       class Component extends WebComponent {
-        render(): string {
-          throw new Error("I'm broken");
-        }
-      },
-    );
-
-    mount(
-      container,
-      <ErrorBoundary>
-        <Component />
-        <span slot="errored">error</span>
-      </ErrorBoundary>,
-    );
-
-    expect(container.childNodes.length).to.equal(1);
-
-    expect(container.textContent).to.equal("error");
-  });
-
-  it("creates broken component and should display error", () => {
-    const foo = signal(true);
-
-    const Component = webcomponent(
-      "test-later-broken",
-      class Component extends WebComponent {
+        #hasError = signal(false);
         render() {
-          if (foo.value === true) {
-            return "good";
-          }
-          throw new Error("I'm broken");
+          return (
+            <div
+              onplusnewerror={(evt) => {
+                this.#hasError.value = true;
+                evt.preventDefault();
+              }}
+            >
+              {this.#hasError.value ? "error" : error()}
+            </div>
+          );
         }
       },
     );
 
-    mount(
-      container,
-      <ErrorBoundary>
-        <Component />
-        <span slot="errored">error</span>
-      </ErrorBoundary>,
-    );
+    mount(container, <Component />);
 
     expect(container.childNodes.length).to.equal(1);
 
-    // @TODO check if good is shown
+    const component = container.childNodes[0] as HTMLElement;
 
-    foo.value = false;
-
-    // @TODO check if error is shown
+    expect(component.tagName).to.equal("TEST-BROKEN");
+    expect((component.shadowRoot as ShadowRoot).textContent).to.equal("error");
   });
+
+  // it("creates broken component and should display error", () => {
+  //   const foo = signal(true);
+
+  //   const Component = webcomponent(
+  //     "test-later-broken",
+  //     class Component extends WebComponent {
+  //       render() {
+  //         if (foo.value === true) {
+  //           return "good";
+  //         }
+  //         throw new Error("I'm broken");
+  //       }
+  //     },
+  //   );
+
+  //   mount(
+  //     container,
+  //     <ErrorBoundary>
+  //       <Component />
+  //       <span slot="errored">error</span>
+  //     </ErrorBoundary>,
+  //   );
+
+  //   expect(container.childNodes.length).to.equal(1);
+
+  //   // @TODO check if good is shown
+
+  //   foo.value = false;
+
+  //   // @TODO check if error is shown
+  // });
 });

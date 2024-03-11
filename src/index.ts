@@ -53,27 +53,26 @@ export abstract class WebComponent extends HTMLElement {
     unmount: null,
   };
 
-  throw(error: unknown, instance: WebComponent) {
-    findParent(
-      WebComponent as { new (): WebComponent },
-      this.parentNode as Element,
-    ).throw(error, instance);
-  }
-
   connectedCallback(this: HTMLElement & WebComponent) {
     const shadowRoot = this.attachShadow({ mode: "open" });
 
     this.#disconnect = effect(() => {
       batch(() => {
         const previousActiveElement = active.parentElement;
+        let errored = false;
+        let result;
         try {
-          // eslint-disable-next-line @typescript-eslint/no-this-alias
           active.parentElement = this;
-          const result = this.render();
+          result = this.render();
           active.parentElement = previousActiveElement;
-          reconcile(shadowRoot, null, this.#shadowCache, result);
         } catch (error) {
-          this.throw(error, this);
+          errored = true;
+          dispatchError(this, error);
+
+          return;
+        }
+        if (errored === false) {
+          reconcile(shadowRoot, null, this.#shadowCache, result);
         }
       });
     });
@@ -85,6 +84,17 @@ export abstract class WebComponent extends HTMLElement {
     unmount(this.#shadowCache);
   }
   abstract render(): ShadowElement;
+}
+
+export function dispatchError(element: Element, error: unknown) {
+  element.dispatchEvent(
+    new CustomEvent("plusnewerror", {
+      detail: error,
+      cancelable: true,
+      bubbles: true,
+      composed: true,
+    }),
+  );
 }
 
 export const active = { parentElement: null as null | Element };

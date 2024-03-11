@@ -6,7 +6,7 @@ import {
 } from "../types.js";
 import type { Reconciler } from "./index.js";
 import { append, arrayReconcileWithoutSorting, remove } from "./util.js";
-import { active } from "../index.js";
+import { active, dispatchError } from "../index.js";
 
 const EVENT_PREFIX = "on";
 
@@ -68,16 +68,23 @@ export const hostReconcile: Reconciler = (
         (shadowCache.value as ShadowHostElement).props[propKey] !==
         shadowElement.props[propKey]
       ) {
-        (shadowCache.node as any)[propKey] =
-          propKey.startsWith(EVENT_PREFIX) === true
-            ? shadowElement.type === "input" && propKey === "oninput"
+        if (propKey.startsWith(EVENT_PREFIX) === true) {
+          const eventName = propKey.slice(EVENT_PREFIX.length);
+          if (propKey in (shadowCache.value as ShadowHostElement).props) {
+            (shadowCache.node as Element).removeEventListener(
+              eventName,
+              (shadowCache.value as ShadowHostElement).props[propKey],
+            );
+          }
+
+          (shadowCache.node as Element).addEventListener(
+            eventName,
+            shadowElement.type === "input" && propKey === "oninput"
               ? (evt: KeyboardEvent, ...args: any[]) => {
                   const newValue = (evt.currentTarget as HTMLInputElement)
                     .value;
 
-                  batch(() => {
-                    shadowElement.props[propKey](evt, ...args);
-                  });
+                  shadowElement.props[propKey](evt, ...args);
 
                   if (shadowElement.props.value !== newValue) {
                     evt.preventDefault();
@@ -85,12 +92,12 @@ export const hostReconcile: Reconciler = (
                       shadowElement.props.value;
                   }
                 }
-              : (...args: any[]) => {
-                  batch(() => {
-                    shadowElement.props[propKey](...args);
-                  });
-                }
-            : shadowElement.props[propKey];
+              : shadowElement.props[propKey],
+          );
+        } else {
+          (shadowCache.node as any)[propKey] = shadowElement.props[propKey];
+        }
+
         (shadowCache.value as ShadowHostElement).props[propKey] =
           shadowElement.props[propKey];
       }
@@ -101,14 +108,23 @@ export const hostReconcile: Reconciler = (
     const previousActiveElement = active.parentElement;
     active.parentElement = shadowCache.node as Element;
 
+    const children: ShadowElement[] = [];
+    for (const childCallback of shadowElement.children) {
+      try {
+        children.push(childCallback());
+      } catch (error) {
+        debugger;
+        dispatchError(shadowCache.node as Element, error);
+      }
+    }
+    active.parentElement = previousActiveElement;
+
     arrayReconcileWithoutSorting(
       shadowCache.node as ParentNode,
       null,
       shadowCache,
-      shadowElement.children.map((child) => child()),
+      children,
     );
-
-    active.parentElement = previousActiveElement;
 
     if (elementNeedsAppending) {
       append(parentElement, previousSibling, shadowCache.node as Node);

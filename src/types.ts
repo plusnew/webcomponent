@@ -4,11 +4,10 @@ export const PLUSNEW_ELEMENT_TYPE = Symbol("plusnew-element-type");
 
 type Expect<T extends true> = T;
 
-type IsEqual<CheckA, CheckB, Then, Else> = (<T>() => T extends CheckA
-  ? 1
-  : 2) extends <T>() => T extends CheckB ? 1 : 2
-  ? Then
-  : Else;
+type IsEqual<CheckA, CheckB, Then, Else> =
+  (<T>() => T extends CheckA ? 1 : 2) extends <T>() => T extends CheckB ? 1 : 2
+    ? Then
+    : Else;
 
 type ReadonlyKeys<T> = {
   [P in keyof T]-?: IsEqual<
@@ -87,12 +86,22 @@ declare global {
           HTMLElementTagNameMap[Tag],
           ForbiddenHTMLProperties
         >
-      > & { children?: ShadowElement };
+      > & {
+        children?: ShadowElement;
+        onplusnewerror?: (evt: CustomEvent<unknown>) => void;
+      };
     } & {
       [Tag in keyof SVGElementTagNameMap]: Partial<
         RemoveUnneededProperties<SVGElementTagNameMap[Tag], never>
-      > & { children?: ShadowElement };
+      > & {
+        children?: ShadowElement;
+        onplusnewerror?: (evt: CustomEvent<unknown>) => void;
+      };
     };
+
+    interface IntrinsicAttributes {
+      onplusnewerror?: () => void;
+    }
   }
 }
 
