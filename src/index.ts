@@ -65,12 +65,12 @@ export abstract class WebComponent extends HTMLElement {
 
     this.#disconnect = effect(() => {
       batch(() => {
-        const previousActiveElement = active.element;
+        const previousActiveElement = active.parentElement;
         try {
           // eslint-disable-next-line @typescript-eslint/no-this-alias
-          active.element = this;
+          active.parentElement = this;
           const result = this.render();
-          active.element = previousActiveElement;
+          active.parentElement = previousActiveElement;
           reconcile(shadowRoot, null, this.#shadowCache, result);
         } catch (error) {
           this.throw(error, this);
@@ -87,7 +87,7 @@ export abstract class WebComponent extends HTMLElement {
   abstract render(): ShadowElement;
 }
 
-export const active = { element: null as null | Element };
+export const active = { parentElement: null as null | Element };
 
 export function findParent<T = Element>(
   needle: { new (args: any): T } | string,
@@ -110,10 +110,10 @@ export function findParent<T = Element>(
 
   let target;
   if (haystack === undefined) {
-    if (active.element === null) {
+    if (active.parentElement === null) {
       throw new Error("No element is being rendered currently");
     } else {
-      target = active.element;
+      target = active.parentElement;
     }
   } else {
     target = haystack;

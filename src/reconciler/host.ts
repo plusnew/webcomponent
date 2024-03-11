@@ -98,8 +98,8 @@ export const hostReconcile: Reconciler = (
 
     // @TODO Remove unneded props
 
-    const previousActiveElement = active.element;
-    active.element = shadowCache.node as Element;
+    const previousActiveElement = active.parentElement;
+    active.parentElement = shadowCache.node as Element;
 
     arrayReconcileWithoutSorting(
       shadowCache.node as ParentNode,
@@ -108,7 +108,7 @@ export const hostReconcile: Reconciler = (
       shadowElement.children.map((child) => child()),
     );
 
-    active.element = previousActiveElement;
+    active.parentElement = previousActiveElement;
 
     if (elementNeedsAppending) {
       append(parentElement, previousSibling, shadowCache.node as Node);
