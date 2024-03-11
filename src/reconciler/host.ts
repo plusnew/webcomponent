@@ -1,4 +1,4 @@
-import { batch } from "@preact/signals-core";
+import { active, dispatchError } from "../index.js";
 import {
   PLUSNEW_ELEMENT_TYPE,
   type ShadowElement,
@@ -6,7 +6,6 @@ import {
 } from "../types.js";
 import type { Reconciler } from "./index.js";
 import { append, arrayReconcileWithoutSorting, remove } from "./util.js";
-import { active, dispatchError } from "../index.js";
 
 const EVENT_PREFIX = "on";
 
@@ -69,31 +68,48 @@ export const hostReconcile: Reconciler = (
         shadowElement.props[propKey]
       ) {
         if (propKey.startsWith(EVENT_PREFIX) === true) {
-          const eventName = propKey.slice(EVENT_PREFIX.length);
-          if (propKey in (shadowCache.value as ShadowHostElement).props) {
-            (shadowCache.node as Element).removeEventListener(
+          if (shadowElement.type === "input" && propKey === "oninput") {
+            (shadowCache.node as any)[propKey] = (
+              evt: KeyboardEvent,
+              ...args: any[]
+            ) => {
+              const newValue = (evt.currentTarget as HTMLInputElement).value;
+
+              shadowElement.props[propKey](evt, ...args);
+
+              if (shadowElement.props.value !== newValue) {
+                evt.preventDefault();
+                (evt.currentTarget as HTMLInputElement).value =
+                  shadowElement.props.value;
+              }
+            };
+          } else {
+            const eventName = propKey.slice(EVENT_PREFIX.length);
+            if (propKey in (shadowCache.value as ShadowHostElement).props) {
+              (shadowCache.node as Element).removeEventListener(
+                eventName,
+                (shadowCache.value as ShadowHostElement).props[propKey], // @TODO doesnt work for oninput
+              );
+            }
+
+            (shadowCache.node as Element).addEventListener(
               eventName,
-              (shadowCache.value as ShadowHostElement).props[propKey],
+              shadowElement.type === "input" && propKey === "oninput"
+                ? (evt: KeyboardEvent, ...args: any[]) => {
+                    const newValue = (evt.currentTarget as HTMLInputElement)
+                      .value;
+
+                    shadowElement.props[propKey](evt, ...args);
+
+                    if (shadowElement.props.value !== newValue) {
+                      evt.preventDefault();
+                      (evt.currentTarget as HTMLInputElement).value =
+                        shadowElement.props.value;
+                    }
+                  }
+                : shadowElement.props[propKey],
             );
           }
-
-          (shadowCache.node as Element).addEventListener(
-            eventName,
-            shadowElement.type === "input" && propKey === "oninput"
-              ? (evt: KeyboardEvent, ...args: any[]) => {
-                  const newValue = (evt.currentTarget as HTMLInputElement)
-                    .value;
-
-                  shadowElement.props[propKey](evt, ...args);
-
-                  if (shadowElement.props.value !== newValue) {
-                    evt.preventDefault();
-                    (evt.currentTarget as HTMLInputElement).value =
-                      shadowElement.props.value;
-                  }
-                }
-              : shadowElement.props[propKey],
-          );
         } else {
           (shadowCache.node as any)[propKey] = shadowElement.props[propKey];
         }
@@ -113,7 +129,6 @@ export const hostReconcile: Reconciler = (
       try {
         children.push(childCallback());
       } catch (error) {
-        debugger;
         dispatchError(shadowCache.node as Element, error);
       }
     }
