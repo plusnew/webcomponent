@@ -140,4 +140,54 @@ describe("webcomponent", () => {
 
     expect(component.shadowRoot?.childNodes.length).to.equal(0);
   });
+
+  it("parent component should not rerender when child signal changes", () => {
+    const foo = signal(0);
+    let containerRenderCount = 0;
+    let nestedRenderCount = 0;
+
+    const Component = webcomponent(
+      "test-container",
+      class Component extends WebComponent {
+        render() {
+          containerRenderCount++;
+          return <NestedComponent />;
+        }
+      },
+    );
+
+    const NestedComponent = webcomponent(
+      "test-nest",
+      class Component extends WebComponent {
+        render() {
+          nestedRenderCount++;
+          return `${foo.value}`;
+        }
+      },
+    );
+
+    mount(container, <Component />);
+
+    expect(container.childNodes.length).to.equal(1);
+
+    const containerComponent = container.childNodes[0] as HTMLElement;
+    const nestedComponent = (containerComponent.shadowRoot as ShadowRoot)
+      .childNodes[0] as HTMLElement;
+
+    expect(containerComponent.tagName).to.equal("TEST-CONTAINER");
+    expect(nestedComponent.tagName).to.equal("TEST-NEST");
+    expect((nestedComponent.shadowRoot as ShadowRoot).textContent).to.equal(
+      "0",
+    );
+    expect(containerRenderCount).to.equal(1);
+    expect(nestedRenderCount).to.equal(1);
+
+    foo.value = 1;
+
+    expect((nestedComponent.shadowRoot as ShadowRoot).textContent).to.equal(
+      "1",
+    );
+    expect(containerRenderCount).to.equal(1);
+    expect(nestedRenderCount).to.equal(2);
+  });
 });
