@@ -24,14 +24,16 @@ describe("webcomponent", () => {
       class Component extends WebComponent {
         #hasError = signal(false);
         render() {
-          return (
+          return this.#hasError.value ? (
+            "error"
+          ) : (
             <div
               onplusnewerror={(evt) => {
                 this.#hasError.value = true;
                 evt.preventDefault();
               }}
             >
-              {this.#hasError.value ? "error" : error()}
+              {error()}
             </div>
           );
         }

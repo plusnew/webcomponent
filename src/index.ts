@@ -1,13 +1,13 @@
 import type { Signal } from "@preact/signals-core";
-import { batch, effect, signal } from "@preact/signals-core";
+import { batch, effect, signal, untracked } from "@preact/signals-core";
 import { reconcile, type ShadowCache } from "./reconciler/index.js";
+import { unmount } from "./reconciler/util.js";
 import type {
   ForbiddenHTMLProperties,
   RemoveUnneededProperties,
   ShadowElement,
   Webcomponent,
 } from "./types.js";
-import { unmount } from "./reconciler/util.js";
 
 export { default as PortalEntrance } from "./components/PortalEntrance.js";
 
@@ -67,7 +67,7 @@ export abstract class WebComponent extends HTMLElement {
           active.parentElement = previousActiveElement;
         } catch (error) {
           errored = true;
-          dispatchError(this, error);
+          untracked(() => dispatchError(this, error));
 
           return;
         }
