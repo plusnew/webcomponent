@@ -1,5 +1,5 @@
 import { expect } from "@esm-bundle/chai";
-import { mount, prop, webcomponent, WebComponent } from "@plusnew/webcomponent";
+import { mount, prop, createComponent, WebComponent } from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
 describe("webcomponent", () => {
@@ -15,7 +15,7 @@ describe("webcomponent", () => {
   });
 
   it("creates basic component and updating its props", () => {
-    const Component = webcomponent(
+    const Component = createComponent(
       "test-base",
       class Component extends WebComponent {
         @prop()
@@ -54,7 +54,7 @@ describe("webcomponent", () => {
   });
 
   it("crates array based on given number", () => {
-    const Component = webcomponent(
+    const Component = createComponent(
       "test-array",
       class Component extends WebComponent {
         @prop()
@@ -107,7 +107,7 @@ describe("webcomponent", () => {
   });
 
   it("crates element if needed", () => {
-    const Component = webcomponent(
+    const Component = createComponent(
       "test-placeholder",
       class Component extends WebComponent {
         @prop()
@@ -146,7 +146,7 @@ describe("webcomponent", () => {
     let containerRenderCount = 0;
     let nestedRenderCount = 0;
 
-    const Component = webcomponent(
+    const Component = createComponent(
       "test-container",
       class Component extends WebComponent {
         render() {
@@ -156,7 +156,7 @@ describe("webcomponent", () => {
       },
     );
 
-    const NestedComponent = webcomponent(
+    const NestedComponent = createComponent(
       "test-nest",
       class Component extends WebComponent {
         render() {

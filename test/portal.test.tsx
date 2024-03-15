@@ -2,7 +2,7 @@ import { expect } from "@esm-bundle/chai";
 import {
   mount,
   PortalEntrance,
-  webcomponent,
+  createComponent,
   WebComponent,
 } from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
@@ -27,7 +27,7 @@ describe("webcomponent", () => {
 
   it("moves element to portal", () => {
     const show = signal(true);
-    const Component = webcomponent(
+    const Component = createComponent(
       "test-base",
       class Component extends WebComponent {
         render() {

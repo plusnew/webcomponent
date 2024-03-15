@@ -1,13 +1,13 @@
 import { expect } from "@esm-bundle/chai";
 import {
   mount,
-  webcomponent,
+  createComponent,
   WebComponent,
   findParent,
 } from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
-const Provider = webcomponent(
+const Provider = createComponent(
   "test-provider",
   class Component extends WebComponent {
     readonly foo = signal("bar");
@@ -18,7 +18,7 @@ const Provider = webcomponent(
   },
 );
 
-const Consumer = webcomponent(
+const Consumer = createComponent(
   "test-consumer",
   class Component extends WebComponent {
     render() {
@@ -73,7 +73,7 @@ describe("webcomponent", () => {
   });
 
   it("finds context inline", () => {
-    const Component = webcomponent(
+    const Component = createComponent(
       "test-inline",
       class Component extends WebComponent {
         render() {
@@ -113,7 +113,7 @@ describe("webcomponent", () => {
   });
 
   it("no context", () => {
-    const Injection = webcomponent(
+    const Injection = createComponent(
       "test-injection",
       class Component extends WebComponent {
         render() {

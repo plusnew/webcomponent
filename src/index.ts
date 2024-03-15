@@ -27,7 +27,7 @@ type PartialHtmlElement = Partial<
   RemoveUnneededProperties<HTMLElement, ForbiddenHTMLProperties>
 >;
 
-export function webcomponent<T extends { render: () => ShadowElement }>(
+export function createComponent<T extends { render: () => ShadowElement }>(
   name: string,
   Webcomponent: Webcomponent<T>,
 ): {
