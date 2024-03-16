@@ -1,5 +1,10 @@
 import { expect } from "@esm-bundle/chai";
-import { mount, prop, createComponent, WebComponent } from "@plusnew/webcomponent";
+import {
+  mount,
+  prop,
+  createComponent,
+  WebComponent,
+} from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
 describe("webcomponent", () => {
@@ -189,5 +194,63 @@ describe("webcomponent", () => {
     );
     expect(containerRenderCount).to.equal(1);
     expect(nestedRenderCount).to.equal(2);
+  });
+
+  it("creates basic component and updating its props", () => {
+    let containerRenderCounter = 0;
+    let nestedRenderCounter = 0;
+
+    const NestedComponent = createComponent(
+      "test-counter-constructor",
+      class Component extends WebComponent {
+        #counter = signal(0);
+        constructor() {
+          super();
+
+          this.#counter = signal(0);
+          this.#counter.value;
+        }
+        render() {
+          nestedRenderCounter += 1;
+          return (
+            <button
+              onclick={() => {
+                this.#counter.value = this.#counter.value + 1;
+              }}
+            >
+              {this.#counter.value.toString()}
+            </button>
+          );
+        }
+      },
+    );
+
+    const Component = createComponent(
+      "test-container-rerender",
+      class Component extends WebComponent {
+        render() {
+          containerRenderCounter += 1;
+          return <NestedComponent />;
+        }
+      },
+    );
+
+    mount(container, <Component />);
+
+    expect(container.childNodes.length).to.equal(1);
+
+    const component = container.childNodes[0] as HTMLElement;
+    const nestedComponent = component.shadowRoot?.childNodes[0] as HTMLElement;
+    expect(component.tagName).to.equal("TEST-CONTAINER-RERENDER");
+    expect(component.childNodes.length).to.equal(0);
+    expect(nestedComponent.shadowRoot?.childNodes[0].textContent).to.equal("0");
+    expect(containerRenderCounter).to.equal(1);
+    expect(nestedRenderCounter).to.equal(1);
+
+    nestedComponent.shadowRoot?.childNodes[0].dispatchEvent(new Event("click"));
+
+    expect(nestedComponent.shadowRoot?.childNodes[0].textContent).to.equal("1");
+    expect(containerRenderCounter).to.equal(1);
+    expect(nestedRenderCounter).to.equal(2);
   });
 });

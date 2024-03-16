@@ -1,3 +1,4 @@
+import { untracked } from "@preact/signals-core";
 import { active, dispatchError } from "../index.js";
 import {
   PLUSNEW_ELEMENT_TYPE,
@@ -39,7 +40,9 @@ export const hostReconcile: Reconciler = (
       remove(shadowCache);
 
       // create new element
-      const element = document.createElement(shadowElement.type);
+      const element = untracked(() =>
+        document.createElement(shadowElement.type),
+      );
 
       shadowCache.node = element;
       shadowCache.value = {
