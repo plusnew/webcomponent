@@ -8,6 +8,7 @@ import type {
   ShadowElement,
   Webcomponent,
 } from "./types.js";
+import { dispatchError } from "./utils.js";
 
 export { default as PortalEntrance } from "./components/PortalEntrance.js";
 
@@ -84,21 +85,6 @@ export abstract class WebComponent extends HTMLElement {
     unmount(this.#shadowCache);
   }
   abstract render(): ShadowElement;
-}
-
-export function dispatchError(element: Element, error: unknown) {
-  const result = element.dispatchEvent(
-    new CustomEvent("plusnewerror", {
-      detail: error,
-      cancelable: true,
-      bubbles: true,
-      composed: true,
-    }),
-  );
-
-  if (result === true) {
-    throw error;
-  }
 }
 
 export const active = { parentElement: null as null | Element };
