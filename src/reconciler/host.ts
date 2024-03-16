@@ -138,6 +138,7 @@ export const hostReconcile: Reconciler = (
       try {
         children.push(childCallback());
       } catch (error) {
+        children.push(false);
         dispatchError(shadowCache.node as Element, error);
       }
     }

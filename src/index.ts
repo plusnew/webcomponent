@@ -87,7 +87,7 @@ export abstract class WebComponent extends HTMLElement {
 }
 
 export function dispatchError(element: Element, error: unknown) {
-  element.dispatchEvent(
+  const result = element.dispatchEvent(
     new CustomEvent("plusnewerror", {
       detail: error,
       cancelable: true,
@@ -95,6 +95,10 @@ export function dispatchError(element: Element, error: unknown) {
       composed: true,
     }),
   );
+
+  if (result === true) {
+    throw error;
+  }
 }
 
 export const active = { parentElement: null as null | Element };
