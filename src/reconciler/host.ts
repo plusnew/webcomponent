@@ -55,8 +55,11 @@ export const hostReconcile: Reconciler = (
       shadowCache.unmount = () => {
         for (const propKey in (shadowCache.value as ShadowHostElement).props) {
           if (propKey.startsWith(EVENT_PREFIX)) {
-            (shadowCache.node as any)[propKey] = null;
-            (shadowCache.value as ShadowHostElement).props[propKey] = null;
+            (shadowCache.node as any).removeEventListener(
+              propKey.slice(EVENT_PREFIX.length),
+              (shadowCache.value as ShadowHostElement).props[propKey],
+            );
+            delete (shadowCache.value as ShadowHostElement).props[propKey];
           }
         }
       };
@@ -72,13 +75,14 @@ export const hostReconcile: Reconciler = (
       ) {
         if (propKey.startsWith(EVENT_PREFIX) === true) {
           if (shadowElement.type === "input" && propKey === "oninput") {
-            (shadowCache.node as any)[propKey] = (
+            const callback = shadowElement.props[propKey];
+            shadowElement.props[propKey] = (
               evt: KeyboardEvent,
               ...args: any[]
             ) => {
               const newValue = (evt.currentTarget as HTMLInputElement).value;
 
-              shadowElement.props[propKey](evt, ...args);
+              callback(evt, ...args);
 
               if (shadowElement.props.value !== newValue) {
                 evt.preventDefault();
@@ -86,35 +90,37 @@ export const hostReconcile: Reconciler = (
                   shadowElement.props.value;
               }
             };
-          } else {
-            const eventName = propKey.slice(EVENT_PREFIX.length);
-            if (propKey in (shadowCache.value as ShadowHostElement).props) {
-              (shadowCache.node as Element).removeEventListener(
-                eventName,
-                (shadowCache.value as ShadowHostElement).props[propKey], // @TODO doesnt work for oninput
-              );
-            }
+          }
 
-            (shadowCache.node as Element).addEventListener(
+          const eventName = propKey.slice(EVENT_PREFIX.length);
+          if (propKey in (shadowCache.value as ShadowHostElement).props) {
+            (shadowCache.node as Element).removeEventListener(
               eventName,
-              shadowElement.type === "input" && propKey === "oninput"
-                ? (evt: KeyboardEvent, ...args: any[]) => {
-                    const newValue = (evt.currentTarget as HTMLInputElement)
-                      .value;
-
-                    shadowElement.props[propKey](evt, ...args);
-
-                    if (shadowElement.props.value !== newValue) {
-                      evt.preventDefault();
-                      (evt.currentTarget as HTMLInputElement).value =
-                        shadowElement.props.value;
-                    }
-                  }
-                : shadowElement.props[propKey],
+              (shadowCache.value as ShadowHostElement).props[propKey], // @TODO doesnt work for oninput
             );
           }
+
+          (shadowCache.node as Element).addEventListener(
+            eventName,
+            shadowElement.type === "input" && propKey === "oninput"
+              ? (evt: KeyboardEvent, ...args: any[]) => {
+                  const newValue = (evt.currentTarget as HTMLInputElement)
+                    .value;
+
+                  shadowElement.props[propKey](evt, ...args);
+
+                  if (shadowElement.props.value !== newValue) {
+                    evt.preventDefault();
+                    (evt.currentTarget as HTMLInputElement).value =
+                      shadowElement.props.value;
+                  }
+                }
+              : shadowElement.props[propKey],
+          );
         } else {
-          (shadowCache.node as any)[propKey] = shadowElement.props[propKey];
+          untracked(() => {
+            (shadowCache.node as any)[propKey] = shadowElement.props[propKey];
+          });
         }
 
         (shadowCache.value as ShadowHostElement).props[propKey] =
