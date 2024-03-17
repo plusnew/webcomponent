@@ -21,7 +21,7 @@ describe("webcomponent", () => {
   it("creates broken component and should display error", () => {
     const Component = createComponent(
       "test-broken",
-      class Component extends WebComponent {
+      class Component extends WebComponent(HTMLElement) {
         #hasError = signal(false);
         render() {
           return this.#hasError.value ? (
@@ -55,7 +55,7 @@ describe("webcomponent", () => {
 
   //   const Component = webcomponent(
   //     "test-later-broken",
-  //     class Component extends WebComponent {
+  //     class Component extends WebComponent(HTMLElement) {
   //       render() {
   //         if (foo.value === true) {
   //           return "good";

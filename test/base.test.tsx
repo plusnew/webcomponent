@@ -22,7 +22,7 @@ describe("webcomponent", () => {
   it("creates basic component and updating its props", () => {
     const Component = createComponent(
       "test-base",
-      class Component extends WebComponent {
+      class Component extends WebComponent(HTMLElement) {
         @prop()
         accessor foo: string;
 
@@ -61,7 +61,7 @@ describe("webcomponent", () => {
   it("crates array based on given number", () => {
     const Component = createComponent(
       "test-array",
-      class Component extends WebComponent {
+      class Component extends WebComponent(HTMLElement) {
         @prop()
         accessor amount: number;
 
@@ -114,7 +114,7 @@ describe("webcomponent", () => {
   it("crates element if needed", () => {
     const Component = createComponent(
       "test-placeholder",
-      class Component extends WebComponent {
+      class Component extends WebComponent(HTMLElement) {
         @prop()
         accessor show: boolean;
 
@@ -153,7 +153,7 @@ describe("webcomponent", () => {
 
     const Component = createComponent(
       "test-container",
-      class Component extends WebComponent {
+      class Component extends WebComponent(HTMLElement) {
         render() {
           containerRenderCount++;
           return <NestedComponent />;
@@ -163,7 +163,7 @@ describe("webcomponent", () => {
 
     const NestedComponent = createComponent(
       "test-nest",
-      class Component extends WebComponent {
+      class Component extends WebComponent(HTMLElement) {
         render() {
           nestedRenderCount++;
           return `${foo.value}`;
@@ -202,7 +202,7 @@ describe("webcomponent", () => {
 
     const NestedComponent = createComponent(
       "test-counter-constructor",
-      class Component extends WebComponent {
+      class Component extends WebComponent(HTMLElement) {
         #counter = signal(0);
         constructor() {
           super();
@@ -227,7 +227,7 @@ describe("webcomponent", () => {
 
     const Component = createComponent(
       "test-container-rerender",
-      class Component extends WebComponent {
+      class Component extends WebComponent(HTMLElement) {
         render() {
           containerRenderCounter += 1;
           return <NestedComponent />;

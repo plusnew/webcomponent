@@ -29,7 +29,7 @@ describe("webcomponent", () => {
     const show = signal(true);
     const Component = createComponent(
       "test-base",
-      class Component extends WebComponent {
+      class Component extends WebComponent(HTMLElement) {
         render() {
           return (
             show.value && (

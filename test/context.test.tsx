@@ -9,7 +9,7 @@ import { signal } from "@preact/signals-core";
 
 const Provider = createComponent(
   "test-provider",
-  class Component extends WebComponent {
+  class Component extends WebComponent(HTMLElement) {
     readonly foo = signal("bar");
 
     render() {
@@ -20,7 +20,7 @@ const Provider = createComponent(
 
 const Consumer = createComponent(
   "test-consumer",
-  class Component extends WebComponent {
+  class Component extends WebComponent(HTMLElement) {
     render() {
       try {
         return findParent(Provider).foo.value;
@@ -75,7 +75,7 @@ describe("webcomponent", () => {
   it("finds context inline", () => {
     const Component = createComponent(
       "test-inline",
-      class Component extends WebComponent {
+      class Component extends WebComponent(HTMLElement) {
         render() {
           return <Provider>{findParent(Provider).foo.value}</Provider>;
         }
@@ -115,7 +115,7 @@ describe("webcomponent", () => {
   it("no context", () => {
     const Injection = createComponent(
       "test-injection",
-      class Component extends WebComponent {
+      class Component extends WebComponent(HTMLElement) {
         render() {
           return (
             <Provider>

@@ -105,10 +105,6 @@ declare global {
   }
 }
 
-export type Webcomponent<T extends { render: () => ShadowElement }> = {
-  new (): T;
-};
-
 export type ShadowHostElement = {
   $$typeof: typeof PLUSNEW_ELEMENT_TYPE;
   type: string;

@@ -6,7 +6,6 @@ import type {
   ForbiddenHTMLProperties,
   RemoveUnneededProperties,
   ShadowElement,
-  Webcomponent,
 } from "./types.js";
 import { dispatchError } from "./utils.js";
 
@@ -28,64 +27,71 @@ type PartialHtmlElement = Partial<
   RemoveUnneededProperties<HTMLElement, ForbiddenHTMLProperties>
 >;
 
-export function createComponent<T extends { render: () => ShadowElement }>(
+export function createComponent<T extends HTMLElement>(
   name: string,
-  Webcomponent: Webcomponent<T>,
+  Component: { new (): T },
 ): {
   new (
     properties: PartialHtmlElement &
-      RemoveUnneededProperties<T, "render" | keyof WebComponent>,
+      RemoveUnneededProperties<
+        T,
+        "render" | keyof InstanceType<ReturnType<typeof WebComponent>>
+      >,
   ): T;
 } {
-  customElements.define(name, Webcomponent as any);
+  customElements.define(name, Component as any);
 
   return name as any;
 }
 
 const parentsCache = Symbol("parentsCache");
 
-export abstract class WebComponent extends HTMLElement {
-  #disconnect = () => {};
-  [parentsCache] = new Map();
-  #shadowCache: ShadowCache = {
-    node: null,
-    nestedShadows: [],
-    value: false,
-    unmount: null,
-  };
+export const WebComponent = (Parent: { new (): HTMLElement }) => {
+  abstract class WebComponent extends Parent {
+    #disconnect = () => {};
+    [parentsCache] = new Map();
+    #shadowCache: ShadowCache = {
+      node: null,
+      nestedShadows: [],
+      value: false,
+      unmount: null,
+    };
 
-  connectedCallback(this: HTMLElement & WebComponent) {
-    const shadowRoot = this.attachShadow({ mode: "open" });
+    connectedCallback(this: HTMLElement & WebComponent) {
+      const shadowRoot = this.attachShadow({ mode: "open" });
 
-    this.#disconnect = effect(() => {
-      batch(() => {
-        const previousActiveElement = active.parentElement;
-        let errored = false;
-        let result;
-        try {
-          active.parentElement = this;
-          result = this.render();
-          active.parentElement = previousActiveElement;
-        } catch (error) {
-          errored = true;
-          untracked(() => dispatchError(this, error));
+      this.#disconnect = effect(() => {
+        batch(() => {
+          const previousActiveElement = active.parentElement;
+          let errored = false;
+          let result;
+          try {
+            active.parentElement = this;
+            result = this.render();
+            active.parentElement = previousActiveElement;
+          } catch (error) {
+            errored = true;
+            untracked(() => dispatchError(this, error));
 
-          return;
-        }
-        if (errored === false) {
-          reconcile(shadowRoot, null, this.#shadowCache, result);
-        }
+            return;
+          }
+          if (errored === false) {
+            reconcile(shadowRoot, null, this.#shadowCache, result);
+          }
+        });
       });
-    });
+    }
+
+    disconnectedCallback() {
+      this.#disconnect();
+      this[parentsCache].clear();
+      unmount(this.#shadowCache);
+    }
+    abstract render(): ShadowElement;
   }
 
-  disconnectedCallback() {
-    this.#disconnect();
-    this[parentsCache].clear();
-    unmount(this.#shadowCache);
-  }
-  abstract render(): ShadowElement;
-}
+  return WebComponent;
+};
 
 export const active = { parentElement: null as null | Element };
 
