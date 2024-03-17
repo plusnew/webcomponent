@@ -35,7 +35,7 @@ export function createComponent<T extends HTMLElement>(
     properties: PartialHtmlElement &
       RemoveUnneededProperties<
         T,
-        "render" | keyof InstanceType<ReturnType<typeof WebComponent>>
+        keyof InstanceType<ReturnType<typeof WebComponent>>
       >,
   ): T;
 } {
