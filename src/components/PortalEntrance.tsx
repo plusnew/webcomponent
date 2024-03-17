@@ -17,7 +17,9 @@ const portalReconcile: Reconciler = (
   }
 
   shadowCache.unmount = () => {
-    portalExit.childNodes.forEach((child) => child.remove());
+    for (const childNode of portalExit.childNodes) {
+      childNode.remove();
+    }
   };
 
   arrayReconcileWithoutSorting(

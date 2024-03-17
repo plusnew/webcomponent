@@ -4,22 +4,26 @@ import { reconcile, type ShadowCache } from "./index.js";
 export function unmount(oldShadowCache: ShadowCache) {
   if (oldShadowCache.unmount !== null) {
     oldShadowCache.unmount();
+    oldShadowCache.unmount = null;
   }
-  oldShadowCache.nestedShadows.forEach(unmount);
+  for (const nestedShadow of oldShadowCache.nestedShadows) {
+    unmount(nestedShadow);
+  }
 }
 
 export function remove(oldShadowCache: ShadowCache) {
   unmount(oldShadowCache);
 
   if (oldShadowCache.node === null) {
-    oldShadowCache.nestedShadows.forEach(remove);
+    for (const nestedShadow of oldShadowCache.nestedShadows) {
+      remove(nestedShadow);
+    }
   } else {
     oldShadowCache.node.parentNode?.removeChild(oldShadowCache.node);
   }
 
   oldShadowCache.node = null;
   oldShadowCache.nestedShadows = [];
-  oldShadowCache.unmount = null;
 }
 
 export const arrayReconcileWithoutSorting = (
