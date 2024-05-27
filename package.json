@@ -25,7 +25,7 @@
   "homepage": "https://github.com/plusnew/webcomponent#readme",
   "devDependencies": {
     "@babel/core": "^7.24.0",
-    "@babel/plugin-proposal-decorators": "^7.24.0",
+    "@babel/plugin-proposal-decorators": "^7.24.6",
     "@babel/plugin-transform-react-jsx": "^7.22.15",
     "@babel/preset-typescript": "^7.23.3",
     "@esm-bundle/chai": "^4.3.4-fix.0",
