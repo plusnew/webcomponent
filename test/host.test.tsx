@@ -1,5 +1,5 @@
 import { expect } from "@esm-bundle/chai";
-import { mount, createComponent, WebComponent } from "@plusnew/webcomponent";
+import { createComponent, mount } from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
 describe("webcomponent", () => {
@@ -17,7 +17,7 @@ describe("webcomponent", () => {
   it("registers click event", async () => {
     const Component = createComponent(
       "test-click",
-      class Component extends WebComponent(HTMLElement) {
+      class Component extends HTMLElement {
         #baz = signal(0);
 
         render() {
@@ -78,7 +78,7 @@ describe("webcomponent", () => {
   it("registers input event and updating", async () => {
     const Component = createComponent(
       "test-input-update",
-      class Component extends WebComponent(HTMLElement) {
+      class Component extends HTMLElement {
         #baz = signal("foo");
 
         render() {
@@ -131,7 +131,7 @@ describe("webcomponent", () => {
   it("registers input event without updating", async () => {
     const Component = createComponent(
       "test-input-reject",
-      class Component extends WebComponent(HTMLElement) {
+      class Component extends HTMLElement {
         #baz = signal("foo");
 
         render() {

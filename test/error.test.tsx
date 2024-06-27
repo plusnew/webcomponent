@@ -1,5 +1,5 @@
 import { expect } from "@esm-bundle/chai";
-import { mount, createComponent, WebComponent } from "@plusnew/webcomponent";
+import { createComponent, mount } from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
 function error(): never {
@@ -21,7 +21,7 @@ describe("webcomponent", () => {
   it("creates broken component and should display error", () => {
     const Component = createComponent(
       "test-broken",
-      class Component extends WebComponent(HTMLElement) {
+      class Component extends HTMLElement {
         #hasError = signal(false);
         render() {
           return this.#hasError.value ? (
@@ -55,7 +55,7 @@ describe("webcomponent", () => {
 
   //   const Component = webcomponent(
   //     "test-later-broken",
-  //     class Component extends WebComponent(HTMLElement) {
+  //     class Component extends HTMLElement {
   //       render() {
   //         if (foo.value === true) {
   //           return "good";

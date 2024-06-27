@@ -27,6 +27,9 @@ type PartialHtmlElement = Partial<
   RemoveUnneededProperties<HTMLElement, ForbiddenHTMLProperties>
 >;
 
+const disconnect = Symbol("disconnect");
+const shadowCache = Symbol("shadowCache");
+
 export function createComponent<T extends HTMLElement>(
   name: string,
   Component: { new (): T },
@@ -35,63 +38,57 @@ export function createComponent<T extends HTMLElement>(
     properties: PartialHtmlElement &
       RemoveUnneededProperties<
         T,
-        keyof InstanceType<ReturnType<typeof WebComponent>>
+        keyof HTMLElement
       >,
   ): T;
 } {
+
+
+  Component.prototype.connectedCallback = function(this: HTMLElement) {
+    if(this.shadowRoot === null) {
+       this.attachShadow({ mode: "open" });
+
+      (this as any)[parentsCache] = new Map();
+      (this as any)[shadowCache] = {
+        node: null,
+        nestedShadows: [],
+        value: false,
+        unmount: null,
+      }
+    }
+
+    (this as any)[disconnect] = effect(() => {
+      batch(() => {
+        const previousActiveElement = active.parentElement;
+        let errored = false;
+        let result;
+        try {
+          active.parentElement = this;
+          result = (this as any).render();
+          active.parentElement = previousActiveElement;
+        } catch (error) {
+          errored = true;
+          untracked(() => dispatchError(this, error));
+
+          return;
+        }
+        if (errored === false) {
+          reconcile((this.shadowRoot as ShadowRoot), null, (this as any)[shadowCache], result);
+        }
+      });
+    });
+  }
+  Component.prototype.disconnectedCallback = function() {
+    this[disconnect];
+    this[parentsCache].clear();
+    unmount(this[shadowCache]);
+  }
   customElements.define(name, Component as any);
 
   return name as any;
 }
 
 const parentsCache = Symbol("parentsCache");
-
-export const WebComponent = (Parent: { new (): HTMLElement }) => {
-  abstract class WebComponent extends Parent {
-    #disconnect = () => {};
-    [parentsCache] = new Map();
-    #shadowCache: ShadowCache = {
-      node: null,
-      nestedShadows: [],
-      value: false,
-      unmount: null,
-    };
-
-    connectedCallback(this: HTMLElement & WebComponent) {
-      const shadowRoot = this.attachShadow({ mode: "open" });
-
-      this.#disconnect = effect(() => {
-        batch(() => {
-          const previousActiveElement = active.parentElement;
-          let errored = false;
-          let result;
-          try {
-            active.parentElement = this;
-            result = this.render();
-            active.parentElement = previousActiveElement;
-          } catch (error) {
-            errored = true;
-            untracked(() => dispatchError(this, error));
-
-            return;
-          }
-          if (errored === false) {
-            reconcile(shadowRoot, null, this.#shadowCache, result);
-          }
-        });
-      });
-    }
-
-    disconnectedCallback() {
-      this.#disconnect();
-      this[parentsCache].clear();
-      unmount(this.#shadowCache);
-    }
-    abstract render(): ShadowElement;
-  }
-
-  return WebComponent;
-};
 
 export const active = { parentElement: null as null | Element };
 

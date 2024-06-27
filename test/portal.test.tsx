@@ -1,9 +1,8 @@
 import { expect } from "@esm-bundle/chai";
 import {
-  mount,
   PortalEntrance,
   createComponent,
-  WebComponent,
+  mount
 } from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
@@ -29,7 +28,7 @@ describe("webcomponent", () => {
     const show = signal(true);
     const Component = createComponent(
       "test-base",
-      class Component extends WebComponent(HTMLElement) {
+      class Component extends HTMLElement {
         render() {
           return (
             show.value && (
