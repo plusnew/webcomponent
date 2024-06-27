@@ -4,7 +4,7 @@ import {
   mount,
   prop
 } from "@plusnew/webcomponent";
-import { signal } from "@preact/signals-core";
+import { Signal, signal } from "@preact/signals-core";
 
 describe("webcomponent", () => {
   let container: HTMLElement;
@@ -202,7 +202,7 @@ describe("webcomponent", () => {
     const NestedComponent = createComponent(
       "test-counter-constructor",
       class Component extends HTMLElement {
-        #counter = signal(0);
+        #counter: Signal<number>;
         constructor() {
           super();
 
