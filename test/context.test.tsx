@@ -1,9 +1,5 @@
 import { expect } from "@esm-bundle/chai";
-import {
-  mount,
-  createComponent,
-  findParent,
-} from "@plusnew/webcomponent";
+import { mount, createComponent, findParent } from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
 const Provider = createComponent(

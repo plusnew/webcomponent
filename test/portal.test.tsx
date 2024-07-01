@@ -1,9 +1,5 @@
 import { expect } from "@esm-bundle/chai";
-import {
-  PortalEntrance,
-  createComponent,
-  mount
-} from "@plusnew/webcomponent";
+import { PortalEntrance, createComponent, mount } from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
 describe("webcomponent", () => {

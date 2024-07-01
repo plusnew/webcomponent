@@ -1,10 +1,7 @@
 import { expect } from "@esm-bundle/chai";
-import {
-  createComponent,
-  mount,
-  prop
-} from "@plusnew/webcomponent";
-import { Signal, signal } from "@preact/signals-core";
+import { createComponent, mount, prop } from "@plusnew/webcomponent";
+import type { Signal } from "@preact/signals-core";
+import { signal } from "@preact/signals-core";
 
 describe("webcomponent", () => {
   let container: HTMLElement;

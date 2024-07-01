@@ -30,23 +30,20 @@ type PartialHtmlElement = Partial<
 const disconnect = Symbol("disconnect");
 const shadowCache = Symbol("shadowCache");
 
-export function createComponent<T extends HTMLElement>(
+export function createComponent<
+  T extends HTMLElement & { render: () => ShadowElement },
+>(
   name: string,
   Component: { new (): T },
 ): {
   new (
     properties: PartialHtmlElement &
-      RemoveUnneededProperties<
-        T,
-        keyof HTMLElement
-      >,
+      RemoveUnneededProperties<T, keyof HTMLElement>,
   ): T;
 } {
-
-
-  Component.prototype.connectedCallback = function(this: HTMLElement) {
-    if(this.shadowRoot === null) {
-       this.attachShadow({ mode: "open" });
+  Component.prototype.connectedCallback = function (this: T) {
+    if (this.shadowRoot === null) {
+      this.attachShadow({ mode: "open" });
 
       (this as any)[parentsCache] = new Map();
       (this as any)[shadowCache] = {
@@ -54,17 +51,17 @@ export function createComponent<T extends HTMLElement>(
         nestedShadows: [],
         value: false,
         unmount: null,
-      }
+      };
     }
 
     (this as any)[disconnect] = effect(() => {
       batch(() => {
         const previousActiveElement = active.parentElement;
         let errored = false;
-        let result;
+        let result: ShadowElement;
         try {
           active.parentElement = this;
-          result = (this as any).render();
+          result = this.render();
           active.parentElement = previousActiveElement;
         } catch (error) {
           errored = true;
@@ -73,16 +70,21 @@ export function createComponent<T extends HTMLElement>(
           return;
         }
         if (errored === false) {
-          reconcile((this.shadowRoot as ShadowRoot), null, (this as any)[shadowCache], result);
+          reconcile(
+            this.shadowRoot as ShadowRoot,
+            null,
+            (this as any)[shadowCache],
+            result,
+          );
         }
       });
     });
-  }
-  Component.prototype.disconnectedCallback = function() {
-    this[disconnect];
-    this[parentsCache].clear();
-    unmount(this[shadowCache]);
-  }
+  };
+  Component.prototype.disconnectedCallback = function (this: T) {
+    (this as any)[disconnect];
+    (this as any)[parentsCache].clear();
+    unmount((this as any)[shadowCache]);
+  };
   customElements.define(name, Component as any);
 
   return name as any;
