@@ -9,6 +9,8 @@ import type {
 } from "./types.js";
 import { dispatchError } from "./utils.js";
 
+export { ShadowElement } from "./types.js";
+
 export { default as PortalEntrance } from "./components/PortalEntrance.js";
 
 export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
@@ -81,7 +83,7 @@ export function createComponent<
     });
   };
   Component.prototype.disconnectedCallback = function (this: T) {
-    (this as any)[disconnect];
+    (this as any)[disconnect]();
     (this as any)[parentsCache].clear();
     unmount((this as any)[shadowCache]);
   };
