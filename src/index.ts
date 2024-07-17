@@ -9,7 +9,7 @@ import type {
 } from "./types.js";
 import { dispatchError } from "./utils.js";
 
-export { ShadowElement } from "./types.js";
+export type { ShadowElement } from "./types.js";
 
 export { default as PortalEntrance } from "./components/PortalEntrance.js";
 
