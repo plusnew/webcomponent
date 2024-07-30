@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/plusnew/webcomponent#readme",
   "devDependencies": {
-    "@babel/core": "^7.24.8",
+    "@babel/core": "^7.25.2",
     "@babel/plugin-proposal-decorators": "^7.24.7",
     "@babel/plugin-transform-react-jsx": "^7.24.7",
     "@babel/preset-typescript": "^7.24.7",
