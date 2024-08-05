@@ -53,12 +53,7 @@ type checkFunctions = Expect<
   >
 >;
 
-export type RemoveUnneededProperties<T, U> = Pick<
-  T,
-  Exclude<keyof T, ReadonlyKeys<T> | FunctionKeys<T> | U>
->;
-
-export type ForbiddenHTMLProperties =
+type ForbiddenHTMLProperties =
   | "innerHTML"
   | "outerHTML"
   | "innerText"

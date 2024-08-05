@@ -3,10 +3,8 @@ import { reconcile, type ShadowCache } from "./reconciler/index.js";
 import { unmount } from "./reconciler/util.js";
 import type {
   CustomEvents,
-  ForbiddenHTMLProperties,
   IntrinsicElementAttributes,
   ReadonlyKeys,
-  RemoveUnneededProperties,
   ShadowElement,
 } from "./types.js";
 import { dispatchError } from "./utils.js";
@@ -26,10 +24,6 @@ export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
 
   return shadowResult.node;
 }
-
-type PartialHtmlElement = Partial<
-  RemoveUnneededProperties<HTMLElement, ForbiddenHTMLProperties>
->;
 
 const disconnect = Symbol("disconnect");
 const shadowCache = Symbol("shadowCache");
