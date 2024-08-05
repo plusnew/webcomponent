@@ -24,22 +24,22 @@
   },
   "homepage": "https://github.com/plusnew/webcomponent#readme",
   "devDependencies": {
-    "@babel/core": "^7.24.7",
+    "@babel/core": "^7.25.2",
     "@babel/plugin-proposal-decorators": "^7.24.7",
-    "@babel/plugin-transform-react-jsx": "^7.24.7",
+    "@babel/plugin-transform-react-jsx": "^7.25.2",
     "@babel/preset-typescript": "^7.24.7",
     "@esm-bundle/chai": "^4.3.4-fix.0",
-    "@preact/signals-core": "^1.6.1",
+    "@preact/signals-core": "^1.7.0",
     "@rollup/plugin-babel": "^6.0.4",
     "@types/mocha": "^10.0.7",
-    "@typescript-eslint/eslint-plugin": "^7.14.1",
-    "@typescript-eslint/parser": "^7.3.1",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
     "@web/test-runner": "^0.18.2",
     "babel-plugin-inferno": "^6.7.1",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.0.0",
-    "eslint-plugin-prettier": "^5.0.1",
-    "prettier": "^3.3.2",
-    "typescript": "^5.4.2"
+    "eslint-plugin-prettier": "^5.2.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
   }
 }

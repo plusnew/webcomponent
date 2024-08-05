@@ -19,8 +19,7 @@ describe("webcomponent", () => {
     const Component = createComponent(
       "test-base",
       class Component extends HTMLElement {
-        @prop()
-        accessor foo: string;
+        @prop() accessor foo: string;
 
         #baz = signal("baz");
 
@@ -58,8 +57,7 @@ describe("webcomponent", () => {
     const Component = createComponent(
       "test-array",
       class Component extends HTMLElement {
-        @prop()
-        accessor amount: number;
+        @prop() accessor amount: number;
 
         render() {
           return [...Array(this.amount).keys()].map((value) => (
@@ -111,8 +109,7 @@ describe("webcomponent", () => {
     const Component = createComponent(
       "test-placeholder",
       class Component extends HTMLElement {
-        @prop()
-        accessor show: boolean;
+        @prop() accessor show: boolean;
 
         render() {
           return this.show === true && <div />;
@@ -204,6 +201,7 @@ describe("webcomponent", () => {
           super();
 
           this.#counter = signal(0);
+          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
           this.#counter.value;
         }
         render() {

@@ -19,6 +19,7 @@ const Consumer = createComponent(
     render() {
       try {
         return findParent(Provider).foo.value;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (_error) {
         return "not-found";
       }
