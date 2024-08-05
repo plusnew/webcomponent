@@ -19,7 +19,7 @@ export type ReadonlyKeys<T> = {
 }[keyof T];
 
 type FunctionKeys<T> = {
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   [P in keyof T]: T[P] extends Function ? P : never;
 }[keyof T];
 
@@ -76,15 +76,19 @@ declare global {
      * All the DOM Nodes are here
      */
     type IntrinsicElements = {
-      [Tag in keyof HTMLElementTagNameMap]: IntrinsicElementAttributes<HTMLElementTagNameMap[Tag]> & {
+      [Tag in keyof HTMLElementTagNameMap]: IntrinsicElementAttributes<
+        HTMLElementTagNameMap[Tag]
+      > & {
         children?: ShadowElement;
         onplusnewerror?: (evt: CustomEvent<unknown>) => void;
       };
     } & {
-      [Tag in keyof SVGElementTagNameMap]: IntrinsicElementAttributes<SVGElementTagNameMap[Tag]> & {
+      [Tag in keyof SVGElementTagNameMap]: IntrinsicElementAttributes<
+        SVGElementTagNameMap[Tag]
+      > & {
         children?: ShadowElement;
         onplusnewerror?: (evt: CustomEvent<unknown>) => void;
-      }
+      };
     };
 
     interface IntrinsicAttributes {
@@ -94,19 +98,16 @@ declare global {
 }
 
 export type IntrinsicElementAttributes<T> = {
-  [Prop in keyof T as 
-    Prop extends ReadonlyKeys<T>
+  [Prop in keyof T as Prop extends ReadonlyKeys<T>
+    ? never
+    : Prop extends ForbiddenHTMLProperties
       ? never
-      : Prop extends ForbiddenHTMLProperties 
-        ? never 
-        : Prop extends `on${any}`
-          ? Prop
-          : T[Prop] extends () => any
-            ? never
-            : Prop
-  ]?: T[Prop] | null
-}
-
+      : Prop extends `on${any}`
+        ? Prop
+        : T[Prop] extends () => any
+          ? never
+          : Prop]?: T[Prop] | null;
+};
 
 export type ShadowHostElement = {
   $$typeof: typeof PLUSNEW_ELEMENT_TYPE;
@@ -131,7 +132,9 @@ export type ShadowElement =
   | ShadowElement[];
 
 export type CustomEvents<C> = {
-  [Key in keyof C as Key extends`on${infer Event}`
-    ? ((evt: CustomEvent<any>) => any) extends C[Key] ? Event: never
+  [Key in keyof C as Key extends `on${infer Event}`
+    ? ((evt: CustomEvent<any>) => any) extends C[Key]
+      ? Event
+      : never
     : never]: C[Key] extends (evt: CustomEvent<infer R>) => void ? R : never;
 };
