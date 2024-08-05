@@ -4,6 +4,8 @@ import { unmount } from "./reconciler/util.js";
 import type {
   CustomEvents,
   ForbiddenHTMLProperties,
+  IntrinsicElementAttributes,
+  ReadonlyKeys,
   RemoveUnneededProperties,
   ShadowElement,
 } from "./types.js";
@@ -39,8 +41,19 @@ export function createComponent<
   Component: { new (): T },
 ): {
   new (
-    properties: PartialHtmlElement &
-      RemoveUnneededProperties<T, keyof HTMLElement>,
+    properties: IntrinsicElementAttributes<HTMLElement> &
+      {
+        [Prop in keyof T as Prop extends keyof HTMLElement
+          ? never
+          : Prop extends ReadonlyKeys<T>
+            ? never
+            : Prop extends `on${any}`
+              ? Prop
+              : T[Prop] extends () => any
+                ? never
+                : Prop
+        ]: T[Prop]
+      }
   ): T;
 } {
   Component.prototype.connectedCallback = function (this: T) {

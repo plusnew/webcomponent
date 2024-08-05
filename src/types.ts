@@ -9,7 +9,7 @@ type IsEqual<CheckA, CheckB, Then, Else> =
     ? Then
     : Else;
 
-type ReadonlyKeys<T> = {
+export type ReadonlyKeys<T> = {
   [P in keyof T]-?: IsEqual<
     { [Q in P]: T[P] },
     { -readonly [Q in P]: T[P] },
@@ -81,22 +81,15 @@ declare global {
      * All the DOM Nodes are here
      */
     type IntrinsicElements = {
-      [Tag in keyof HTMLElementTagNameMap]: Partial<
-        RemoveUnneededProperties<
-          HTMLElementTagNameMap[Tag],
-          ForbiddenHTMLProperties
-        >
-      > & {
+      [Tag in keyof HTMLElementTagNameMap]: IntrinsicElementAttributes<HTMLElementTagNameMap[Tag]> & {
         children?: ShadowElement;
         onplusnewerror?: (evt: CustomEvent<unknown>) => void;
       };
     } & {
-      [Tag in keyof SVGElementTagNameMap]: Partial<
-        RemoveUnneededProperties<SVGElementTagNameMap[Tag], never>
-      > & {
+      [Tag in keyof SVGElementTagNameMap]: IntrinsicElementAttributes<SVGElementTagNameMap[Tag]> & {
         children?: ShadowElement;
         onplusnewerror?: (evt: CustomEvent<unknown>) => void;
-      };
+      }
     };
 
     interface IntrinsicAttributes {
@@ -104,6 +97,21 @@ declare global {
     }
   }
 }
+
+export type IntrinsicElementAttributes<T> = {
+  [Prop in keyof T as 
+    Prop extends ReadonlyKeys<T>
+      ? never
+      : Prop extends ForbiddenHTMLProperties 
+        ? never 
+        : Prop extends `on${any}`
+          ? Prop
+          : T[Prop] extends () => any
+            ? never
+            : Prop
+  ]?: T[Prop] | null
+}
+
 
 export type ShadowHostElement = {
   $$typeof: typeof PLUSNEW_ELEMENT_TYPE;
