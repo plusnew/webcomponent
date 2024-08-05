@@ -45,6 +45,9 @@ export function createComponent<
             : T[Prop] extends () => any
               ? never
               : Prop]: T[Prop];
+    } & {
+      children?: ShadowElement;
+      onplusnewerror?: (evt: CustomEvent<unknown>) => void;
     },
   ): T;
 } {
@@ -87,7 +90,12 @@ export function createComponent<
       });
     });
   };
+
+  const previousDisconnectedCallback = Component.prototype.disconnectedCallback;
   Component.prototype.disconnectedCallback = function (this: T) {
+    if (previousDisconnectedCallback) {
+      previousDisconnectedCallback.call(this)
+    }
     (this as any)[disconnect]();
     (this as any)[parentsCache].clear();
     unmount((this as any)[shadowCache]);
