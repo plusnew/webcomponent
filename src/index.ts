@@ -33,7 +33,7 @@ const disconnect = Symbol("disconnect");
 const shadowCache = Symbol("shadowCache");
 
 export function createComponent<
-  T extends HTMLElement & { render: () => ShadowElement },
+  T extends HTMLElement & { render: (this: T) => ShadowElement },
 >(
   name: string,
   Component: { new (): T },
