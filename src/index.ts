@@ -1,4 +1,3 @@
-import type { Signal } from "@preact/signals-core";
 import { batch, effect, signal, untracked } from "@preact/signals-core";
 import { reconcile, type ShadowCache } from "./reconciler/index.js";
 import { unmount } from "./reconciler/util.js";
@@ -146,20 +145,19 @@ export function findParent<T = Element>(
 
 export function prop() {
   return <T, U>(
-    decoratorTarget: ClassAccessorDecoratorTarget<T, U>,
-    accessor: ClassAccessorDecoratorContext<T, U>,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _decoratorTarget: ClassAccessorDecoratorTarget<T, U>,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _accessor: ClassAccessorDecoratorContext<T, U>,
   ): ClassAccessorDecoratorResult<T, U> => {
-    accessor;
-    const storage: Signal<number> = signal(0);
+    const storage = signal<U | undefined>();
 
     return {
       set: function (value) {
-        decoratorTarget.set.call(this, value);
-        storage.value = storage.value + 1;
+        storage.value = value;
       },
       get: function () {
-        storage.value;
-        return decoratorTarget.get.call(this);
+        return storage.value as U;
       },
     };
   };

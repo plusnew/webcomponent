@@ -201,6 +201,7 @@ describe("webcomponent", () => {
           super();
 
           this.#counter = signal(0);
+          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
           this.#counter.value;
         }
         render() {
