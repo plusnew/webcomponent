@@ -33,7 +33,7 @@ const disconnect = Symbol("disconnect");
 const shadowCache = Symbol("shadowCache");
 
 export function createComponent<
-  T extends HTMLElement & { render: () => ShadowElement },
+  T extends HTMLElement & { render: (this: T) => ShadowElement },
 >(
   name: string,
   Component: { new (): T },
@@ -149,7 +149,7 @@ export function dispatchEvent<
   U extends keyof CustomEvents<T>,
 >(target: T, eventName: U, detail: CustomEvents<T>[U]) {
   target.dispatchEvent(
-    new CustomEvent((eventName as string).slice(2), { detail: detail }),
+    new CustomEvent(eventName as string, { detail: detail }),
   );
 }
 

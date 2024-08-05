@@ -128,7 +128,7 @@ export type ShadowElement =
   | ShadowElement[];
 
 export type CustomEvents<C> = {
-  [Key in keyof C as C[Key] extends (evt: CustomEvent<any>) => void
-    ? Key
+  [Key in keyof C as Key extends`on${infer Event}`
+    ? ((evt: CustomEvent<any>) => any) extends C[Key] ? Event: never
     : never]: C[Key] extends (evt: CustomEvent<infer R>) => void ? R : never;
 };
