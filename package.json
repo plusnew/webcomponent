@@ -33,7 +33,7 @@
     "@preact/signals-core": "^1.7.0",
     "@rollup/plugin-babel": "^6.0.4",
     "@types/mocha": "^10.0.7",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.1",
     "@typescript-eslint/parser": "^8.0.0",
     "@web/test-runner": "^0.18.2",
     "babel-plugin-inferno": "^6.7.1",
