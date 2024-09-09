@@ -27,7 +27,6 @@ export const fragmentReconcile: Reconciler = (
         remove(shadowCache);
     }
 
-    debugger
     return arrayReconcileWithoutSorting(
       parentElement,
       previousSibling,
