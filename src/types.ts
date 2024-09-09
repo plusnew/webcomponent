@@ -3,7 +3,7 @@ import type { Reconciler } from "./reconciler/index.js";
 export const PLUSNEW_ELEMENT_TYPE = Symbol("plusnew-element-type");
 export const PLUSNEW_FRAGMENT_TYPE = Symbol("plusnew-fragment-type");
 
-type Expect<T extends true> = T;
+// type Expect<T extends true> = T;
 
 type IsEqual<CheckA, CheckB, Then, Else> =
   (<T>() => T extends CheckA ? 1 : 2) extends <T>() => T extends CheckB ? 1 : 2
@@ -19,10 +19,10 @@ export type ReadonlyKeys<T> = {
   >;
 }[keyof T];
 
-type FunctionKeys<T> = {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-  [P in keyof T]: T[P] extends Function ? P : never;
-}[keyof T];
+// type FunctionKeys<T> = {
+//   // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+//   [P in keyof T]: T[P] extends Function ? P : never;
+// }[keyof T];
 
 // type checkReadonly = Expect<
 //   IsEqual<
