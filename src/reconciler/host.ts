@@ -49,7 +49,6 @@ export const hostReconcile: Reconciler = (
       shadowCache.value = {
         $$typeof: PLUSNEW_ELEMENT_TYPE,
         type: shadowElement.type,
-        key: shadowElement.props.key,
         props: {},
         children: [],
       };

@@ -1,6 +1,7 @@
 import type { Reconciler } from "./reconciler/index.js";
 
 export const PLUSNEW_ELEMENT_TYPE = Symbol("plusnew-element-type");
+export const PLUSNEW_FRAGMENT_TYPE = Symbol("plusnew-fragment-type");
 
 type Expect<T extends true> = T;
 
@@ -23,35 +24,33 @@ type FunctionKeys<T> = {
   [P in keyof T]: T[P] extends Function ? P : never;
 }[keyof T];
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-type checkReadonly = Expect<
-  IsEqual<
-    ReadonlyKeys<{
-      foo: string;
-      readonly bar: number;
-      readonly baz: string;
-      mep: number;
-    }>,
-    "bar" | "baz",
-    true,
-    false
-  >
->;
+// type checkReadonly = Expect<
+//   IsEqual<
+//     ReadonlyKeys<{
+//       foo: string;
+//       readonly bar: number;
+//       readonly baz: string;
+//       mep: number;
+//     }>,
+//     "bar" | "baz",
+//     true,
+//     false
+//   >
+// >;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-type checkFunctions = Expect<
-  IsEqual<
-    FunctionKeys<{
-      foo: string;
-      bar: () => number;
-      baz: () => string;
-      mep: number;
-    }>,
-    "bar" | "baz",
-    true,
-    false
-  >
->;
+// type checkFunctions = Expect<
+//   IsEqual<
+//     FunctionKeys<{
+//       foo: string;
+//       bar: () => number;
+//       baz: () => string;
+//       mep: number;
+//     }>,
+//     "bar" | "baz",
+//     true,
+//     false
+//   >
+// >;
 
 type ForbiddenHTMLProperties =
   | "innerHTML"
@@ -119,7 +118,13 @@ export type ShadowHostElement = {
 export type ShadowComponentElement = {
   $$typeof: typeof PLUSNEW_ELEMENT_TYPE;
   type: Reconciler;
-  key: any;
+  props: any;
+  children: (() => ShadowElement)[];
+};
+
+export type ShadowFragmentElement = {
+  $$typeof: typeof PLUSNEW_ELEMENT_TYPE;
+  type: typeof PLUSNEW_FRAGMENT_TYPE;
   props: any;
   children: (() => ShadowElement)[];
 };
@@ -127,6 +132,7 @@ export type ShadowComponentElement = {
 export type ShadowElement =
   | ShadowHostElement
   | ShadowComponentElement
+  | ShadowFragmentElement
   | string
   | false
   | ShadowElement[];

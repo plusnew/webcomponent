@@ -2,6 +2,7 @@ import { type ShadowElement } from "../types.js";
 import { arrayReconcile } from "./array.js";
 import { componentReconcile } from "./component.js";
 import { falseReconcile } from "./false.js";
+import { fragmentReconcile } from "./fragment.js";
 import { hostReconcile } from "./host.js";
 import { textReconcile } from "./text.js";
 
@@ -28,6 +29,7 @@ export function reconcile(
   for (const reconciler of [
     hostReconcile,
     componentReconcile,
+    fragmentReconcile,
     textReconcile,
     arrayReconcile,
     falseReconcile,

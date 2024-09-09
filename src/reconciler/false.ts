@@ -2,7 +2,7 @@ import type { Reconciler } from "./index.js";
 import { remove } from "./util.js";
 
 export const falseReconcile: Reconciler = (
-  parentElement,
+  _parentElement,
   previousSibling,
   shadowCache,
   shadowElement,

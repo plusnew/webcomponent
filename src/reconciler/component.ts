@@ -18,7 +18,7 @@ export const componentReconcile: Reconciler = (
   shadowCache,
   shadowElement,
 ) => {
-  // Check if new shadow is of type dom-element
+  // Check if new shadow is of type component-element
   if (isComponentElement(shadowElement)) {
     // Check if old shadow is of same shadow-type
     if (

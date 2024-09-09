@@ -32,7 +32,7 @@ const portalReconcile: Reconciler = (
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default function Portal(props: {
+export default function Portal(_props: {
   target: string;
   children: ShadowElement;
 }): ShadowElement {

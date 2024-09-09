@@ -18,6 +18,28 @@ export default function (babel) {
           );
         },
       },
+      JSXFragment(path, state) {
+        if (!state.get("id/Fragment")) {
+          state.set(
+            "id/Fragment",
+            addNamed(
+              path,
+              "Fragment",
+              "@plusnew/webcomponent/jsx-runtime",
+            ),
+          );
+        }
+
+        path.replaceWith(
+          t.callExpression(state.get("id/createElement"), [
+            state.get("id/Fragment"),
+            t.objectExpression([]),
+            ...t.react
+              .buildChildren(path.node)
+              .map((child) => t.arrowFunctionExpression([], child))
+          ]),
+        );
+      },
       JSXElement(path, state) {
         const openingElement = path.get("openingElement");
         const typeValue = openingElement.node.name.name;
