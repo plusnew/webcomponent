@@ -137,6 +137,11 @@ describe("webcomponent", () => {
     (component as any).show = false;
 
     expect(component.shadowRoot?.childNodes.length).to.equal(0);
+
+    // Mounting same component a second time, should not interfer with the first
+    mount(container, <Component show={true} />);
+
+    expect(component.shadowRoot?.childNodes.length).to.equal(0);
   });
 
   it("parent component should not rerender when child signal changes", () => {

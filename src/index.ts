@@ -1,4 +1,4 @@
-import { batch, effect, signal, untracked } from "@preact/signals-core";
+import { batch, effect, Signal, signal, untracked } from "@preact/signals-core";
 import { reconcile, type ShadowCache } from "./reconciler/index.js";
 import { unmount } from "./reconciler/util.js";
 import type {
@@ -168,19 +168,23 @@ export function dispatchEvent<
 
 export function prop() {
   return <T, U>(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _decoratorTarget: ClassAccessorDecoratorTarget<T, U>,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _accessor: ClassAccessorDecoratorContext<T, U>,
+    decoratorTarget: ClassAccessorDecoratorTarget<T, U>,
+    accessor: ClassAccessorDecoratorContext<T, U>,
   ): ClassAccessorDecoratorResult<T, U> => {
-    const storage = signal<U | undefined>();
-
     return {
       set: function (value) {
-        storage.value = value;
+        if (accessor.access.has(this)) {
+          (decoratorTarget.get.call(this) as Signal<U>).value = value
+        } else {
+          decoratorTarget.set.call(this, signal(value) as U)
+        }
+        
       },
       get: function () {
-        return storage.value as U;
+        return (decoratorTarget.get.call(this) as Signal<U>).value
+      },
+      init(value) {
+        return signal(value) as U
       },
     };
   };
