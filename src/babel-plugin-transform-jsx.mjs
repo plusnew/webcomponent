@@ -9,10 +9,10 @@ export default function (babel) {
       Program: {
         enter: (path, state) => {
           state.set(
-            "id/createElement",
+            "id/jsx",
             addNamed(
               path,
-              "createElement",
+              "jsx",
               "@plusnew/webcomponent/jsx-runtime",
             ),
           );
@@ -31,7 +31,7 @@ export default function (babel) {
         }
 
         path.replaceWith(
-          t.callExpression(state.get("id/createElement"), [
+          t.callExpression(state.get("id/jsx"), [
             state.get("id/Fragment"),
             t.objectExpression([]),
             ...t.react
@@ -101,7 +101,7 @@ export default function (babel) {
         }
 
         path.replaceWith(
-          t.callExpression(state.get("id/createElement"), [
+          t.callExpression(state.get("id/jsx"), [
             type,
             t.objectExpression(properties),
             ...children,

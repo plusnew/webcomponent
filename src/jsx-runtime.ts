@@ -3,7 +3,7 @@ import { PLUSNEW_ELEMENT_TYPE } from "./types.js";
 
 export { PLUSNEW_FRAGMENT_TYPE as Fragment } from "./types.js"
 
-export function createElement(
+export function jsx(
   type: string,
   props: object,
   ...children: (() => ShadowHostElement)[]
