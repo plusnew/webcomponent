@@ -18,3 +18,7 @@ export function jsx(
     children,
   };
 }
+
+export const jsxs = jsx;
+export const jsxDEV = jsx;
+
