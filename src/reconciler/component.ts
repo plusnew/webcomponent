@@ -1,4 +1,4 @@
-import type { ShadowComponentElement, ShadowElement } from "../types.js";
+import { type ShadowComponentElement, type ShadowElement, PLUSNEW_ELEMENT_TYPE} from "../types.js";
 import type { Reconciler } from "./index.js";
 import { remove } from "./util.js";
 
@@ -8,6 +8,7 @@ export function isComponentElement(
   return (
     typeof shadowElement === "object" &&
     "$$typeof" in shadowElement &&
+    shadowElement.$$typeof === PLUSNEW_ELEMENT_TYPE &&
     typeof shadowElement.type === "function"
   );
 }

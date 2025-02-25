@@ -1,15 +1,16 @@
-import { PLUSNEW_FRAGMENT_TYPE, type ShadowFragmentElement, type ShadowElement } from "../types.js";
+import { PLUSNEW_ELEMENT_TYPE, Fragment, type ShadowElement, ShadowComponentElement, ShadowHostElement } from "../types.js";
 import type { Reconciler } from "./index.js";
 import { arrayReconcileWithoutSorting, remove } from "./util.js";
 
 
 export function isFragmentElement(
     shadowElement: ShadowElement,
-  ): shadowElement is ShadowFragmentElement {
+  ): shadowElement is ShadowHostElement {
     return (
       typeof shadowElement === "object" &&
       "$$typeof" in shadowElement &&
-       shadowElement.type === PLUSNEW_FRAGMENT_TYPE
+      shadowElement.$$typeof === PLUSNEW_ELEMENT_TYPE &&
+      shadowElement.type === Fragment
     );
   }
 

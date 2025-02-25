@@ -1,7 +1,10 @@
 import type { Reconciler } from "./reconciler/index.js";
 
 export const PLUSNEW_ELEMENT_TYPE = Symbol("plusnew-element-type");
-export const PLUSNEW_FRAGMENT_TYPE = Symbol("plusnew-fragment-type");
+
+export function Fragment(props: { children: ShadowElement }) {
+  return props.children
+}
 
 // type Expect<T extends true> = T;
 
@@ -123,8 +126,8 @@ export type ShadowComponentElement = {
 };
 
 export type ShadowFragmentElement = {
-  $$typeof: typeof PLUSNEW_ELEMENT_TYPE;
-  type: typeof PLUSNEW_FRAGMENT_TYPE;
+  $$typeof: typeof PLUSNEW_ELEMENT_TYPE
+  type: typeof Fragment;
   props: any;
   children: (() => ShadowElement)[];
 };

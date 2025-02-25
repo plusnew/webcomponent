@@ -27,9 +27,9 @@ export function reconcile(
   shadowElement: ShadowElement,
 ): Node | null {
   for (const reconciler of [
+    fragmentReconcile,
     hostReconcile,
     componentReconcile,
-    fragmentReconcile,
     textReconcile,
     arrayReconcile,
     falseReconcile,

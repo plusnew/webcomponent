@@ -1,7 +1,7 @@
 import type { ShadowHostElement } from "./types.js";
 import { PLUSNEW_ELEMENT_TYPE } from "./types.js";
 
-export { PLUSNEW_FRAGMENT_TYPE as Fragment } from "./types.js"
+export { Fragment } from "./types.js";
 
 export function jsx(
   type: string,
@@ -9,7 +9,7 @@ export function jsx(
   ...children: (() => ShadowHostElement)[]
 ): ShadowHostElement {
   return {
-    // This tag allows us to uniquely identify this as a React Element
+    // This tag allows us to uniquely identify this as a JSX Element
     $$typeof: PLUSNEW_ELEMENT_TYPE,
 
     // Built-in properties that belong on the element
