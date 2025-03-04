@@ -20,7 +20,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./jsx-runtime": "./src/jsx-runtime.ts",
-    "./babel-plugin-transform-jsx": "./src/babel-plugin-transform-jsx.mjs"
+    "./babel-plugin-transform-jsx": "./src/babel-plugin-transform-jsx.js"
   },
   "homepage": "https://github.com/plusnew/webcomponent#readme",
   "devDependencies": {
