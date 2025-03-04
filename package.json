@@ -5,7 +5,6 @@
   "directories": {
     "test": "test"
   },
-  "type": "module",
   "scripts": {
     "test": "web-test-runner"
   },

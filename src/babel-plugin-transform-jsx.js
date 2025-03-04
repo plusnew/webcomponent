@@ -1,6 +1,6 @@
-import { addNamed } from "@babel/helper-module-imports";
+const { addNamed } = require("@babel/helper-module-imports");
 
-export default function (babel) {
+module.exports = function (babel) {
   const { types: t } = babel;
 
   return {

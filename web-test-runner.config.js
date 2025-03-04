@@ -1,10 +1,10 @@
-import { fromRollup } from "@web/dev-server-rollup";
-import rollupBabel from "@rollup/plugin-babel";
-import transform from "./src/babel-plugin-transform-jsx.mjs";
+const { fromRollup } = require("@web/dev-server-rollup");
+const rollupBabel = require("@rollup/plugin-babel");
+const transform = require("./src/babel-plugin-transform-jsx");
 // note that you need to use `.default` for babel
 const babel = fromRollup(rollupBabel);
 
-export default {
+module.exports = {
   nodeResolve: true,
   files: ["test/**/*.test.tsx"],
   mimeTypes: {
