@@ -1,5 +1,5 @@
-import type { Reconciler } from "./index.js";
-import { arrayReconcileWithoutSorting, remove } from "./util.js";
+import type { Reconciler } from "./index";
+import { arrayReconcileWithoutSorting, remove } from "./util";
 
 export const arrayReconcile: Reconciler = (
   parentElement,

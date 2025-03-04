@@ -1,7 +1,7 @@
-import type { ShadowHostElement } from "./types.js";
-import { PLUSNEW_ELEMENT_TYPE } from "./types.js";
+import type { ShadowHostElement } from "./types";
+import { PLUSNEW_ELEMENT_TYPE } from "./types";
 
-export { Fragment } from "./types.js";
+export { Fragment } from "./types";
 
 export function jsx(
   type: string,

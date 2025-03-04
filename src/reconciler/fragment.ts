@@ -1,6 +1,6 @@
-import { PLUSNEW_ELEMENT_TYPE, Fragment, type ShadowElement, type ShadowHostElement } from "../types.js";
-import type { Reconciler } from "./index.js";
-import { arrayReconcileWithoutSorting, remove } from "./util.js";
+import { PLUSNEW_ELEMENT_TYPE, Fragment, type ShadowElement, type ShadowHostElement } from "../types";
+import type { Reconciler } from "./index";
+import { arrayReconcileWithoutSorting, remove } from "./util";
 
 
 export function isFragmentElement(

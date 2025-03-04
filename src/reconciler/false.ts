@@ -1,5 +1,5 @@
-import type { Reconciler } from "./index.js";
-import { remove } from "./util.js";
+import type { Reconciler } from "./index";
+import { remove } from "./util";
 
 export const falseReconcile: Reconciler = (
   _parentElement,

@@ -1,10 +1,10 @@
-import { type ShadowElement } from "../types.js";
-import { arrayReconcile } from "./array.js";
-import { componentReconcile } from "./component.js";
-import { falseReconcile } from "./false.js";
-import { fragmentReconcile } from "./fragment.js";
-import { hostReconcile } from "./host.js";
-import { textReconcile } from "./text.js";
+import { type ShadowElement } from "../types";
+import { arrayReconcile } from "./array";
+import { componentReconcile } from "./component";
+import { falseReconcile } from "./false";
+import { fragmentReconcile } from "./fragment";
+import { hostReconcile } from "./host";
+import { textReconcile } from "./text";
 
 export type ShadowCache = {
   value: ShadowElement;

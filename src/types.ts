@@ -1,4 +1,4 @@
-import type { Reconciler } from "./reconciler/index.js";
+import type { Reconciler } from "./reconciler/index";
 
 export const PLUSNEW_ELEMENT_TYPE = Symbol("plusnew-element-type");
 

@@ -1,13 +1,13 @@
 import { untracked } from "@preact/signals-core";
-import { active } from "../index.js";
+import { active } from "../index";
 import {
   PLUSNEW_ELEMENT_TYPE,
   type ShadowElement,
   type ShadowHostElement,
-} from "../types.js";
-import type { Reconciler } from "./index.js";
-import { append, arrayReconcileWithoutSorting, remove } from "./util.js";
-import { dispatchError } from "../utils.js";
+} from "../types";
+import type { Reconciler } from "./index";
+import { append, arrayReconcileWithoutSorting, remove } from "./util";
+import { dispatchError } from "../utils";
 
 const EVENT_PREFIX = "on";
 

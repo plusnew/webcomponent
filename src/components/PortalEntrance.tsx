@@ -1,6 +1,6 @@
-import type { Reconciler } from "../reconciler/index.js";
-import { arrayReconcileWithoutSorting } from "../reconciler/util.js";
-import type { ShadowComponentElement, ShadowElement } from "../types.js";
+import type { Reconciler } from "../reconciler/index";
+import { arrayReconcileWithoutSorting } from "../reconciler/util";
+import type { ShadowComponentElement, ShadowElement } from "../types";
 
 const portalReconcile: Reconciler = (
   parentElement,

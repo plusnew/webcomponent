@@ -1,5 +1,5 @@
-import type { ShadowElement } from "../types.js";
-import { reconcile, type ShadowCache } from "./index.js";
+import type { ShadowElement } from "../types";
+import { reconcile, type ShadowCache } from "./index";
 
 export function unmount(oldShadowCache: ShadowCache) {
   if (oldShadowCache.unmount !== null) {

@@ -1,17 +1,17 @@
 import { batch, effect, Signal, signal, untracked } from "@preact/signals-core";
-import { reconcile, type ShadowCache } from "./reconciler/index.js";
-import { unmount } from "./reconciler/util.js";
+import { reconcile, type ShadowCache } from "./reconciler/index";
+import { unmount } from "./reconciler/util";
 import type {
   CustomEvents,
   IntrinsicElementAttributes,
   ReadonlyKeys,
   ShadowElement,
-} from "./types.js";
-import { dispatchError } from "./utils.js";
+} from "./types";
+import { dispatchError } from "./utils";
 
-export type { ShadowElement } from "./types.js";
+export type { ShadowElement } from "./types";
 
-export { default as PortalEntrance } from "./components/PortalEntrance.js";
+export { default as PortalEntrance } from "./components/PortalEntrance";
 
 export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
   const shadowResult: ShadowCache = {
