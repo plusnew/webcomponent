@@ -1,6 +1,6 @@
 const { fromRollup } = require("@web/dev-server-rollup");
 const rollupBabel = require("@rollup/plugin-babel");
-const transform = require("./src/babel-plugin-transform-jsx");
+const transform = require("@plusnew/webcomponent/babel-plugin-transform-jsx");
 // note that you need to use `.default` for babel
 const babel = fromRollup(rollupBabel);
 
