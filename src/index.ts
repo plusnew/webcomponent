@@ -28,31 +28,8 @@ export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
 const disconnect = Symbol("disconnect");
 const shadowCache = Symbol("shadowCache");
 
-export function createComponent<
-  T extends HTMLElement & { render: (this: T) => ShadowElement },
->(
-  name: string,
-  Component: { new (): T },
-): {
-  new (
-    properties: IntrinsicElementAttributes<HTMLElement> & {
-      [Prop in keyof T as Prop extends keyof HTMLElement
-        ? never
-        : Prop extends ReadonlyKeys<T>
-          ? never
-          : Prop extends `on${any}`
-            ? Prop
-            : T[Prop] extends () => any
-              ? never
-              : Prop]: T[Prop];
-    } & {
-      children?: ShadowElement;
-      onplusnewerror?: (evt: CustomEvent<unknown>) => void;
-    },
-  ): T;
-} {
-  Component.prototype.connectedCallback = function (this: T) {
-    if (this.shadowRoot === null) {
+export function connectedCallback(this: HTMLElement & {render: ()=> ShadowElement}) {
+  if (this.shadowRoot === null) {
       this.attachShadow({ mode: "open" });
 
       (this as any)[parentsCache] = new Map();
@@ -89,17 +66,45 @@ export function createComponent<
         }
       });
     });
-  };
+}
 
-  const previousDisconnectedCallback = Component.prototype.disconnectedCallback;
-  Component.prototype.disconnectedCallback = function (this: T) {
-    if (previousDisconnectedCallback) {
-      previousDisconnectedCallback.call(this)
-    }
-    (this as any)[disconnect]();
-    (this as any)[parentsCache].clear();
-    unmount((this as any)[shadowCache]);
-  };
+export function disconnectedCallback(this: HTMLElement & {render: ()=> ShadowElement}) {
+   (this as any)[disconnect]();
+   (this as any)[parentsCache].clear();
+   unmount((this as any)[shadowCache]);
+}
+
+export function createComponent<
+  T extends HTMLElement & { render: (this: T) => ShadowElement },
+>(
+  name: string,
+  Component: { new (): T },
+): {
+  new (
+    properties: IntrinsicElementAttributes<HTMLElement> & {
+      [Prop in keyof T as Prop extends keyof HTMLElement
+        ? never
+        : Prop extends ReadonlyKeys<T>
+          ? never
+          : Prop extends `on${any}`
+            ? Prop
+            : T[Prop] extends () => any
+              ? never
+              : Prop]: T[Prop];
+    } & {
+      children?: ShadowElement;
+      onplusnewerror?: (evt: CustomEvent<unknown>) => void;
+    },
+  ): T;
+} {
+  if("connectedCallback" in Component.prototype === false) {
+    Component.prototype.connectedCallback = connectedCallback;
+  }
+
+  if("disconnectedCallback" in Component.prototype === false) {
+    Component.prototype.disconnectedCallback = disconnectedCallback;
+  }
+
   customElements.define(name, Component as any);
 
   return name as any;
