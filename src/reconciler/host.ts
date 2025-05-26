@@ -17,7 +17,7 @@ function isHostElement(
   return (
     typeof shadowElement === "object" &&
     "$$typeof" in shadowElement &&
-    typeof shadowElement.type === "string"
+    (typeof shadowElement.type === "string" || Element.isPrototypeOf(shadowElement.type))
   );
 }
 
@@ -42,7 +42,7 @@ export const hostReconcile: Reconciler = (
 
       // create new element
       const element = untracked(() =>
-        document.createElement(shadowElement.type),
+        typeof shadowElement.type  === "string" ? document.createElement(shadowElement.type) : new (shadowElement.type)(),
       );
 
       shadowCache.node = element;

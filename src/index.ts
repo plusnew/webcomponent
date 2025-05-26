@@ -107,7 +107,7 @@ export function createComponent<
 
   customElements.define(name, Component as any);
 
-  return name as any;
+  return Component;
 }
 
 const parentsCache = Symbol("parentsCache");
@@ -115,7 +115,7 @@ const parentsCache = Symbol("parentsCache");
 export const active = { parentElement: null as null | Element };
 
 export function findParent<T = Element>(
-  needle: { new (args: any): T } | string,
+  needle: { new (args: any): T },
   haystack?: Element,
 ): T {
   function getParent(element: Element) {
@@ -144,10 +144,7 @@ export function findParent<T = Element>(
     target = haystack;
   }
 
-  if (
-    (typeof needle === "string" && target.tagName === needle.toUpperCase()) ||
-    (typeof needle === "function" && target instanceof needle)
-  ) {
+  if (typeof needle === "function" && target instanceof needle) {
     return target as T;
   }
 

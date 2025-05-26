@@ -113,7 +113,7 @@ export type IntrinsicElementAttributes<T> = {
 
 export type ShadowHostElement = {
   $$typeof: typeof PLUSNEW_ELEMENT_TYPE;
-  type: string;
+  type: string | { new (): HTMLElement };
   props: any;
   children: (() => ShadowElement)[];
 };
