@@ -118,10 +118,10 @@ export type ShadowHostElement = {
   children: (() => ShadowElement)[];
 };
 
-export type ShadowComponentElement = {
+export type ShadowComponentElement<T> = {
   $$typeof: typeof PLUSNEW_ELEMENT_TYPE;
-  type: Reconciler;
-  props: any;
+  type: (props: T)=> ShadowElement;
+  props: T;
   children: (() => ShadowElement)[];
 };
 
@@ -134,7 +134,7 @@ export type ShadowFragmentElement = {
 
 export type ShadowElement =
   | ShadowHostElement
-  | ShadowComponentElement
+  | ShadowComponentElement<{}>
   | ShadowFragmentElement
   | string
   | false

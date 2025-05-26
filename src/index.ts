@@ -20,6 +20,7 @@ export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
     nestedShadows: [],
     unmount: null,
   };
+  active.parentElement = parent;
   reconcile(parent, parent.lastElementChild, shadowResult, JSXElement);
 
   return shadowResult.node;
@@ -68,7 +69,7 @@ export function connectedCallback(this: HTMLElement & {render: ()=> ShadowElemen
     });
 }
 
-export function disconnectedCallback(this: HTMLElement & {render: ()=> ShadowElement}) {
+export function disconnectedCallback(this: HTMLElement & {render: () => ShadowElement}) {
    (this as any)[disconnect]();
    (this as any)[parentsCache].clear();
    unmount((this as any)[shadowCache]);
@@ -144,8 +145,8 @@ export function findParent<T = Element>(
     target = haystack;
   }
 
-  if (typeof needle === "function" && target instanceof needle) {
-    return target as T;
+  if (target instanceof needle) {
+    return target;
   }
 
   if (parentsCache in target) {

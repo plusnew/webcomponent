@@ -9,6 +9,9 @@ export function unmount(oldShadowCache: ShadowCache) {
   for (const nestedShadow of oldShadowCache.nestedShadows) {
     unmount(nestedShadow);
   }
+  if (oldShadowCache.node !== null) {
+    
+  }
 }
 
 export function remove(oldShadowCache: ShadowCache) {
