@@ -1,6 +1,6 @@
 import { PLUSNEW_ELEMENT_TYPE, Fragment, type ShadowElement, type ShadowHostElement } from "../types";
 import type { Reconciler } from "./index";
-import { arrayReconcileWithoutSorting, remove } from "./util";
+import { arrayReconcileWithoutSorting } from "./utils";
 
 
 export function isFragmentElement(
@@ -25,7 +25,7 @@ export const fragmentReconcile: Reconciler = (
   if (isFragmentElement(shadowElement)) {
     // Check if old shadow is of same shadow-type
     if (isFragmentElement(shadowCache.value) === false) {
-        remove(shadowCache);
+        shadowCache.remove();
     }
 
     return arrayReconcileWithoutSorting(

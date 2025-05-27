@@ -1,33 +1,35 @@
 import type { ShadowElement } from "../types";
-import { reconcile, type ShadowCache } from "./index";
+import { reconcile } from "./index";
 
-export function unmount(oldShadowCache: ShadowCache) {
-  if (oldShadowCache.unmount !== null) {
-    oldShadowCache.unmount();
-    oldShadowCache.unmount = null;
-  }
-  for (const nestedShadow of oldShadowCache.nestedShadows) {
-    unmount(nestedShadow);
-  }
-  if (oldShadowCache.node !== null) {
-    
-  }
-}
+export  class ShadowCache {
+  value: ShadowElement;
+  node: Node | null = null;
+  nestedShadows: ShadowCache[] = []
 
-export function remove(oldShadowCache: ShadowCache) {
-  unmount(oldShadowCache);
+  constructor(value: ShadowElement) {
+    this.value = value;
+  }
+  remove() {
+    this.unmount();
 
-  if (oldShadowCache.node === null) {
-    for (const nestedShadow of oldShadowCache.nestedShadows) {
-      remove(nestedShadow);
+
+    if (this.node === null) {
+      for (const nestedShadow of this.nestedShadows) {
+        nestedShadow.remove();
+      }
+    } else {
+      this.node.parentNode?.removeChild(this.node);
     }
-  } else {
-    oldShadowCache.node.parentNode?.removeChild(oldShadowCache.node);
-  }
 
-  oldShadowCache.node = null;
-  oldShadowCache.nestedShadows = [];
-}
+    this.node = null;
+    this.nestedShadows = [];
+  }
+  unmount() {
+    for (const nestedShadow of this.nestedShadows) {
+      nestedShadow.unmount();
+    }
+  }
+};
 
 export const arrayReconcileWithoutSorting = (
   parentElement: ParentNode,
@@ -40,12 +42,7 @@ export const arrayReconcileWithoutSorting = (
   let i = 0;
   while (i < shadowElement.length) {
     if (shadowCache.nestedShadows.length <= i) {
-      shadowCache.nestedShadows.push({
-        node: null,
-        value: false,
-        nestedShadows: [],
-        unmount: null,
-      });
+      shadowCache.nestedShadows.push(new ShadowCache(false));
     }
     lastAddedSibling = reconcile(
       parentElement,
@@ -56,7 +53,7 @@ export const arrayReconcileWithoutSorting = (
     i++;
   }
   while (i < shadowCache.nestedShadows.length) {
-    remove(shadowCache.nestedShadows[i]);
+    shadowCache.nestedShadows[i].remove();
     shadowCache.nestedShadows.splice(i, 1);
   }
   return lastAddedSibling;

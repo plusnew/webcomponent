@@ -1,5 +1,4 @@
 import type { Reconciler } from "./index";
-import { remove } from "./util";
 
 export const falseReconcile: Reconciler = (
   _parentElement,
@@ -10,7 +9,7 @@ export const falseReconcile: Reconciler = (
 ) => {
   if (shadowElement === false) {
     if (shadowCache.value !== false) {
-      remove(shadowCache);
+      shadowCache.remove();
 
       shadowCache.value = false;
     }

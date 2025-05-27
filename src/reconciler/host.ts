@@ -6,7 +6,7 @@ import {
   type ShadowHostElement,
 } from "../types";
 import type { Reconciler } from "./index";
-import { append, arrayReconcileWithoutSorting, remove } from "./util";
+import { append, arrayReconcileWithoutSorting } from "./utils";
 import { dispatchError } from "../utils";
 
 const EVENT_PREFIX = "on";
@@ -38,7 +38,7 @@ export const hostReconcile: Reconciler = (
       // Nothing needs to be done
     } else {
       // remove old element
-      remove(shadowCache);
+      shadowCache.remove();
 
       // create new element
       const element = untracked(() =>
@@ -52,16 +52,18 @@ export const hostReconcile: Reconciler = (
         props: {},
         children: [],
       };
-      shadowCache.unmount = () => {
-        for (const propKey in (shadowCache.value as ShadowHostElement).props) {
+      shadowCache.unmount = function () {
+        delete (this as any).unmount;
+        for (const propKey in (this.value as ShadowHostElement).props) {
           if (propKey.startsWith(EVENT_PREFIX)) {
-            (shadowCache.node as any).removeEventListener(
+            (this.node as any).removeEventListener(
               propKey.slice(EVENT_PREFIX.length),
-              (shadowCache.value as ShadowHostElement).props[propKey],
+              (this.value as ShadowHostElement).props[propKey],
             );
-            delete (shadowCache.value as ShadowHostElement).props[propKey];
+            delete (this.value as ShadowHostElement).props[propKey];
           }
         }
+        this.unmount();
       };
 
       elementNeedsAppending = true;

@@ -1,5 +1,5 @@
 import type { Reconciler } from "./index";
-import { arrayReconcileWithoutSorting, remove } from "./util";
+import { arrayReconcileWithoutSorting } from "./utils";
 
 export const arrayReconcile: Reconciler = (
   parentElement,
@@ -9,7 +9,7 @@ export const arrayReconcile: Reconciler = (
 ) => {
   if (Array.isArray(shadowElement)) {
     if (Array.isArray(shadowCache.value) === false) {
-      remove(shadowCache);
+      shadowCache.remove();
     }
     shadowCache.value = [];
 

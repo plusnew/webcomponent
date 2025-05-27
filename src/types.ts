@@ -1,5 +1,3 @@
-import type { Reconciler } from "./reconciler/index";
-
 export const PLUSNEW_ELEMENT_TYPE = Symbol("plusnew-element-type");
 
 export function Fragment(props: { children: ShadowElement }) {

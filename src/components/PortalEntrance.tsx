@@ -1,24 +1,34 @@
 import { active } from "..";
-import type { Reconciler } from "../reconciler/index";
-import { arrayReconcileWithoutSorting } from "../reconciler/util";
+import { ShadowCache } from "../reconciler/utils";
 import type {  ShadowElement } from "../types";
 
 export default function Portal(props: {
   target: string;
   children: ShadowElement;
-}): ShadowElement {
-  if (active.parentElement === null) {
-    throw new Error("Cant find currently rendering parent")
-  }
+}, { shadowCache}: { shadowCache: ShadowCache }): ShadowElement {
+  if (shadowCache.node === null) {
+    if (active.parentElement === null) {
+      throw new Error("Cant find currently rendering parent")
+    }
+    const portalExit = active.parentElement.ownerDocument.getElementById(
+      props.target,
+    );
 
-  const portalExit = active.parentElement.ownerDocument.getElementById(
-    props.target,
-  );
+    shadowCache.node = portalExit;
+    shadowCache.unmount = function() {
+      delete (shadowCache as any).unmount;
 
-  if (portalExit === null) {
-    throw new Error("Could not find portal exit " + props.target);
+      for (const nestedShadow of this.nestedShadows) {
+        nestedShadow.remove();
+      }
+    }
+
+    shadowCache.remove = function() {
+      delete (shadowCache as any).remove;
+
+      this.unmount();
+    }
   }
-  active.parentElement = portalExit;
 
   return props.children;
 }

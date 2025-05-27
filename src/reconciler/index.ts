@@ -5,13 +5,7 @@ import { falseReconcile } from "./false";
 import { fragmentReconcile } from "./fragment";
 import { hostReconcile } from "./host";
 import { textReconcile } from "./text";
-
-export type ShadowCache = {
-  value: ShadowElement;
-  node: Node | null;
-  nestedShadows: ShadowCache[];
-  unmount: (() => void) | null;
-};
+import type { ShadowCache } from "./utils";
 
 export type Reconciler = (
   parentElement: ParentNode,

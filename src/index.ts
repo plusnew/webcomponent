@@ -1,6 +1,6 @@
 import { batch, effect, Signal, signal, untracked } from "@preact/signals-core";
-import { reconcile, type ShadowCache } from "./reconciler/index";
-import { unmount } from "./reconciler/util";
+import { reconcile, } from "./reconciler/index";
+import { ShadowCache } from "./reconciler/utils";
 import type {
   CustomEvents,
   IntrinsicElementAttributes,
@@ -14,12 +14,8 @@ export type { ShadowElement } from "./types";
 export { default as PortalEntrance } from "./components/PortalEntrance";
 
 export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
-  const shadowResult: ShadowCache = {
-    value: false as const,
-    node: null,
-    nestedShadows: [],
-    unmount: null,
-  };
+  const shadowResult: ShadowCache = new ShadowCache(false);
+
   active.parentElement = parent;
   reconcile(parent, parent.lastElementChild, shadowResult, JSXElement);
 
@@ -34,12 +30,7 @@ export function connectedCallback(this: HTMLElement & {render: ()=> ShadowElemen
       this.attachShadow({ mode: "open" });
 
       (this as any)[parentsCache] = new Map();
-      (this as any)[shadowCache] = {
-        node: null,
-        nestedShadows: [],
-        value: false,
-        unmount: null,
-      };
+      (this as any)[shadowCache] = new ShadowCache(false);
     }
 
     (this as any)[disconnect] = effect(() => {
@@ -72,7 +63,7 @@ export function connectedCallback(this: HTMLElement & {render: ()=> ShadowElemen
 export function disconnectedCallback(this: HTMLElement & {render: () => ShadowElement}) {
    (this as any)[disconnect]();
    (this as any)[parentsCache].clear();
-   unmount((this as any)[shadowCache]);
+   (this as any)[shadowCache].unmount();
 }
 
 export function createComponent<

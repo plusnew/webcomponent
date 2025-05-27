@@ -1,5 +1,5 @@
 import type { Reconciler } from "./index";
-import { append, remove } from "./util";
+import { append } from "./utils";
 
 export const textReconcile: Reconciler = (
   parentElement,
@@ -18,7 +18,7 @@ export const textReconcile: Reconciler = (
       return shadowCache.node;
     } else {
       // remove old element
-      remove(shadowCache);
+      shadowCache.remove();
 
       // create new element
       const element = document.createTextNode(shadowElement);

@@ -1,7 +1,6 @@
-import { active } from "..";
 import { type ShadowComponentElement, type ShadowElement, PLUSNEW_ELEMENT_TYPE} from "../types";
 import { reconcile, type Reconciler } from "./index";
-import { remove } from "./util";
+import { ShadowCache } from "./utils";
 
 export function isComponentElement(
   shadowElement: ShadowElement,
@@ -30,37 +29,24 @@ export const componentReconcile: Reconciler = (
       // Nothing needs to be done
     } else {
       // remove old element
-      remove(shadowCache);
+      shadowCache.remove();
 
       shadowCache.value = shadowElement;
-      shadowCache.nestedShadows = [{
-        value: false as const,
-        node: null,
-        nestedShadows: [],
-        unmount: null,
-      }]
+      shadowCache.nestedShadows = [new ShadowCache(false)]
     }
     
-    if (active.parentElement === null){
-      throw new Error("there is currently nothing rendering");
-    }
 
-    const previousActiveElement = active.parentElement;
-    const result = shadowElement.type({
+    const result = (shadowElement.type as any)({
       ...shadowElement.props,
       children: shadowElement.children.map((child) => child())
-    });
+    }, { shadowCache });
+
     let nextSibling = reconcile(
-      active.parentElement,
-      active.parentElement === previousActiveElement ? previousSibling : null,
+      (shadowCache.node as ParentNode | null) ?? parentElement,
+      shadowCache.node === null ? null : previousSibling,
       shadowCache.nestedShadows[0],
       result
     );
-
-    if (active.parentElement !== previousActiveElement) {
-      nextSibling = previousSibling;
-      active.parentElement;
-    }
 
     return nextSibling;
   } else {
