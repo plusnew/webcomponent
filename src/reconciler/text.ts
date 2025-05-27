@@ -1,31 +1,26 @@
 import type { Reconciler } from "./index";
 import { append } from "./utils";
 
-export const textReconcile: Reconciler = (
-  parentElement,
-  previousSibling,
-  shadowCache,
-  shadowElement,
-) => {
-  if (typeof shadowElement === "string") {
-    if (typeof shadowCache.value === "string") {
+export const textReconcile: Reconciler = (opt) => {
+  if (typeof opt.shadowElement === "string") {
+    if (typeof opt.shadowCache.value === "string") {
       // Only update if needed
-      if (shadowElement !== shadowCache.value) {
-        (shadowCache.node as Text).textContent = shadowElement;
-        shadowCache.value = shadowElement;
+      if (opt.shadowElement !== opt.shadowCache.value) {
+        (opt.shadowCache.node as Text).textContent = opt.shadowElement;
+        opt.shadowCache.value = opt.shadowElement;
       }
 
-      return shadowCache.node;
+      return opt.shadowCache.node;
     } else {
       // remove old element
-      shadowCache.remove();
+      opt.shadowCache.remove();
 
       // create new element
-      const element = document.createTextNode(shadowElement);
-      append(parentElement, previousSibling, element);
+      const element = document.createTextNode(opt.shadowElement);
+      append(opt.parentElement, opt.previousSibling, element);
 
-      shadowCache.node = element;
-      shadowCache.value = shadowElement;
+      opt.shadowCache.node = element;
+      opt.shadowCache.value = opt.shadowElement;
 
       return element;
     }

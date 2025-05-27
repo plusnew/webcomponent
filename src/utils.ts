@@ -1,6 +1,8 @@
+const ERROR_EVENT = "plusnewerror"
+
 export function dispatchError(element: Element, error: unknown) {
   const result = element.dispatchEvent(
-    new CustomEvent("plusnewerror", {
+    new CustomEvent(ERROR_EVENT, {
       detail: error,
       cancelable: true,
       bubbles: true,

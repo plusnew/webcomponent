@@ -4,7 +4,7 @@ import { reconcile } from "./index";
 export  class ShadowCache {
   value: ShadowElement;
   node: Node | null = null;
-  nestedShadows: ShadowCache[] = []
+  nestedShadows: ShadowCache[] = [];
 
   constructor(value: ShadowElement) {
     this.value = value;
@@ -31,30 +31,30 @@ export  class ShadowCache {
   }
 };
 
-export const arrayReconcileWithoutSorting = (
+export const arrayReconcileWithoutSorting = (opt: {
   parentElement: ParentNode,
   previousSibling: Node | null,
   shadowCache: ShadowCache,
   shadowElement: ShadowElement[],
-) => {
-  let lastAddedSibling = previousSibling;
+}) => {
+  let lastAddedSibling = opt.previousSibling;
 
   let i = 0;
-  while (i < shadowElement.length) {
-    if (shadowCache.nestedShadows.length <= i) {
-      shadowCache.nestedShadows.push(new ShadowCache(false));
+  while (i < opt.shadowElement.length) {
+    if (opt.shadowCache.nestedShadows.length <= i) {
+      opt.shadowCache.nestedShadows.push(new ShadowCache(false));
     }
-    lastAddedSibling = reconcile(
-      parentElement,
-      lastAddedSibling,
-      shadowCache.nestedShadows[i],
-      shadowElement[i],
-    );
+    lastAddedSibling = reconcile({
+      parentElement: opt.parentElement,
+      previousSibling: lastAddedSibling,
+      shadowCache: opt.shadowCache.nestedShadows[i],
+      shadowElement: opt.shadowElement[i],
+    });
     i++;
   }
-  while (i < shadowCache.nestedShadows.length) {
-    shadowCache.nestedShadows[i].remove();
-    shadowCache.nestedShadows.splice(i, 1);
+  while (i < opt.shadowCache.nestedShadows.length) {
+    opt.shadowCache.nestedShadows[i].remove();
+    opt.shadowCache.nestedShadows.splice(i, 1);
   }
   return lastAddedSibling;
 };

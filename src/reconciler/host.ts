@@ -21,38 +21,34 @@ function isHostElement(
   );
 }
 
-export const hostReconcile: Reconciler = (
-  parentElement,
-  previousSibling,
-  shadowCache,
-  shadowElement,
-) => {
+export const hostReconcile: Reconciler = (opt) => {
   // Check if new shadow is of type dom-element
-  if (isHostElement(shadowElement)) {
+  if (isHostElement(opt.shadowElement)) {
     // Check if old shadow is of same shadow-type
     let elementNeedsAppending = null;
     if (
-      isHostElement(shadowCache.value) &&
-      shadowCache.value.type === shadowElement.type
+      isHostElement(opt.shadowCache.value) &&
+      opt.shadowCache.value.type === opt.shadowElement.type
     ) {
       // Nothing needs to be done
     } else {
       // remove old element
-      shadowCache.remove();
+      opt.shadowCache.remove();
 
       // create new element
-      const element = untracked(() =>
-        typeof shadowElement.type  === "string" ? document.createElement(shadowElement.type) : new (shadowElement.type)(),
-      );
+      const element = untracked(() => {
+        const shadowElement = opt.shadowElement as ShadowHostElement;
+        return typeof shadowElement.type === "string" ? document.createElement(shadowElement.type) : new (shadowElement.type)();
+      });
 
-      shadowCache.node = element;
-      shadowCache.value = {
+      opt.shadowCache.node = element;
+      opt.shadowCache.value = {
         $$typeof: PLUSNEW_ELEMENT_TYPE,
-        type: shadowElement.type,
+        type: opt.shadowElement.type,
         props: {},
         children: [],
       };
-      shadowCache.unmount = function () {
+      opt.shadowCache.unmount = function () {
         delete (this as any).unmount;
         for (const propKey in (this.value as ShadowHostElement).props) {
           if (propKey.startsWith(EVENT_PREFIX)) {
@@ -69,16 +65,16 @@ export const hostReconcile: Reconciler = (
       elementNeedsAppending = true;
     }
 
-    for (const propKey in shadowElement.props) {
+    for (const propKey in opt.shadowElement.props) {
       // Only set value if needed
       if (
-        (shadowCache.value as ShadowHostElement).props[propKey] !==
-        shadowElement.props[propKey]
+        (opt.shadowCache.value as ShadowHostElement).props[propKey] !==
+        opt.shadowElement.props[propKey]
       ) {
         if (propKey.startsWith(EVENT_PREFIX) === true) {
-          if (shadowElement.type === "input" && propKey === "oninput") {
-            const callback = shadowElement.props[propKey];
-            shadowElement.props[propKey] = (
+          if (opt.shadowElement.type === "input" && propKey === "oninput") {
+            const callback = opt.shadowElement.props[propKey];
+            opt.shadowElement.props[propKey] = (
               evt: KeyboardEvent,
               ...args: any[]
             ) => {
@@ -86,26 +82,27 @@ export const hostReconcile: Reconciler = (
 
               callback(evt, ...args);
 
-              if (shadowElement.props.value !== newValue) {
+              if ((opt.shadowElement as ShadowHostElement).props.value !== newValue) {
                 evt.preventDefault();
                 (evt.currentTarget as HTMLInputElement).value =
-                  shadowElement.props.value;
+                  (opt.shadowElement as ShadowHostElement).props.value;
               }
             };
           }
 
           const eventName = propKey.slice(EVENT_PREFIX.length);
-          if (propKey in (shadowCache.value as ShadowHostElement).props) {
-            (shadowCache.node as Element).removeEventListener(
+          if (propKey in (opt.shadowCache.value as ShadowHostElement).props) {
+            (opt.shadowCache.node as Element).removeEventListener(
               eventName,
-              (shadowCache.value as ShadowHostElement).props[propKey], // @TODO doesnt work for oninput
+              (opt.shadowCache.value as ShadowHostElement).props[propKey], // @TODO doesnt work for oninput
             );
           }
 
-          (shadowCache.node as Element).addEventListener(
+          (opt.shadowCache.node as Element).addEventListener(
             eventName,
-            shadowElement.type === "input" && propKey === "oninput"
+            opt.shadowElement.type === "input" && propKey === "oninput"
               ? (evt: KeyboardEvent, ...args: any[]) => {
+                  const shadowElement = opt.shadowElement as ShadowHostElement;
                   const newValue = (evt.currentTarget as HTMLInputElement)
                     .value;
 
@@ -117,47 +114,47 @@ export const hostReconcile: Reconciler = (
                       shadowElement.props.value;
                   }
                 }
-              : shadowElement.props[propKey],
+              : (opt.shadowElement).props[propKey],
           );
         } else {
           untracked(() => {
-            (shadowCache.node as any)[propKey] = shadowElement.props[propKey];
+            (opt.shadowCache.node as any)[propKey] = (opt.shadowElement as ShadowHostElement).props[propKey];
           });
         }
 
-        (shadowCache.value as ShadowHostElement).props[propKey] =
-          shadowElement.props[propKey];
+        (opt.shadowCache.value as ShadowHostElement).props[propKey] =
+          opt.shadowElement.props[propKey];
       }
     }
 
     // @TODO Remove unneded props
 
     const previousActiveElement = active.parentElement;
-    active.parentElement = shadowCache.node as Element;
+    active.parentElement = opt.shadowCache.node as Element;
 
     const children: ShadowElement[] = [];
-    for (const childCallback of shadowElement.children) {
+    for (const childCallback of opt.shadowElement.children) {
       try {
         children.push(childCallback());
       } catch (error) {
         children.push(false);
-        dispatchError(shadowCache.node as Element, error);
+        dispatchError(opt.shadowCache.node as Element, error);
       }
     }
     active.parentElement = previousActiveElement;
 
-    arrayReconcileWithoutSorting(
-      shadowCache.node as ParentNode,
-      null,
-      shadowCache,
-      children,
-    );
+    arrayReconcileWithoutSorting({
+      parentElement: opt.shadowCache.node as ParentNode,
+      previousSibling: null,
+      shadowCache: opt.shadowCache,
+      shadowElement: children,
+    });
 
     if (elementNeedsAppending) {
-      append(parentElement, previousSibling, shadowCache.node as Node);
+      append(opt.parentElement, opt.previousSibling, opt.shadowCache.node as Node);
     }
 
-    return shadowCache.node;
+    return opt.shadowCache.node;
   } else {
     return false;
   }

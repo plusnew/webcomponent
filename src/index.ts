@@ -17,7 +17,12 @@ export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
   const shadowResult: ShadowCache = new ShadowCache(false);
 
   active.parentElement = parent;
-  reconcile(parent, parent.lastElementChild, shadowResult, JSXElement);
+  reconcile({
+    parentElement: parent,
+    previousSibling: parent.lastElementChild,
+    shadowCache: shadowResult,
+    shadowElement: JSXElement
+  });
 
   return shadowResult.node;
 }
@@ -29,7 +34,7 @@ export function connectedCallback(this: HTMLElement & {render: ()=> ShadowElemen
   if (this.shadowRoot === null) {
       this.attachShadow({ mode: "open" });
 
-      (this as any)[parentsCache] = new Map();
+      (this as any)[parentsCacheSymbol] = new Map();
       (this as any)[shadowCache] = new ShadowCache(false);
     }
 
@@ -43,26 +48,26 @@ export function connectedCallback(this: HTMLElement & {render: ()=> ShadowElemen
           result = this.render();
           active.parentElement = previousActiveElement;
         } catch (error) {
+          active.parentElement = previousActiveElement;
           errored = true;
           untracked(() => dispatchError(this, error));
 
           return;
         }
-        if (errored === false) {
-          reconcile(
-            this.shadowRoot as ShadowRoot,
-            null,
-            (this as any)[shadowCache],
-            result,
-          );
-        }
+
+        reconcile({
+          parentElement: this.shadowRoot as ShadowRoot,
+          previousSibling: null,
+          shadowCache: (this as any)[shadowCache],
+          shadowElement: result,
+        });
       });
     });
 }
 
 export function disconnectedCallback(this: HTMLElement & {render: () => ShadowElement}) {
    (this as any)[disconnect]();
-   (this as any)[parentsCache].clear();
+   (this as any)[parentsCacheSymbol].clear();
    (this as any)[shadowCache].unmount();
 }
 
@@ -102,7 +107,8 @@ export function createComponent<
   return Component;
 }
 
-const parentsCache = Symbol("parentsCache");
+const parentsCacheSymbol = Symbol("parentsCache");
+const getParentSymbol = Symbol("getParent");
 
 export const active = { parentElement: null as null | Element };
 
@@ -111,6 +117,10 @@ export function findParent<T = Element>(
   haystack?: Element,
 ): T {
   function getParent(element: Element) {
+    if (getParentSymbol in element) {
+      return (element as any)[getParentSymbol]();
+    }
+
     const parentNode =
       element.assignedSlot === null
         ? element.parentNode instanceof ShadowRoot
@@ -140,8 +150,8 @@ export function findParent<T = Element>(
     return target;
   }
 
-  if (parentsCache in target) {
-    const parentsCacheMap = target[parentsCache] as any;
+  if (parentsCacheSymbol in target) {
+    const parentsCacheMap = target[parentsCacheSymbol] as any;
     if (parentsCacheMap.has(needle) === false) {
       parentsCacheMap.set(needle, findParent(needle, getParent(target)));
     }

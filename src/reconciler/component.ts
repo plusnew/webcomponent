@@ -13,40 +13,35 @@ export function isComponentElement(
   );
 }
 
-export const componentReconcile: Reconciler = (
-  parentElement,
-  previousSibling,
-  shadowCache,
-  shadowElement,
-) => {
+export const componentReconcile: Reconciler = (opt) => {
   // Check if new shadow is of type component-element
-  if (isComponentElement(shadowElement)) {
+  if (isComponentElement(opt.shadowElement)) {
     // Check if old shadow is of same shadow-type
     if (
-      isComponentElement(shadowCache.value) &&
-      shadowCache.value.type === shadowElement.type
+      isComponentElement(opt.shadowCache.value) &&
+      opt.shadowCache.value.type === opt.shadowElement.type
     ) {
       // Nothing needs to be done
     } else {
       // remove old element
-      shadowCache.remove();
+      opt.shadowCache.remove();
 
-      shadowCache.value = shadowElement;
-      shadowCache.nestedShadows = [new ShadowCache(false)]
+      opt.shadowCache.value = opt.shadowElement;
+      opt.shadowCache.nestedShadows = [new ShadowCache(false)]
     }
     
 
-    const result = (shadowElement.type as any)({
-      ...shadowElement.props,
-      children: shadowElement.children.map((child) => child())
-    }, { shadowCache });
+    const result = (opt.shadowElement.type as any)({
+      ...opt.shadowElement.props,
+      children: opt.shadowElement.children.map((child) => child())
+    }, { shadowCache: opt.shadowCache });
 
-    let nextSibling = reconcile(
-      (shadowCache.node as ParentNode | null) ?? parentElement,
-      shadowCache.node === null ? null : previousSibling,
-      shadowCache.nestedShadows[0],
-      result
-    );
+    let nextSibling = reconcile({
+      parentElement: (opt.shadowCache.node as ParentNode | null) ?? opt.parentElement,
+      previousSibling: opt.shadowCache.node === null ? null : opt.previousSibling,
+      shadowCache: opt.shadowCache.nestedShadows[0],
+      shadowElement: result
+    });
 
     return nextSibling;
   } else {

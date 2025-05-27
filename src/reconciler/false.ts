@@ -1,20 +1,14 @@
 import type { Reconciler } from "./index";
 
-export const falseReconcile: Reconciler = (
-  _parentElement,
-  previousSibling,
-  shadowCache,
-  shadowElement,
-  // abortSignal,
-) => {
-  if (shadowElement === false) {
-    if (shadowCache.value !== false) {
-      shadowCache.remove();
+export const falseReconcile: Reconciler = (opt) => {
+  if (opt.shadowElement === false) {
+    if (opt.shadowCache.value !== false) {
+      opt.shadowCache.remove();
 
-      shadowCache.value = false;
+      opt.shadowCache.value = false;
     }
 
-    return previousSibling;
+    return opt.previousSibling;
   } else {
     return false;
   }

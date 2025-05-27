@@ -7,19 +7,14 @@ import { hostReconcile } from "./host";
 import { textReconcile } from "./text";
 import type { ShadowCache } from "./utils";
 
-export type Reconciler = (
+export type Reconciler = (opt: {
   parentElement: ParentNode,
   previousSibling: Node | null,
   shadowCache: ShadowCache,
   shadowElement: ShadowElement,
-) => Node | null | false;
+}) => Node | null | false;
 
-export function reconcile(
-  parentElement: ParentNode,
-  previousSibling: Node | null,
-  shadowCache: ShadowCache,
-  shadowElement: ShadowElement,
-): Node | null {
+export function reconcile(opt: Parameters<Reconciler>[0]): Node | null {
   for (const reconciler of [
     fragmentReconcile,
     hostReconcile,
@@ -28,17 +23,12 @@ export function reconcile(
     arrayReconcile,
     falseReconcile,
   ]) {
-    const result = reconciler(
-      parentElement,
-      previousSibling,
-      shadowCache,
-      shadowElement,
-    );
+    const result = reconciler(opt);
     if (result !== false) {
       return result;
     }
   }
   throw new Error(
-    "Could not find fitting reconciler for " + shadowElement.toString(),
+    "Could not find fitting reconciler for " + opt.shadowElement.toString(),
   );
 }

@@ -1,24 +1,19 @@
 import type { Reconciler } from "./index";
 import { arrayReconcileWithoutSorting } from "./utils";
 
-export const arrayReconcile: Reconciler = (
-  parentElement,
-  previousSibling,
-  shadowCache,
-  shadowElement,
-) => {
-  if (Array.isArray(shadowElement)) {
-    if (Array.isArray(shadowCache.value) === false) {
-      shadowCache.remove();
+export const arrayReconcile: Reconciler = (opt) => {
+  if (Array.isArray(opt.shadowElement)) {
+    if (Array.isArray(opt.shadowCache.value) === false) {
+      opt.shadowCache.remove();
     }
-    shadowCache.value = [];
+    opt.shadowCache.value = [];
 
-    return arrayReconcileWithoutSorting(
-      parentElement,
-      previousSibling,
-      shadowCache,
-      shadowElement,
-    );
+    return arrayReconcileWithoutSorting({
+      parentElement: opt.parentElement,
+      previousSibling: opt.previousSibling,
+      shadowCache: opt.shadowCache,
+      shadowElement: opt.shadowElement,
+    });
   } else {
     return false;
   }

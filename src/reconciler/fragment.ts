@@ -15,25 +15,20 @@ export function isFragmentElement(
   }
 
   
-export const fragmentReconcile: Reconciler = (
-  parentElement,
-  previousSibling,
-  shadowCache,
-  shadowElement,
-) => {
+export const fragmentReconcile: Reconciler = (opt) => {
   // Check if new shadow is of type dom-element
-  if (isFragmentElement(shadowElement)) {
+  if (isFragmentElement(opt.shadowElement)) {
     // Check if old shadow is of same shadow-type
-    if (isFragmentElement(shadowCache.value) === false) {
-        shadowCache.remove();
+    if (isFragmentElement(opt.shadowCache.value) === false) {
+        opt.shadowCache.remove();
     }
 
-    return arrayReconcileWithoutSorting(
-      parentElement,
-      previousSibling,
-      shadowCache,
-      shadowElement.children.map(child => child()),
-    );
+    return arrayReconcileWithoutSorting({
+      parentElement: opt.parentElement,
+      previousSibling: opt.previousSibling,
+      shadowCache: opt.shadowCache,
+      shadowElement: opt.shadowElement.children.map(child => child()),
+    });
   } else {
     return false;
   }
