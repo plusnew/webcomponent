@@ -28,6 +28,7 @@ export const fragmentReconcile: Reconciler = (opt) => {
       previousSibling: opt.previousSibling,
       shadowCache: opt.shadowCache,
       shadowElement: opt.shadowElement.children.map(child => child()),
+      getParentOverwrite: opt.getParentOverwrite,
     });
   } else {
     return false;

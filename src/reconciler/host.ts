@@ -1,5 +1,5 @@
 import { untracked } from "@preact/signals-core";
-import { active } from "../index";
+import { active, getParentSymbol } from "../index";
 import {
   PLUSNEW_ELEMENT_TYPE,
   type ShadowElement,
@@ -49,6 +49,7 @@ export const hostReconcile: Reconciler = (opt) => {
         children: [],
       };
       opt.shadowCache.unmount = function () {
+        delete (this.node as any)[getParentSymbol];
         delete (this as any).unmount;
         for (const propKey in (this.value as ShadowHostElement).props) {
           if (propKey.startsWith(EVENT_PREFIX)) {
@@ -63,6 +64,10 @@ export const hostReconcile: Reconciler = (opt) => {
       };
 
       elementNeedsAppending = true;
+    }
+
+    if (opt.getParentOverwrite !== null) {
+      (opt.shadowCache.node as any)[getParentSymbol] = opt.getParentOverwrite;
     }
 
     for (const propKey in opt.shadowElement.props) {
@@ -148,6 +153,7 @@ export const hostReconcile: Reconciler = (opt) => {
       previousSibling: null,
       shadowCache: opt.shadowCache,
       shadowElement: children,
+      getParentOverwrite: null,
     });
 
     if (elementNeedsAppending) {

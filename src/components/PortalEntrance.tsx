@@ -5,7 +5,7 @@ import type {  ShadowElement } from "../types";
 export default function Portal(props: {
   target: string;
   children: ShadowElement;
-}, { shadowCache}: { shadowCache: ShadowCache }): ShadowElement {
+}, { shadowCache, parentElement}: { shadowCache: ShadowCache, parentElement: Element }): ShadowElement {
   if (shadowCache.node === null) {
     if (active.parentElement === null) {
       throw new Error("Cant find currently rendering parent")
@@ -15,6 +15,9 @@ export default function Portal(props: {
     );
 
     shadowCache.node = portalExit;
+    shadowCache.getParentOverwrite = function() {
+      return parentElement;
+    }
     shadowCache.unmount = function() {
       delete (shadowCache as any).unmount;
 
@@ -22,7 +25,6 @@ export default function Portal(props: {
         nestedShadow.remove();
       }
     }
-
     shadowCache.remove = function() {
       delete (shadowCache as any).remove;
 

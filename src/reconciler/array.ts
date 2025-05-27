@@ -13,6 +13,7 @@ export const arrayReconcile: Reconciler = (opt) => {
       previousSibling: opt.previousSibling,
       shadowCache: opt.shadowCache,
       shadowElement: opt.shadowElement,
+      getParentOverwrite: opt.getParentOverwrite,
     });
   } else {
     return false;

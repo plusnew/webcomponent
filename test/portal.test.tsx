@@ -148,7 +148,7 @@ describe("webcomponent", () => {
     expect(providerElement.childNodes.length).to.equal(0);
 
     expect((portal.childNodes[0] as HTMLElement).tagName).to.equal("TEST-CONSUMER");
-    expect((portal.childNodes[0] as HTMLElement).shadowRoot?.textContent).to.equal("foo");
+    expect((portal.childNodes[0] as HTMLElement).shadowRoot?.textContent).to.equal("bar");
 
     providerElement.foo.value = "baz";
 

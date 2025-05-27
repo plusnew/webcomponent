@@ -34,13 +34,14 @@ export const componentReconcile: Reconciler = (opt) => {
     const result = (opt.shadowElement.type as any)({
       ...opt.shadowElement.props,
       children: opt.shadowElement.children.map((child) => child())
-    }, { shadowCache: opt.shadowCache });
+    }, { shadowCache: opt.shadowCache, parentElement: opt.parentElement });
 
     let nextSibling = reconcile({
       parentElement: (opt.shadowCache.node as ParentNode | null) ?? opt.parentElement,
       previousSibling: opt.shadowCache.node === null ? null : opt.previousSibling,
       shadowCache: opt.shadowCache.nestedShadows[0],
-      shadowElement: result
+      shadowElement: result,
+      getParentOverwrite: opt.shadowCache.getParentOverwrite,
     });
 
     return nextSibling;

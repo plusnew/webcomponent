@@ -21,7 +21,8 @@ export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
     parentElement: parent,
     previousSibling: parent.lastElementChild,
     shadowCache: shadowResult,
-    shadowElement: JSXElement
+    shadowElement: JSXElement,
+    getParentOverwrite: null
   });
 
   return shadowResult.node;
@@ -60,6 +61,7 @@ export function connectedCallback(this: HTMLElement & {render: ()=> ShadowElemen
           previousSibling: null,
           shadowCache: (this as any)[shadowCache],
           shadowElement: result,
+          getParentOverwrite: null,
         });
       });
     });
@@ -108,7 +110,7 @@ export function createComponent<
 }
 
 const parentsCacheSymbol = Symbol("parentsCache");
-const getParentSymbol = Symbol("getParent");
+export const getParentSymbol = Symbol("getParent");
 
 export const active = { parentElement: null as null | Element };
 
