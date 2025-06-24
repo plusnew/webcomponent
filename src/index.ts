@@ -42,7 +42,6 @@ export function connectedCallback(this: HTMLElement & {render: ()=> ShadowElemen
     (this as any)[disconnect] = effect(() => {
       batch(() => {
         const previousActiveElement = active.parentElement;
-        let errored = false;
         let result: ShadowElement;
         try {
           active.parentElement = this;
@@ -50,7 +49,6 @@ export function connectedCallback(this: HTMLElement & {render: ()=> ShadowElemen
           active.parentElement = previousActiveElement;
         } catch (error) {
           active.parentElement = previousActiveElement;
-          errored = true;
           untracked(() => dispatchError(this, error));
 
           return;
