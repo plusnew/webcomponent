@@ -53,7 +53,7 @@ export type ReadonlyKeys<T> = {
 //   >
 // >;
 
-type ForbiddenHTMLProperties =
+export type ForbiddenHTMLProperties =
   | "innerHTML"
   | "outerHTML"
   | "innerText"

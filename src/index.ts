@@ -1,8 +1,9 @@
 import { batch, effect, Signal, signal, untracked } from "@preact/signals-core";
-import { reconcile, } from "./reconciler/index";
+import { reconcile } from "./reconciler/index";
 import { ShadowCache } from "./reconciler/utils";
 import type {
   CustomEvents,
+  ForbiddenHTMLProperties,
   IntrinsicElementAttributes,
   ReadonlyKeys,
   ShadowElement,
@@ -22,7 +23,7 @@ export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
     previousSibling: parent.lastElementChild,
     shadowCache: shadowResult,
     shadowElement: JSXElement,
-    getParentOverwrite: null
+    getParentOverwrite: null,
   });
 
   return shadowResult.node;
@@ -31,44 +32,48 @@ export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
 const disconnect = Symbol("disconnect");
 const shadowCache = Symbol("shadowCache");
 
-export function connectedCallback(this: HTMLElement & {render: ()=> ShadowElement}) {
+export function connectedCallback(
+  this: HTMLElement & { render: () => ShadowElement },
+) {
   if (this.shadowRoot === null) {
-      this.attachShadow({ mode: "open" });
+    this.attachShadow({ mode: "open" });
 
-      (this as any)[parentsCacheSymbol] = new Map();
-      (this as any)[shadowCache] = new ShadowCache(false);
-    }
+    (this as any)[parentsCacheSymbol] = new Map();
+    (this as any)[shadowCache] = new ShadowCache(false);
+  }
 
-    (this as any)[disconnect] = effect(() => {
-      batch(() => {
-        const previousActiveElement = active.parentElement;
-        let result: ShadowElement;
-        try {
-          active.parentElement = this;
-          result = this.render();
-          active.parentElement = previousActiveElement;
-        } catch (error) {
-          active.parentElement = previousActiveElement;
-          untracked(() => dispatchError(this, error));
+  (this as any)[disconnect] = effect(() => {
+    batch(() => {
+      const previousActiveElement = active.parentElement;
+      let result: ShadowElement;
+      try {
+        active.parentElement = this;
+        result = this.render();
+        active.parentElement = previousActiveElement;
+      } catch (error) {
+        active.parentElement = previousActiveElement;
+        untracked(() => dispatchError(this, error));
 
-          return;
-        }
+        return;
+      }
 
-        reconcile({
-          parentElement: this.shadowRoot as ShadowRoot,
-          previousSibling: null,
-          shadowCache: (this as any)[shadowCache],
-          shadowElement: result,
-          getParentOverwrite: null,
-        });
+      reconcile({
+        parentElement: this.shadowRoot as ShadowRoot,
+        previousSibling: null,
+        shadowCache: (this as any)[shadowCache],
+        shadowElement: result,
+        getParentOverwrite: null,
       });
     });
+  });
 }
 
-export function disconnectedCallback(this: HTMLElement & {render: () => ShadowElement}) {
-   (this as any)[disconnect]();
-   (this as any)[parentsCacheSymbol].clear();
-   (this as any)[shadowCache].unmount();
+export function disconnectedCallback(
+  this: HTMLElement & { render: () => ShadowElement },
+) {
+  (this as any)[disconnect]();
+  (this as any)[parentsCacheSymbol].clear();
+  (this as any)[shadowCache].unmount();
 }
 
 export function createComponent<
@@ -78,27 +83,34 @@ export function createComponent<
   Component: { new (): T },
 ): {
   new (
-    properties: IntrinsicElementAttributes<HTMLElement> & {
-      [Prop in keyof T as Prop extends keyof HTMLElement
-        ? never
-        : Prop extends ReadonlyKeys<T>
+    properties: Omit<
+      { [K in keyof T]?: T[K] } & {
+        [K in keyof T as undefined extends T[K]
           ? never
-          : Prop extends `on${any}`
-            ? Prop
-            : T[Prop] extends () => any
+          : K extends keyof HTMLElement
+            ? never
+            : K]-?: T[K];
+      },
+      | ReadonlyKeys<T>
+      | ForbiddenHTMLProperties
+      | keyof {
+          [K in keyof T as T[K] extends Function
+            ? K extends `on${any}`
               ? never
-              : Prop]: T[Prop];
-    } & {
+              : K
+            : never]: K;
+        }
+    > & {
       children?: ShadowElement;
       onplusnewerror?: (evt: CustomEvent<unknown>) => void;
     },
   ): T;
 } {
-  if("connectedCallback" in Component.prototype === false) {
+  if ("connectedCallback" in Component.prototype === false) {
     Component.prototype.connectedCallback = connectedCallback;
   }
 
-  if("disconnectedCallback" in Component.prototype === false) {
+  if ("disconnectedCallback" in Component.prototype === false) {
     Component.prototype.disconnectedCallback = disconnectedCallback;
   }
 
@@ -113,7 +125,7 @@ export const getParentSymbol = Symbol("getParent");
 export const active = { parentElement: null as null | Element };
 
 export function findParent<T = Element>(
-  needle: ({ new (args: any): T }) | string,
+  needle: { new (args: any): T } | string,
   haystack?: Element,
 ): T {
   function getParent(element: Element) {
@@ -146,10 +158,10 @@ export function findParent<T = Element>(
     target = haystack;
   }
 
-  if ((typeof needle === "string" && target.tagName === needle.toUpperCase()) ||
-
-
-    (typeof needle === "function" && target instanceof needle)) {
+  if (
+    (typeof needle === "string" && target.tagName === needle.toUpperCase()) ||
+    (typeof needle === "function" && target instanceof needle)
+  ) {
     return target as T;
   }
 
@@ -181,17 +193,16 @@ export function prop() {
     return {
       set: function (value) {
         if (accessor.access.has(this)) {
-          (decoratorTarget.get.call(this) as Signal<U>).value = value
+          (decoratorTarget.get.call(this) as Signal<U>).value = value;
         } else {
-          decoratorTarget.set.call(this, signal(value) as U)
+          decoratorTarget.set.call(this, signal(value) as U);
         }
-        
       },
       get: function () {
-        return (decoratorTarget.get.call(this) as Signal<U>).value
+        return (decoratorTarget.get.call(this) as Signal<U>).value;
       },
       init(value) {
-        return signal(value) as U
+        return signal(value) as U;
       },
     };
   };
