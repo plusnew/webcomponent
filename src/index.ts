@@ -4,7 +4,6 @@ import { ShadowCache } from "./reconciler/utils";
 import type {
   CustomEvents,
   ForbiddenHTMLProperties,
-  IntrinsicElementAttributes,
   ReadonlyKeys,
   ShadowElement,
 } from "./types";
