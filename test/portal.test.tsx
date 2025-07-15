@@ -84,7 +84,48 @@ describe("webcomponent", () => {
     expect(portal.childNodes.length).to.equal(0);
   });
 
-   it("moves nested element to portal", () => {
+  it("moves element to portal with fragment", () => {
+    const show = signal(true);
+
+    const Component = createComponent(
+      "test-base-fragment",
+      class Component extends HTMLElement {
+        render() {
+          return (
+            <>
+              {show.value && (
+                <PortalEntrance target="portal-exit">
+                  <span>foo</span>
+                </PortalEntrance>
+              )}
+            </>
+          );
+        }
+      },
+    );
+
+    mount(container, <Component />);
+
+    expect(container.childNodes.length).to.equal(1);
+    expect(portal.childNodes.length).to.equal(1);
+
+    const component = container.childNodes[0] as HTMLElement;
+
+    expect(component.tagName).to.equal("TEST-BASE-FRAGMENT");
+    expect(component.shadowRoot?.childNodes.length).to.equal(0);
+
+    expect(portal.childNodes.length).to.equal(1);
+
+    expect((portal.childNodes[0] as HTMLElement).tagName).to.equal("SPAN");
+    expect((portal.childNodes[0] as HTMLElement).textContent).to.equal("foo");
+
+    show.value = false;
+
+    expect(container.childNodes.length).to.equal(1);
+    expect(portal.childNodes.length).to.equal(0);
+  });
+
+  it("moves nested element to portal", () => {
     const show = signal(true);
 
     const Component = createComponent(

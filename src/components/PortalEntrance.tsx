@@ -7,10 +7,7 @@ export default function Portal(props: {
   children: ShadowElement;
 }, { shadowCache, parentElement}: { shadowCache: ShadowCache, parentElement: Element }): ShadowElement {
   if (shadowCache.node === null) {
-    if (active.parentElement === null) {
-      throw new Error("Cant find currently rendering parent")
-    }
-    const portalExit = active.parentElement.ownerDocument.getElementById(
+    const portalExit = parentElement.ownerDocument.getElementById(
       props.target,
     );
 
