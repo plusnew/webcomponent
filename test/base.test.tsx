@@ -240,15 +240,18 @@ describe("webcomponent", () => {
 
     const component = container.childNodes[0] as HTMLElement;
     const nestedComponent = component.shadowRoot?.childNodes[0] as HTMLElement;
+    const buttonElement = nestedComponent.shadowRoot?.childNodes[0] as ChildNode;
+
     expect(component.tagName).to.equal("TEST-CONTAINER-RERENDER");
     expect(component.childNodes.length).to.equal(0);
-    expect(nestedComponent.shadowRoot?.childNodes[0].textContent).to.equal("0");
+    expect(buttonElement.textContent).to.equal("0");
     expect(containerRenderCounter).to.equal(1);
     expect(nestedRenderCounter).to.equal(1);
 
-    nestedComponent.shadowRoot?.childNodes[0].dispatchEvent(new Event("click"));
+    buttonElement.dispatchEvent(new Event("click"));
 
-    expect(nestedComponent.shadowRoot?.childNodes[0].textContent).to.equal("1");
+    expect(nestedComponent.shadowRoot?.childNodes[0] === buttonElement).to.equal(true);
+    expect(buttonElement.textContent).to.equal("1");
     expect(containerRenderCounter).to.equal(1);
     expect(nestedRenderCounter).to.equal(2);
   });

@@ -21,6 +21,13 @@ export const fragmentReconcile: Reconciler = (opt) => {
     // Check if old shadow is of same shadow-type
     if (isFragmentElement(opt.shadowCache.value) === false) {
         opt.shadowCache.remove();
+
+        opt.shadowCache.value = {
+          $$typeof: PLUSNEW_ELEMENT_TYPE,
+          type: Fragment,
+          props: {},
+          children: []
+        }
     }
 
     return arrayReconcileWithoutSorting({
