@@ -59,41 +59,39 @@ export type ForbiddenHTMLProperties =
   | "innerText"
   | "outerText";
 
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace JSX {
-    /**
-     * the JSX.Element is a abstract representation of a Component
-     */
-    type Element = ShadowElement;
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace JSX {
+  /**
+   * the JSX.Element is a abstract representation of a Component
+   */
+  export type Element = ShadowElement;
 
-    interface ElementChildrenAttribute {
-      // @FIXME children are always arrays, but typescript doesn't accept that because of react
-      children: ShadowElement;
-    }
+  export interface ElementChildrenAttribute {
+    // @FIXME children are always arrays, but typescript doesn't accept that because of react
+    children: ShadowElement;
+  }
 
-    /**
-     * All the DOM Nodes are here
-     */
-    type IntrinsicElements = {
-      [Tag in keyof HTMLElementTagNameMap]: IntrinsicElementAttributes<
-        HTMLElementTagNameMap[Tag]
-      > & {
-        children?: ShadowElement;
-        onplusnewerror?: (evt: CustomEvent<unknown>) => void;
-      };
-    } & {
-      [Tag in keyof SVGElementTagNameMap]: IntrinsicElementAttributes<
-        SVGElementTagNameMap[Tag]
-      > & {
-        children?: ShadowElement;
-        onplusnewerror?: (evt: CustomEvent<unknown>) => void;
-      };
+  /**
+   * All the DOM Nodes are here
+   */
+  export type IntrinsicElements = {
+    [Tag in keyof HTMLElementTagNameMap]: IntrinsicElementAttributes<
+      HTMLElementTagNameMap[Tag]
+    > & {
+      children?: ShadowElement;
+      onplusnewerror?: (evt: CustomEvent<unknown>) => void;
     };
+  } & {
+    [Tag in keyof SVGElementTagNameMap]: IntrinsicElementAttributes<
+      SVGElementTagNameMap[Tag]
+    > & {
+      children?: ShadowElement;
+      onplusnewerror?: (evt: CustomEvent<unknown>) => void;
+    };
+  };
 
-    interface IntrinsicAttributes {
-      onplusnewerror?: () => void;
-    }
+  export interface IntrinsicAttributes {
+    onplusnewerror?: () => void;
   }
 }
 
