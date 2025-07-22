@@ -11,8 +11,6 @@ import { dispatchError } from "./utils";
 
 export type { ShadowElement } from "./types";
 
-export { default as PortalEntrance } from "./components/PortalEntrance";
-
 export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
   const shadowResult: ShadowCache = new ShadowCache(false);
 
