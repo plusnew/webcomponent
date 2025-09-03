@@ -123,7 +123,11 @@ export const hostReconcile: Reconciler = (opt) => {
           );
         } else {
           untracked(() => {
-            (opt.shadowCache.node as any)[propKey] = (opt.shadowElement as ShadowHostElement).props[propKey];
+             if(propKey === "style") {
+                (opt.shadowCache.node as any).setAttribute("style", Object.entries((opt.shadowElement as ShadowHostElement).props[propKey]).map(([key, value]) => `${key}: ${value}`).join(";"));
+             } else {
+                (opt.shadowCache.node as any)[propKey] = (opt.shadowElement as ShadowHostElement).props[propKey];
+            }
           });
         }
 
