@@ -176,10 +176,12 @@ export function findParent<T = Element>(
 export function dispatchEvent<
   T extends HTMLElement,
   U extends keyof CustomEvents<T>,
->(target: T, eventName: U, detail: CustomEvents<T>[U]) {
+>(target: T, eventName: U, detail: CustomEvents<T>[U]): Promise<unknown>[] {
   target.dispatchEvent(
     new CustomEvent(eventName as string, { detail: detail }),
   );
+
+  return [];
 }
 
 export function prop() {
