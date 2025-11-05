@@ -1,7 +1,7 @@
 import type { ShadowElement } from "../types";
 import { reconcile } from "./index";
 
-export  class ShadowCache {
+export class ShadowCache {
   value: ShadowElement;
   node: Node | null = null;
   nestedShadows: ShadowCache[] = [];
@@ -12,7 +12,6 @@ export  class ShadowCache {
   }
   remove() {
     this.unmount();
-
 
     if (this.node === null) {
       for (const nestedShadow of this.nestedShadows) {
@@ -30,14 +29,14 @@ export  class ShadowCache {
       nestedShadow.unmount();
     }
   }
-};
+}
 
 export const arrayReconcileWithoutSorting = (opt: {
-  parentElement: ParentNode,
-  previousSibling: Node | null,
-  shadowCache: ShadowCache,
-  shadowElement: ShadowElement[],
-  getParentOverwrite: (() => Element) | null
+  parentElement: ParentNode;
+  previousSibling: Node | null;
+  shadowCache: ShadowCache;
+  shadowElement: ShadowElement[];
+  getParentOverwrite: (() => Element) | null;
 }) => {
   let lastAddedSibling = opt.previousSibling;
 

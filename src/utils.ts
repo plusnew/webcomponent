@@ -1,4 +1,4 @@
-const ERROR_EVENT = "plusnewerror"
+const ERROR_EVENT = "plusnewerror";
 
 export function dispatchError(element: Element, error: unknown) {
   const result = element.dispatchEvent(
