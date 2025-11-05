@@ -68,7 +68,14 @@ describe("webcomponent", () => {
 
     expect(element.classList.contains("loading")).to.eql(true);
 
+    const abortPromise = new Promise<void>((resolve) => {
+      abortController.signal.addEventListener("abort", async () => {
+        await Promise.resolve();
+        resolve();
+      });
+    });
     abortController.abort("abort");
+    await abortPromise;
 
     expect(element.classList.contains("loading")).to.eql(false);
   });

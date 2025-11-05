@@ -119,7 +119,10 @@ export function createComponent<
 const parentsCacheSymbol = Symbol("parentsCache");
 export const getParentSymbol = Symbol("getParent");
 
-export const active = { parentElement: null as null | Element };
+export const active = {
+  parentElement: null as null | Element,
+  eventPromises: null as null | Promise<unknown>[],
+};
 
 export function findParent<T = Element>(
   needle: { new (args: any): T } | string,
@@ -177,11 +180,17 @@ export function dispatchEvent<
   T extends HTMLElement,
   U extends keyof CustomEvents<T>,
 >(target: T, eventName: U, detail: CustomEvents<T>[U]): Promise<unknown>[] {
+  const previousEventPromises = active.eventPromises;
+  const eventPromises: Promise<unknown>[] = [];
+  active.eventPromises = eventPromises;
+
   target.dispatchEvent(
     new CustomEvent(eventName as string, { detail: detail }),
   );
 
-  return [];
+  active.eventPromises = previousEventPromises;
+
+  return eventPromises;
 }
 
 export function prop() {

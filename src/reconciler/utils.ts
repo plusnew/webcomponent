@@ -6,6 +6,7 @@ export class ShadowCache {
   node: Node | null = null;
   nestedShadows: ShadowCache[] = [];
   getParentOverwrite: (() => Element) | null = null;
+  abortController: AbortController | null = null;
 
   constructor(value: ShadowElement) {
     this.value = value;
@@ -25,6 +26,13 @@ export class ShadowCache {
     this.nestedShadows = [];
   }
   unmount() {
+    if (this.abortController !== null) {
+      this.abortController.abort();
+      this.abortController = null;
+    }
+
+    this.value = false;
+
     for (const nestedShadow of this.nestedShadows) {
       nestedShadow.unmount();
     }
