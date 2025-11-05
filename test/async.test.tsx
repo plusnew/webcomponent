@@ -15,7 +15,7 @@ describe("webcomponent", () => {
   });
 
   it("async event", async () => {
-    const abortController = new AbortController();
+    const { promise, resolve } = Promise.withResolvers<void>();
 
     const Component = createComponent(
       "test-nested",
@@ -40,18 +40,7 @@ describe("webcomponent", () => {
       },
     );
 
-    mount(
-      container,
-      <Component
-        onfoo={() =>
-          new Promise((resolve) => {
-            abortController.signal.addEventListener("abort", () => {
-              resolve("done");
-            });
-          })
-        }
-      />,
-    );
+    mount(container, <Component onfoo={() => promise} />);
 
     expect(container.childNodes.length).to.equal(1);
 
@@ -68,14 +57,9 @@ describe("webcomponent", () => {
 
     expect(element.classList.contains("loading")).to.eql(true);
 
-    const abortPromise = new Promise<void>((resolve) => {
-      abortController.signal.addEventListener("abort", async () => {
-        await Promise.resolve();
-        resolve();
-      });
-    });
-    abortController.abort("abort");
-    await abortPromise;
+    resolve();
+    await promise;
+    await Promise.resolve();
 
     expect(element.classList.contains("loading")).to.eql(false);
   });
