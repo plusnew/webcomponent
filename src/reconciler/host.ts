@@ -17,7 +17,8 @@ function isHostElement(
   return (
     typeof shadowElement === "object" &&
     "$$typeof" in shadowElement &&
-    (typeof shadowElement.type === "string" || Element.isPrototypeOf(shadowElement.type))
+    (typeof shadowElement.type === "string" ||
+      Element.isPrototypeOf(shadowElement.type))
   );
 }
 
@@ -38,7 +39,9 @@ export const hostReconcile: Reconciler = (opt) => {
       // create new element
       const element = untracked(() => {
         const shadowElement = opt.shadowElement as ShadowHostElement;
-        return typeof shadowElement.type === "string" ? document.createElement(shadowElement.type) : new (shadowElement.type)();
+        return typeof shadowElement.type === "string"
+          ? document.createElement(shadowElement.type)
+          : new shadowElement.type();
       });
 
       opt.shadowCache.node = element;
@@ -87,10 +90,14 @@ export const hostReconcile: Reconciler = (opt) => {
 
               callback(evt, ...args);
 
-              if ((opt.shadowElement as ShadowHostElement).props.value !== newValue) {
+              if (
+                (opt.shadowElement as ShadowHostElement).props.value !==
+                newValue
+              ) {
                 evt.preventDefault();
-                (evt.currentTarget as HTMLInputElement).value =
-                  (opt.shadowElement as ShadowHostElement).props.value;
+                (evt.currentTarget as HTMLInputElement).value = (
+                  opt.shadowElement as ShadowHostElement
+                ).props.value;
               }
             };
           }
@@ -119,16 +126,40 @@ export const hostReconcile: Reconciler = (opt) => {
                       shadowElement.props.value;
                   }
                 }
-              : (opt.shadowElement).props[propKey],
+              : opt.shadowElement.props[propKey],
           );
         } else {
           untracked(() => {
-            (opt.shadowCache.node as any)[propKey] = (opt.shadowElement as ShadowHostElement).props[propKey];
+            if (propKey === "style") {
+              (opt.shadowCache.node as any).setAttribute(
+                "style",
+                Object.entries(
+                  (opt.shadowElement as ShadowHostElement).props[propKey],
+                )
+                  .map(([key, value]) => `${key}: ${value}`)
+                  .join(";"),
+              );
+            } else {
+              (opt.shadowCache.node as any)[propKey] = (
+                opt.shadowElement as ShadowHostElement
+              ).props[propKey];
+            }
           });
         }
 
         (opt.shadowCache.value as ShadowHostElement).props[propKey] =
           opt.shadowElement.props[propKey];
+      }
+    }
+
+    for (const propKey in (opt.shadowCache.value as ShadowHostElement).props) {
+      if (propKey in opt.shadowElement.props === false) {
+        untracked(() => {
+          if (propKey === "style") {
+            (opt.shadowCache.node as any).removeAttribute("style");
+          }
+        });
+        delete (opt.shadowCache.value as ShadowHostElement).props[propKey];
       }
     }
 
@@ -157,7 +188,11 @@ export const hostReconcile: Reconciler = (opt) => {
     });
 
     if (elementNeedsAppending) {
-      append(opt.parentElement, opt.previousSibling, opt.shadowCache.node as Node);
+      append(
+        opt.parentElement,
+        opt.previousSibling,
+        opt.shadowCache.node as Node,
+      );
     }
 
     return opt.shadowCache.node;

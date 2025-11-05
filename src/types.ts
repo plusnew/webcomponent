@@ -1,7 +1,7 @@
 export const PLUSNEW_ELEMENT_TYPE = Symbol("plusnew-element-type");
 
 export function Fragment(props: { children: ShadowElement }) {
-  return props.children
+  return props.children;
 }
 
 // type Expect<T extends true> = T;
@@ -116,13 +116,13 @@ export type ShadowHostElement = {
 
 export type ShadowComponentElement<T> = {
   $$typeof: typeof PLUSNEW_ELEMENT_TYPE;
-  type: (props: T)=> ShadowElement;
+  type: (props: T) => ShadowElement;
   props: T;
   children: (() => ShadowElement)[];
 };
 
 export type ShadowFragmentElement = {
-  $$typeof: typeof PLUSNEW_ELEMENT_TYPE
+  $$typeof: typeof PLUSNEW_ELEMENT_TYPE;
   type: typeof Fragment;
   props: any;
   children: (() => ShadowElement)[];

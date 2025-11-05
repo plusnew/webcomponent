@@ -14,6 +14,35 @@ describe("webcomponent", () => {
     container.remove();
   });
 
+  xit("adds property and removes it", async () => {
+    const add = signal(false);
+
+    const Component = createComponent(
+      "test-property",
+      class Component extends HTMLElement {
+        render() {
+          return add.value ? <span className="foo" /> : <span />;
+        }
+      },
+    );
+    mount(container, <Component />);
+
+    expect(container.childNodes.length).to.equal(1);
+
+    const component = container.childNodes[0] as HTMLElement;
+    const element = component.shadowRoot?.childNodes[0] as HTMLSpanElement;
+
+    expect(element.className).to.equal("");
+
+    add.value = true;
+
+    expect(element.className).to.equal("foo");
+
+    add.value = false;
+
+    expect(element.className).to.equal("");
+  });
+
   it("registers click event", async () => {
     const Component = createComponent(
       "test-click",
@@ -170,5 +199,65 @@ describe("webcomponent", () => {
     expect(
       (component.shadowRoot?.childNodes[0] as HTMLInputElement).value,
     ).to.equal("foo");
+  });
+
+  it("adds style attribute", async () => {
+    const backgroundColor = signal<null | string>(null);
+    const fontColor = signal<null | string>(null);
+
+    const Component = createComponent(
+      "test-style",
+      class Component extends HTMLElement {
+        render() {
+          return backgroundColor.value === null && fontColor.value === null ? (
+            <span />
+          ) : (
+            <span
+              style={{
+                ...(backgroundColor.value !== null &&
+                  ({ "background-color": backgroundColor.value } as any)),
+                ...(fontColor.value !== null &&
+                  ({ color: fontColor.value } as any)),
+              }}
+            />
+          );
+        }
+      },
+    );
+
+    mount(container, <Component />);
+
+    expect(container.childNodes.length).to.equal(1);
+
+    const component = container.childNodes[0] as HTMLElement;
+    const element = component.shadowRoot?.childNodes[0] as HTMLSpanElement;
+    let computedStyle = getComputedStyle(element);
+
+    expect(computedStyle.backgroundColor).to.eql("rgba(0, 0, 0, 0)");
+    expect(computedStyle.color).to.eql("rgb(0, 0, 0)");
+
+    backgroundColor.value = "rgba(255, 0, 0, 0)";
+    computedStyle = getComputedStyle(element);
+
+    expect(computedStyle.backgroundColor).to.eql(backgroundColor.value);
+    expect(computedStyle.color).to.eql("rgb(0, 0, 0)");
+
+    fontColor.value = "rgb(255, 0, 0)";
+    computedStyle = getComputedStyle(element);
+
+    expect(computedStyle.backgroundColor).to.eql(backgroundColor.value);
+    expect(computedStyle.color).to.eql(fontColor.value);
+
+    backgroundColor.value = null;
+    computedStyle = getComputedStyle(element);
+
+    expect(computedStyle.backgroundColor).to.eql("rgba(0, 0, 0, 0)");
+    expect(computedStyle.color).to.eql(fontColor.value);
+
+    fontColor.value = null;
+    computedStyle = getComputedStyle(element);
+
+    expect(computedStyle.backgroundColor).to.eql("rgba(0, 0, 0, 0)");
+    expect(computedStyle.color).to.eql("rgb(0, 0, 0)");
   });
 });

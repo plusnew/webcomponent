@@ -8,11 +8,11 @@ import { textReconcile } from "./text";
 import type { ShadowCache } from "./utils";
 
 export type Reconciler = (opt: {
-  parentElement: ParentNode,
-  previousSibling: Node | null,
-  shadowCache: ShadowCache,
-  shadowElement: ShadowElement,
-  getParentOverwrite: (() => Element) | null
+  parentElement: ParentNode;
+  previousSibling: Node | null;
+  shadowCache: ShadowCache;
+  shadowElement: ShadowElement;
+  getParentOverwrite: (() => Element) | null;
 }) => Node | null | false;
 
 export function reconcile(opt: Parameters<Reconciler>[0]): Node | null {
