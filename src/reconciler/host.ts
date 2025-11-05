@@ -35,6 +35,7 @@ export const hostReconcile: Reconciler = (opt) => {
     } else {
       // remove old element
       opt.shadowCache.remove();
+      opt.shadowCache.abortController = new AbortController();
 
       // create new element
       const element = untracked(() => {
@@ -51,20 +52,6 @@ export const hostReconcile: Reconciler = (opt) => {
         props: {},
         children: [],
       };
-      opt.shadowCache.unmount = function () {
-        delete (this.node as any)[getParentSymbol];
-        delete (this as any).unmount;
-        for (const propKey in (this.value as ShadowHostElement).props) {
-          if (propKey.startsWith(EVENT_PREFIX)) {
-            (this.node as any).removeEventListener(
-              propKey.slice(EVENT_PREFIX.length),
-              (this.value as ShadowHostElement).props[propKey],
-            );
-            delete (this.value as ShadowHostElement).props[propKey];
-          }
-        }
-        this.unmount();
-      };
 
       elementNeedsAppending = true;
     }
@@ -80,45 +67,21 @@ export const hostReconcile: Reconciler = (opt) => {
         opt.shadowElement.props[propKey]
       ) {
         if (propKey.startsWith(EVENT_PREFIX) === true) {
-          if (opt.shadowElement.type === "input" && propKey === "oninput") {
-            const callback = opt.shadowElement.props[propKey];
-            opt.shadowElement.props[propKey] = (
-              evt: KeyboardEvent,
-              ...args: any[]
-            ) => {
-              const newValue = (evt.currentTarget as HTMLInputElement).value;
+          if (
+            propKey in (opt.shadowCache.value as ShadowHostElement).props ===
+            false
+          ) {
+            const eventName = propKey.slice(EVENT_PREFIX.length);
 
-              callback(evt, ...args);
-
-              if (
-                (opt.shadowElement as ShadowHostElement).props.value !==
-                newValue
-              ) {
-                evt.preventDefault();
-                (evt.currentTarget as HTMLInputElement).value = (
-                  opt.shadowElement as ShadowHostElement
-                ).props.value;
-              }
-            };
-          }
-
-          const eventName = propKey.slice(EVENT_PREFIX.length);
-          if (propKey in (opt.shadowCache.value as ShadowHostElement).props) {
-            (opt.shadowCache.node as Element).removeEventListener(
+            (opt.shadowCache.node as Element).addEventListener(
               eventName,
-              (opt.shadowCache.value as ShadowHostElement).props[propKey], // @TODO doesnt work for oninput
-            );
-          }
+              (evt) => {
+                const shadowElement = opt.shadowElement as ShadowHostElement;
+                const result = shadowElement.props[propKey](evt);
 
-          (opt.shadowCache.node as Element).addEventListener(
-            eventName,
-            opt.shadowElement.type === "input" && propKey === "oninput"
-              ? (evt: KeyboardEvent, ...args: any[]) => {
-                  const shadowElement = opt.shadowElement as ShadowHostElement;
+                if (shadowElement.type === "input" && propKey === "oninput") {
                   const newValue = (evt.currentTarget as HTMLInputElement)
                     .value;
-
-                  shadowElement.props[propKey](evt, ...args);
 
                   if (shadowElement.props.value !== newValue) {
                     evt.preventDefault();
@@ -126,8 +89,16 @@ export const hostReconcile: Reconciler = (opt) => {
                       shadowElement.props.value;
                   }
                 }
-              : opt.shadowElement.props[propKey],
-          );
+
+                if (result instanceof Promise) {
+                  if (active.eventPromises !== null) {
+                    active.eventPromises.push(result);
+                  }
+                }
+              },
+              { signal: opt.shadowCache.abortController?.signal },
+            );
+          }
         } else {
           untracked(() => {
             if (propKey === "style") {
