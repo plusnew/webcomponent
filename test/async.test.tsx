@@ -77,7 +77,7 @@ describe("webcomponent", () => {
           return (
             <span
               className={this.#loading.value === true ? "loading" : ""}
-              onplusnewasyncevent={async (evt) => {
+              onplusneweventasync={async (evt) => {
                 if (
                   (evt.target as HTMLElement).tagName === "BUTTON" &&
                   evt.detail.cause.type === "click"

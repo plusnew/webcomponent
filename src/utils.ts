@@ -1,5 +1,5 @@
 const ERROR = "plusnewerror";
-const ASYNC_EVENT = "plusnewasyncevent";
+const EVENT_ASYNC = "plusneweventasync";
 
 export class PlusnewErrorEvent extends CustomEvent<unknown> {
   constructor(error: unknown) {
@@ -17,7 +17,7 @@ export class PlusnewAsyncEvent extends CustomEvent<{
   cause: Event;
 }> {
   constructor(originalEvent: Event, promise: Promise<unknown>) {
-    super(ASYNC_EVENT, {
+    super(EVENT_ASYNC, {
       detail: { promise, cause: originalEvent },
       cancelable: true,
       bubbles: true,

@@ -100,7 +100,7 @@ export function createComponent<
     > & {
       children?: ShadowElement;
       onplusnewerror?: (evt: PlusnewErrorEvent) => void;
-      onplusnewasyncevent?: (evt: PlusnewAsyncEvent) => void;
+      onplusneweventasync?: (evt: PlusnewAsyncEvent) => void;
     },
   ): T;
 } {

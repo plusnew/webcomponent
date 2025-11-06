@@ -82,7 +82,7 @@ export namespace JSX {
     > & {
       children?: ShadowElement;
       onplusnewerror?: (evt: PlusnewErrorEvent) => void;
-      onplusnewasyncevent?: (evt: PlusnewAsyncEvent) => void;
+      onplusneweventasync?: (evt: PlusnewAsyncEvent) => void;
     };
   } & {
     [Tag in keyof SVGElementTagNameMap]: IntrinsicElementAttributes<
@@ -90,13 +90,13 @@ export namespace JSX {
     > & {
       children?: ShadowElement;
       onplusnewerror?: (evt: PlusnewErrorEvent) => void;
-      onplusnewasyncevent?: (evt: PlusnewAsyncEvent) => void;
+      onplusneweventasync?: (evt: PlusnewAsyncEvent) => void;
     };
   };
 
   export interface IntrinsicAttributes {
     onplusnewerror?: (evt: PlusnewErrorEvent) => void;
-    onplusnewasyncevent?: (evt: PlusnewAsyncEvent) => void;
+    onplusneweventasync?: (evt: PlusnewAsyncEvent) => void;
   }
 }
 
