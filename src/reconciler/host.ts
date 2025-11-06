@@ -91,7 +91,11 @@ export const hostReconcile: Reconciler = (opt) => {
                 }
 
                 if (result instanceof Promise) {
-                  dispatchAsyncEvent(opt.shadowCache.node as Element, result);
+                  dispatchAsyncEvent(
+                    opt.shadowCache.node as Element,
+                    evt,
+                    result,
+                  );
                   if (active.eventPromises !== null) {
                     active.eventPromises.push(result);
                   }

@@ -7,7 +7,7 @@ import type {
   ReadonlyKeys,
   ShadowElement,
 } from "./types";
-import { dispatchError } from "./utils";
+import { dispatchError, PlusnewAsyncEvent, PlusnewErrorEvent } from "./utils";
 
 export type { ShadowElement } from "./types";
 
@@ -99,8 +99,8 @@ export function createComponent<
         }
     > & {
       children?: ShadowElement;
-      onplusnewerror?: (evt: CustomEvent<unknown>) => void;
-      onplusnewasyncevent?: (evt: CustomEvent<Promise<unknown>>) => void;
+      onplusnewerror?: (evt: PlusnewErrorEvent) => void;
+      onplusnewasyncevent?: (evt: PlusnewAsyncEvent) => void;
     },
   ): T;
 } {

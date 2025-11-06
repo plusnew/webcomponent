@@ -1,3 +1,5 @@
+import type { PlusnewAsyncEvent, PlusnewErrorEvent } from "./utils";
+
 export const PLUSNEW_ELEMENT_TYPE = Symbol("plusnew-element-type");
 
 export function Fragment(props: { children: ShadowElement }) {
@@ -79,22 +81,22 @@ export namespace JSX {
       HTMLElementTagNameMap[Tag]
     > & {
       children?: ShadowElement;
-      onplusnewerror?: (evt: CustomEvent<unknown>) => void;
-      onplusnewasyncevent?: (evt: CustomEvent<Promise<unknown>>) => void;
+      onplusnewerror?: (evt: PlusnewErrorEvent) => void;
+      onplusnewasyncevent?: (evt: PlusnewAsyncEvent) => void;
     };
   } & {
     [Tag in keyof SVGElementTagNameMap]: IntrinsicElementAttributes<
       SVGElementTagNameMap[Tag]
     > & {
       children?: ShadowElement;
-      onplusnewerror?: (evt: CustomEvent<unknown>) => void;
-      onplusnewasyncevent?: (evt: CustomEvent<Promise<unknown>>) => void;
+      onplusnewerror?: (evt: PlusnewErrorEvent) => void;
+      onplusnewasyncevent?: (evt: PlusnewAsyncEvent) => void;
     };
   };
 
   export interface IntrinsicAttributes {
-    onplusnewerror?: () => void;
-    onplusnewasyncevent?: (evt: CustomEvent<Promise<unknown>>) => void;
+    onplusnewerror?: (evt: PlusnewErrorEvent) => void;
+    onplusnewasyncevent?: (evt: PlusnewAsyncEvent) => void;
   }
 }
 
