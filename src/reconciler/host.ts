@@ -40,9 +40,28 @@ export const hostReconcile: Reconciler = (opt) => {
       // create new element
       const element = untracked(() => {
         const shadowElement = opt.shadowElement as ShadowHostElement;
-        return typeof shadowElement.type === "string"
-          ? document.createElement(shadowElement.type)
-          : new shadowElement.type();
+
+        if (typeof shadowElement.type === "string") {
+          const elementParts = shadowElement.type.split(":");
+          if (
+            elementParts.length === 2 ||
+            (elementParts.length === 1 && elementParts[0] === "svg")
+          ) {
+            if (elementParts[0] === "svg") {
+              return document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                elementParts[elementParts.length - 1],
+              );
+            } else {
+              throw new Error(`Unsupported namespace: ${elementParts[0]}`);
+            }
+          } else if (elementParts.length === 1) {
+            return document.createElement(shadowElement.type);
+          } else {
+            throw new Error("element cant have several namespaces");
+          }
+        }
+        return new shadowElement.type();
       });
 
       opt.shadowCache.node = element;

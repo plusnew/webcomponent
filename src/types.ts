@@ -85,9 +85,9 @@ export namespace JSX {
       onplusneweventasync?: (evt: PlusnewAsyncEvent) => void;
     };
   } & {
-    [Tag in keyof SVGElementTagNameMap]: IntrinsicElementAttributes<
-      SVGElementTagNameMap[Tag]
-    > & {
+    [Tag in keyof SVGElementTagNameMap as Tag extends "svg"
+      ? Tag
+      : `svg:${Tag}`]: IntrinsicElementAttributes<SVGElementTagNameMap[Tag]> & {
       children?: ShadowElement;
       onplusnewerror?: (evt: PlusnewErrorEvent) => void;
       onplusneweventasync?: (evt: PlusnewAsyncEvent) => void;

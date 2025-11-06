@@ -42,10 +42,13 @@ module.exports = function (babel) {
       },
       JSXElement(path, state) {
         const openingElement = path.get("openingElement");
-        const typeValue = openingElement.node.name.name;
-        const type = t.react.isCompatTag(typeValue)
-          ? t.stringLiteral(typeValue)
-          : t.identifier(typeValue);
+
+        const typeValue = openingElement.node.name;
+        const type = t.isJSXNamespacedName(typeValue)
+          ? t.stringLiteral(`${typeValue.namespace.name}:${typeValue.name.name}`)
+          : t.react.isCompatTag(typeValue.name)
+            ? t.stringLiteral(typeValue.name)
+            : t.identifier(typeValue.name);
         const children = t.react
           .buildChildren(path.node)
           .map((child) => t.arrowFunctionExpression([], child));
