@@ -7,7 +7,7 @@ import {
 } from "../types";
 import type { Reconciler } from "./index";
 import { append, arrayReconcileWithoutSorting } from "./utils";
-import { dispatchError } from "../utils";
+import { dispatchAsyncEvent, dispatchError } from "../utils";
 
 const EVENT_PREFIX = "on";
 
@@ -91,6 +91,7 @@ export const hostReconcile: Reconciler = (opt) => {
                 }
 
                 if (result instanceof Promise) {
+                  dispatchAsyncEvent(opt.shadowCache.node as Element, result);
                   if (active.eventPromises !== null) {
                     active.eventPromises.push(result);
                   }

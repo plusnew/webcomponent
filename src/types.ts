@@ -80,6 +80,7 @@ export namespace JSX {
     > & {
       children?: ShadowElement;
       onplusnewerror?: (evt: CustomEvent<unknown>) => void;
+      onplusnewasyncevent?: (evt: CustomEvent<Promise<unknown>>) => void;
     };
   } & {
     [Tag in keyof SVGElementTagNameMap]: IntrinsicElementAttributes<
@@ -87,11 +88,13 @@ export namespace JSX {
     > & {
       children?: ShadowElement;
       onplusnewerror?: (evt: CustomEvent<unknown>) => void;
+      onplusnewasyncevent?: (evt: CustomEvent<Promise<unknown>>) => void;
     };
   };
 
   export interface IntrinsicAttributes {
     onplusnewerror?: () => void;
+    onplusnewasyncevent?: (evt: CustomEvent<Promise<unknown>>) => void;
   }
 }
 
