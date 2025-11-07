@@ -18,7 +18,7 @@ import {
 } from "./utils";
 
 export type { ShadowElement } from "./types";
-export { active } from "./utils";
+export { active, connectedCallback, disconnectedCallback } from "./utils";
 
 export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
   const shadowResult: ShadowCache = new ShadowCache(false);
