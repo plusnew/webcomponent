@@ -22,6 +22,24 @@ function isHostElement(
   );
 }
 
+const CLASS_MAP = { className: "class", style: "style" };
+function getPropertyKind(
+  type: ShadowHostElement["type"],
+  key: string,
+): { type: "attribute"; key: string } | { type: "property"; key: string } {
+  if (typeof type === "string") {
+    if (key in CLASS_MAP === true) {
+      return { type: "attribute", key: (CLASS_MAP as any)[key] };
+    } else if (type === "svg" || type.startsWith("svg:")) {
+      return { type: "attribute", key };
+    } else {
+      return { type: "property", key };
+    }
+  } else {
+    return { type: "property", key: key };
+  }
+}
+
 export const hostReconcile: Reconciler = (opt) => {
   // Check if new shadow is of type dom-element
   if (isHostElement(opt.shadowElement)) {
@@ -125,25 +143,33 @@ export const hostReconcile: Reconciler = (opt) => {
           }
         } else {
           untracked(() => {
-            if (propKey === "style") {
-              (opt.shadowCache.node as any).setAttribute(
-                "style",
-                Object.entries(
-                  (opt.shadowElement as ShadowHostElement).props[propKey],
-                )
-                  .map(([key, value]) => `${key}: ${value}`)
-                  .join(";"),
+            const kind = getPropertyKind(
+              (opt.shadowCache.value as ShadowHostElement).type,
+              propKey,
+            );
+
+            if (kind.type === "attribute") {
+              (opt.shadowCache.node as Element).setAttribute(
+                kind.key,
+                kind.key === "style"
+                  ? Object.entries(
+                      (opt.shadowElement as ShadowHostElement).props[propKey],
+                    )
+                      .map(([key, value]) => `${key}: ${value}`)
+                      .join(";")
+                  : (opt.shadowElement as ShadowHostElement).props[propKey],
               );
-            } else {
-              (opt.shadowCache.node as any)[propKey] = (
+            } else if (kind.type === "property") {
+              (opt.shadowCache.node as any)[kind.key] = (
                 opt.shadowElement as ShadowHostElement
               ).props[propKey];
             }
           });
         }
 
-        (opt.shadowCache.value as ShadowHostElement).props[propKey] =
-          opt.shadowElement.props[propKey];
+        (opt.shadowCache.value as ShadowHostElement).props[propKey] = (
+          opt.shadowElement as ShadowHostElement
+        ).props[propKey];
       }
     }
 
