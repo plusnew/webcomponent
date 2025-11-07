@@ -30,7 +30,9 @@ describe("webcomponent", () => {
               onclick={async () => {
                 this.#loading.value = true;
                 try {
-                  await Promise.all(dispatchEvent(this, "foo", null));
+                  await Promise.all(
+                    dispatchEvent(this, "foo", { detail: null }).promises,
+                  );
                 } catch (_err) {}
                 this.#loading.value = false;
               }}

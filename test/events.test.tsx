@@ -36,7 +36,11 @@ describe("webcomponent", () => {
       class NestedComponent extends HTMLElement {
         onfoo: (evt: CustomEvent<string>) => void;
         render(this: NestedComponent) {
-          return <button onclick={() => dispatchEvent(this, "foo", "mep")} />;
+          return (
+            <button
+              onclick={() => dispatchEvent(this, "foo", { detail: "mep" })}
+            />
+          );
         }
       },
     );

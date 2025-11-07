@@ -180,18 +180,23 @@ export function findParent<T = Element>(
 export function dispatchEvent<
   T extends HTMLElement,
   U extends keyof CustomEvents<T>,
->(target: T, eventName: U, detail: CustomEvents<T>[U]): Promise<unknown>[] {
+>(
+  target: T,
+  eventName: U,
+  customEventInit: CustomEventInit<CustomEvents<T>[U]>,
+): {
+  promises: Promise<unknown>[];
+  customEvent: CustomEvent<CustomEvents<T>[U]>;
+} {
   const previousEventPromises = active.eventPromises;
   const eventPromises: Promise<unknown>[] = [];
   active.eventPromises = eventPromises;
-
-  target.dispatchEvent(
-    new CustomEvent(eventName as string, { detail: detail }),
-  );
+  const customEvent = new CustomEvent(eventName as string, customEventInit);
+  target.dispatchEvent(customEvent);
 
   active.eventPromises = previousEventPromises;
 
-  return eventPromises;
+  return { promises: eventPromises, customEvent };
 }
 
 export function prop() {
