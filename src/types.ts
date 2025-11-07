@@ -1,4 +1,4 @@
-import type { PlusnewAsyncEvent, PlusnewErrorEvent } from "./utils";
+import type { PlusnewErrorEvent } from "./utils";
 
 export const PLUSNEW_ELEMENT_TYPE = Symbol("plusnew-element-type");
 
