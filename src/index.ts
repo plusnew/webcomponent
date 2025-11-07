@@ -1,4 +1,4 @@
-import { batch, effect, Signal, signal, untracked } from "@preact/signals-core";
+import { Signal, signal } from "@preact/signals-core";
 import { reconcile } from "./reconciler/index";
 import { ShadowCache } from "./reconciler/utils";
 import type {
@@ -7,9 +7,18 @@ import type {
   ReadonlyKeys,
   ShadowElement,
 } from "./types";
-import { dispatchError, PlusnewAsyncEvent, PlusnewErrorEvent } from "./utils";
+import {
+  connectedCallback,
+  disconnectedCallback,
+  parentsCacheSymbol,
+  PlusnewErrorEvent,
+  active,
+  addEventListener,
+  removeEventListener,
+} from "./utils";
 
 export type { ShadowElement } from "./types";
+export { active } from "./utils";
 
 export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
   const shadowResult: ShadowCache = new ShadowCache(false);
@@ -24,53 +33,6 @@ export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
   });
 
   return shadowResult.node;
-}
-
-const disconnect = Symbol("disconnect");
-const shadowCache = Symbol("shadowCache");
-
-export function connectedCallback(
-  this: HTMLElement & { render: () => ShadowElement },
-) {
-  if (this.shadowRoot === null) {
-    this.attachShadow({ mode: "open" });
-
-    (this as any)[parentsCacheSymbol] = new Map();
-    (this as any)[shadowCache] = new ShadowCache(false);
-  }
-
-  (this as any)[disconnect] = effect(() => {
-    batch(() => {
-      const previousActiveElement = active.parentElement;
-      let result: ShadowElement;
-      try {
-        active.parentElement = this;
-        result = this.render();
-        active.parentElement = previousActiveElement;
-      } catch (error) {
-        active.parentElement = previousActiveElement;
-        untracked(() => dispatchError(this, error));
-
-        return;
-      }
-
-      reconcile({
-        parentElement: this.shadowRoot as ShadowRoot,
-        previousSibling: null,
-        shadowCache: (this as any)[shadowCache],
-        shadowElement: result,
-        getParentOverwrite: null,
-      });
-    });
-  });
-}
-
-export function disconnectedCallback(
-  this: HTMLElement & { render: () => ShadowElement },
-) {
-  (this as any)[disconnect]();
-  (this as any)[parentsCacheSymbol].clear();
-  (this as any)[shadowCache].unmount();
 }
 
 export function createComponent<
@@ -100,7 +62,6 @@ export function createComponent<
     > & {
       children?: ShadowElement;
       onplusnewerror?: (evt: PlusnewErrorEvent) => void;
-      onplusneweventasync?: (evt: PlusnewAsyncEvent) => void;
     },
   ): T;
 } {
@@ -112,18 +73,15 @@ export function createComponent<
     Component.prototype.disconnectedCallback = disconnectedCallback;
   }
 
+  Component.prototype.addEventListener = addEventListener;
+  Component.prototype.removeEventListener = removeEventListener;
+
   customElements.define(name, Component as any);
 
   return name as any;
 }
 
-const parentsCacheSymbol = Symbol("parentsCache");
 export const getParentSymbol = Symbol("getParent");
-
-export const active = {
-  parentElement: null as null | Element,
-  eventPromises: null as null | Promise<unknown>[],
-};
 
 export function findParent<T = Element>(
   needle: { new (args: any): T } | string,
@@ -184,10 +142,7 @@ export function dispatchEvent<
   target: T,
   eventName: U,
   customEventInit: CustomEventInit<CustomEvents<T>[U]>,
-): {
-  promises: Promise<unknown>[];
-  customEvent: CustomEvent<CustomEvents<T>[U]>;
-} {
+): Promise<unknown>[] {
   const previousEventPromises = active.eventPromises;
   const eventPromises: Promise<unknown>[] = [];
   active.eventPromises = eventPromises;
@@ -196,7 +151,7 @@ export function dispatchEvent<
 
   active.eventPromises = previousEventPromises;
 
-  return { promises: eventPromises, customEvent };
+  return eventPromises;
 }
 
 export function prop() {

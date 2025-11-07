@@ -7,7 +7,7 @@ import {
 } from "../types";
 import type { Reconciler } from "./index";
 import { append, arrayReconcileWithoutSorting } from "./utils";
-import { dispatchAsyncEvent, dispatchError } from "../utils";
+import { dispatchError } from "../utils";
 
 const EVENT_PREFIX = "on";
 
@@ -112,32 +112,22 @@ export const hostReconcile: Reconciler = (opt) => {
 
             (opt.shadowCache.node as Element).addEventListener(
               eventName,
-              (evt) => {
-                const shadowElement = opt.shadowElement as ShadowHostElement;
-                const result = shadowElement.props[propKey](evt);
+              opt.shadowElement.type === "input" && propKey === "oninput"
+                ? (evt: KeyboardEvent, ...args: any[]) => {
+                    const shadowElement =
+                      opt.shadowElement as ShadowHostElement;
+                    const newValue = (evt.currentTarget as HTMLInputElement)
+                      .value;
 
-                if (shadowElement.type === "input" && propKey === "oninput") {
-                  const newValue = (evt.currentTarget as HTMLInputElement)
-                    .value;
+                    shadowElement.props[propKey](evt, ...args);
 
-                  if (shadowElement.props.value !== newValue) {
-                    evt.preventDefault();
-                    (evt.currentTarget as HTMLInputElement).value =
-                      shadowElement.props.value;
+                    if (shadowElement.props.value !== newValue) {
+                      evt.preventDefault();
+                      (evt.currentTarget as HTMLInputElement).value =
+                        shadowElement.props.value;
+                    }
                   }
-                }
-
-                if (result instanceof Promise) {
-                  dispatchAsyncEvent(
-                    opt.shadowCache.node as Element,
-                    evt,
-                    result,
-                  );
-                  if (active.eventPromises !== null) {
-                    active.eventPromises.push(result);
-                  }
-                }
-              },
+                : opt.shadowElement.props[propKey],
               { signal: opt.shadowCache.abortController?.signal },
             );
           }
