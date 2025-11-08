@@ -26,11 +26,22 @@ const CLASS_MAP = { className: "class", style: "style" };
 function getPropertyKind(
   type: ShadowHostElement["type"],
   key: string,
-): { type: "attribute"; key: string } | { type: "property"; key: string } {
-  if (typeof type === "string") {
-    if (key in CLASS_MAP === true) {
-      return { type: "attribute", key: (CLASS_MAP as any)[key] };
-    } else if (type === "svg" || type.startsWith("svg:")) {
+):
+  | { type: "attribute"; key: string }
+  | { type: "property"; key: string }
+  | { type: "event"; key: string }
+  | { type: "inputevent"; key: string } {
+  if (key.startsWith(EVENT_PREFIX)) {
+    const eventName = key.slice(EVENT_PREFIX.length);
+    if (type === "input") {
+      return { type: "inputevent", key: eventName };
+    } else {
+      return { type: "event", key: eventName };
+    }
+  } else if (key in CLASS_MAP === true) {
+    return { type: "attribute", key: (CLASS_MAP as any)[key] };
+  } else if (typeof type === "string") {
+    if (type === "svg" || type.startsWith("svg:")) {
       return { type: "attribute", key };
     } else {
       return { type: "property", key };
@@ -97,48 +108,43 @@ export const hostReconcile: Reconciler = (opt) => {
       (opt.shadowCache.node as any)[getParentSymbol] = opt.getParentOverwrite;
     }
 
+    const inputEvent = getPropertyKind(
+      (opt.shadowCache.value as ShadowHostElement).type,
+      "oninput",
+    );
+    if (inputEvent.type === "inputevent") {
+      (opt.shadowCache.node as Element).addEventListener(
+        inputEvent.key,
+        (evt: Event) => {
+          const shadowElement = opt.shadowElement as ShadowHostElement;
+          const newValue = (evt.currentTarget as HTMLInputElement).value;
+
+          shadowElement.props[`${EVENT_PREFIX}${inputEvent.key}`](evt);
+
+          if (shadowElement.props.value !== newValue) {
+            evt.preventDefault();
+            (evt.currentTarget as HTMLInputElement).value =
+              shadowElement.props.value;
+          }
+        },
+        { signal: opt.shadowCache.abortController?.signal },
+      );
+    }
+
     for (const propKey in opt.shadowElement.props) {
-      // Only set value if needed
+      // Only set value if changed
       if (
         (opt.shadowCache.value as ShadowHostElement).props[propKey] !==
         opt.shadowElement.props[propKey]
       ) {
-        if (propKey.startsWith(EVENT_PREFIX) === true) {
-          if (
-            propKey in (opt.shadowCache.value as ShadowHostElement).props ===
-            false
-          ) {
-            const eventName = propKey.slice(EVENT_PREFIX.length);
+        const kind = getPropertyKind(
+          (opt.shadowCache.value as ShadowHostElement).type,
+          propKey,
+        );
 
-            (opt.shadowCache.node as Element).addEventListener(
-              eventName,
-              opt.shadowElement.type === "input" && propKey === "oninput"
-                ? (evt: KeyboardEvent, ...args: any[]) => {
-                    const shadowElement =
-                      opt.shadowElement as ShadowHostElement;
-                    const newValue = (evt.currentTarget as HTMLInputElement)
-                      .value;
-
-                    shadowElement.props[propKey](evt, ...args);
-
-                    if (shadowElement.props.value !== newValue) {
-                      evt.preventDefault();
-                      (evt.currentTarget as HTMLInputElement).value =
-                        shadowElement.props.value;
-                    }
-                  }
-                : opt.shadowElement.props[propKey],
-              { signal: opt.shadowCache.abortController?.signal },
-            );
-          }
-        } else {
-          untracked(() => {
-            const kind = getPropertyKind(
-              (opt.shadowCache.value as ShadowHostElement).type,
-              propKey,
-            );
-
-            if (kind.type === "attribute") {
+        untracked(() => {
+          switch (kind.type) {
+            case "attribute":
               (opt.shadowCache.node as Element).setAttribute(
                 kind.key,
                 kind.key === "style"
@@ -149,14 +155,29 @@ export const hostReconcile: Reconciler = (opt) => {
                       .join(";")
                   : (opt.shadowElement as ShadowHostElement).props[propKey],
               );
-            } else if (kind.type === "property") {
+              break;
+            case "property":
               (opt.shadowCache.node as any)[kind.key] = (
                 opt.shadowElement as ShadowHostElement
               ).props[propKey];
-            }
-          });
-        }
-
+              break;
+            case "event":
+              if (
+                propKey in (opt.shadowCache.value as ShadowHostElement).props
+              ) {
+                (opt.shadowCache.node as Element).removeEventListener(
+                  kind.key,
+                  (opt.shadowCache.value as ShadowHostElement).props[propKey],
+                );
+              }
+              (opt.shadowCache.node as Element).addEventListener(
+                kind.key,
+                (opt.shadowElement as ShadowHostElement).props[propKey],
+                { signal: opt.shadowCache.abortController?.signal },
+              );
+              break;
+          }
+        });
         (opt.shadowCache.value as ShadowHostElement).props[propKey] = (
           opt.shadowElement as ShadowHostElement
         ).props[propKey];
@@ -165,16 +186,27 @@ export const hostReconcile: Reconciler = (opt) => {
 
     for (const propKey in (opt.shadowCache.value as ShadowHostElement).props) {
       if (propKey in opt.shadowElement.props === false) {
+        const kind = getPropertyKind(
+          (opt.shadowCache.value as ShadowHostElement).type,
+          propKey,
+        );
+
         untracked(() => {
-          if (propKey === "style") {
-            (opt.shadowCache.node as any).removeAttribute("style");
+          switch (kind.type) {
+            case "attribute":
+              (opt.shadowCache.node as Element).removeAttribute(kind.key);
+              break;
+            case "event":
+              (opt.shadowCache.node as Element).removeEventListener(
+                kind.key,
+                (opt.shadowCache.value as ShadowHostElement).props[propKey],
+              );
+              break;
           }
         });
         delete (opt.shadowCache.value as ShadowHostElement).props[propKey];
       }
     }
-
-    // @TODO Remove unneded props
 
     const previousActiveElement = active.parentElement;
     active.parentElement = opt.shadowCache.node as Element;
