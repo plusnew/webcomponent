@@ -83,7 +83,7 @@ export function addEventListener(
   this: HTMLElement,
   eventName: string,
   listener: (event: Event) => unknown,
-  options?: AddEventListenerOptions,
+  options?: boolean | AddEventListenerOptions,
 ) {
   if (eventListenerSymbol in this === false) {
     (this as any)[eventListenerSymbol] = {};
@@ -93,8 +93,12 @@ export function addEventListener(
   }
 
   const listenerOverwrite = (evt: Event) => {
-    if (options?.once === true) {
-      this.removeEventListener(eventName, listener);
+    if (
+      typeof options === "object" &&
+      options !== null &&
+      options?.once === true
+    ) {
+      (this as any)[eventListenerSymbol]?.[eventName]?.delete(listener);
     }
 
     const result = listener(evt);
@@ -103,6 +107,7 @@ export function addEventListener(
       active.eventPromises.push(result);
     }
   };
+
   (this as any)[eventListenerSymbol][eventName].set(
     listener,
     listenerOverwrite,

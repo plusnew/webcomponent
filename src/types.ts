@@ -86,7 +86,7 @@ export namespace JSX {
   } & {
     [Tag in keyof SVGElementTagNameMap as Tag extends "svg"
       ? Tag
-      : `svg:${Tag}`]: IntrinsicElementAttributes<SVGElementTagNameMap[Tag]> & {
+      : `svg:${Tag}`]: { [key: string]: any } & {
       children?: ShadowElement;
       className: string;
       onplusnewerror?: (evt: PlusnewErrorEvent) => void;
