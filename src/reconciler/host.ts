@@ -33,7 +33,7 @@ function getPropertyKind(
   | { type: "inputevent"; key: string } {
   if (key.startsWith(EVENT_PREFIX)) {
     const eventName = key.slice(EVENT_PREFIX.length);
-    if (type === "input") {
+    if (eventName === "input" && (type === "input" || type === "textarea")) {
       return { type: "inputevent", key: eventName };
     } else {
       return { type: "event", key: eventName };
