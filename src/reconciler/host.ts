@@ -116,7 +116,7 @@ export const hostReconcile: Reconciler = (opt) => {
       (opt.shadowCache.node as Element).addEventListener(
         inputEvent.key,
         (evt: Event) => {
-          const shadowElement = opt.shadowElement as ShadowHostElement;
+          const shadowElement = opt.shadowCache.value as ShadowHostElement;
           const newValue = (evt.currentTarget as HTMLInputElement).value;
 
           shadowElement.props[`${EVENT_PREFIX}${inputEvent.key}`](evt);

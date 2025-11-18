@@ -154,7 +154,7 @@ describe("webcomponent", () => {
 
     expect(
       (component.shadowRoot?.childNodes[0] as HTMLInputElement).value,
-    ).to.equal("foo");
+    ).to.equal("foobar");
   });
 
   it("registers input event without updating", async () => {
