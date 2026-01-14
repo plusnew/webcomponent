@@ -32,7 +32,7 @@ describe("fragment", () => {
       },
     );
 
-    mount(container, <Component foo="mep" className="some-class" />);
+    mount(() => <Component foo="mep" className="some-class" />, container);
 
     expect(container.childNodes.length).to.equal(1);
 

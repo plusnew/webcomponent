@@ -51,7 +51,7 @@ describe("webcomponent", () => {
       },
     );
 
-    mount(container, <Component />);
+    mount(() => <Component />, container);
 
     const component = container.childNodes[0] as HTMLElement;
     (
@@ -107,7 +107,7 @@ describe("webcomponent", () => {
       },
     );
 
-    mount(container, <Component />);
+    mount(() => <Component />, container);
 
     const component = container.childNodes[0] as HTMLElement;
     const nestedComponent = component.shadowRoot?.childNodes[0] as HTMLElement;

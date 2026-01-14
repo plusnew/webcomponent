@@ -41,10 +41,12 @@ describe("webcomponent", () => {
 
   it("finds context", () => {
     mount(
+      () => (
+        <Provider>
+          <Consumer />
+        </Provider>
+      ),
       container,
-      <Provider>
-        <Consumer />
-      </Provider>,
     );
 
     expect(container.childNodes.length).to.equal(1);
@@ -78,7 +80,7 @@ describe("webcomponent", () => {
       },
     );
 
-    mount(container, <Component />);
+    mount(() => <Component />, container);
 
     expect(container.childNodes.length).to.equal(1);
 
@@ -97,7 +99,7 @@ describe("webcomponent", () => {
   });
 
   it("no context", () => {
-    mount(container, <Consumer />);
+    mount(() => <Consumer />, container);
 
     expect(container.childNodes.length).to.equal(1);
     expect((container.childNodes[0] as HTMLElement).tagName).to.equal(
@@ -123,10 +125,12 @@ describe("webcomponent", () => {
     );
 
     mount(
+      () => (
+        <Injection>
+          <Consumer />
+        </Injection>
+      ),
       container,
-      <Injection>
-        <Consumer />
-      </Injection>,
     );
 
     expect(container.childNodes.length).to.equal(1);

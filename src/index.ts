@@ -1,4 +1,4 @@
-import { Signal, signal } from "@preact/signals-core";
+import { effect, Signal, signal } from "@preact/signals-core";
 import { reconcile } from "./reconciler/index";
 import { ShadowCache } from "./reconciler/utils";
 import type {
@@ -20,19 +20,22 @@ import {
 export type { ShadowElement } from "./types";
 export { active, connectedCallback, disconnectedCallback } from "./utils";
 
-export function mount(parent: HTMLElement, JSXElement: ShadowElement) {
+export function mount(
+  render: () => ShadowElement,
+  parent: HTMLElement,
+): () => void {
   const shadowResult: ShadowCache = new ShadowCache(false);
+  return effect(() => {
+    active.parentElement = parent;
 
-  active.parentElement = parent;
-  reconcile({
-    parentElement: parent,
-    previousSibling: parent.lastElementChild,
-    shadowCache: shadowResult,
-    shadowElement: JSXElement,
-    getParentOverwrite: null,
+    reconcile({
+      parentElement: parent,
+      previousSibling: parent.lastElementChild,
+      shadowCache: shadowResult,
+      shadowElement: render(),
+      getParentOverwrite: null,
+    });
   });
-
-  return shadowResult.node;
 }
 
 export function createComponent<

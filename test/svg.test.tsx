@@ -27,7 +27,7 @@ describe("svg", () => {
       },
     );
 
-    mount(container, <Component />);
+    mount(() => <Component />, container);
 
     expect(container.childNodes.length).to.equal(1);
 

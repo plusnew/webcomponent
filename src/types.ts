@@ -88,7 +88,7 @@ export namespace JSX {
       ? Tag
       : `svg:${Tag}`]: { [key: string]: any } & {
       children?: ShadowElement;
-      className: string;
+      className?: string;
       onplusnewerror?: (evt: PlusnewErrorEvent) => void;
     };
   };

@@ -42,7 +42,7 @@ describe("webcomponent", () => {
       },
     );
 
-    mount(container, <Component onfoo={() => promise} />);
+    mount(() => <Component onfoo={() => promise} />, container);
 
     expect(container.childNodes.length).to.equal(1);
 

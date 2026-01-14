@@ -38,7 +38,7 @@ describe("webcomponent", () => {
     // @ts-expect-error component with excessive property baz, should be an error
     <Component foo="bar" baz="mep" />;
 
-    mount(container, <Component foo="mep" className="some-class" />);
+    mount(() => <Component foo="mep" className="some-class" />, container);
 
     expect(container.childNodes.length).to.equal(1);
 
@@ -67,7 +67,7 @@ describe("webcomponent", () => {
       },
     );
 
-    mount(container, <Component amount={0} />);
+    mount(() => <Component amount={0} />, container);
 
     expect(container.childNodes.length).to.equal(1);
 
@@ -117,7 +117,7 @@ describe("webcomponent", () => {
       },
     );
 
-    mount(container, <Component show={false} />);
+    mount(() => <Component show={false} />, container);
 
     expect(container.childNodes.length).to.equal(1);
 
@@ -139,7 +139,7 @@ describe("webcomponent", () => {
     expect(component.shadowRoot?.childNodes.length).to.equal(0);
 
     // Mounting same component a second time, should not interfer with the first
-    mount(container, <Component show={true} />);
+    mount(() => <Component show={true} />, container);
 
     expect(component.shadowRoot?.childNodes.length).to.equal(0);
   });
@@ -169,7 +169,7 @@ describe("webcomponent", () => {
       },
     );
 
-    mount(container, <Component />);
+    mount(() => <Component />, container);
 
     expect(container.childNodes.length).to.equal(1);
 
@@ -234,7 +234,7 @@ describe("webcomponent", () => {
       },
     );
 
-    mount(container, <Component />);
+    mount(() => <Component />, container);
 
     expect(container.childNodes.length).to.equal(1);
 

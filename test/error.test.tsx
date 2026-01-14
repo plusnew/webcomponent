@@ -40,7 +40,7 @@ describe("webcomponent", () => {
       },
     );
 
-    mount(container, <Component />);
+    mount(() => <Component />, container);
 
     expect(container.childNodes.length).to.equal(1);
 
@@ -66,11 +66,12 @@ describe("webcomponent", () => {
   //   );
 
   //   mount(
-  //     container,
-  //     <ErrorBoundary>
-  //       <Component />
-  //       <span slot="errored">error</span>
-  //     </ErrorBoundary>,
+  //     () =>
+  //       <ErrorBoundary>
+  //         <Component />
+  //         <span slot="errored">error</span>
+  //       </ErrorBoundary>,
+  //     container
   //   );
 
   //   expect(container.childNodes.length).to.equal(1);
