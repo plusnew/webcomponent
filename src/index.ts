@@ -25,12 +25,13 @@ export function mount(
   parent: HTMLElement,
 ): () => void {
   const shadowResult: ShadowCache = new ShadowCache(false);
+
   return effect(() => {
     active.parentElement = parent;
 
     reconcile({
       parentElement: parent,
-      previousSibling: parent.lastElementChild,
+      previousSibling: null,
       shadowCache: shadowResult,
       shadowElement: render(),
       getParentOverwrite: null,
