@@ -26,7 +26,7 @@ export function mount(
 ): () => void {
   const shadowResult: ShadowCache = new ShadowCache(false);
 
-  return effect(() => {
+  const disconnect = effect(() => {
     active.parentElement = parent;
 
     reconcile({
@@ -37,6 +37,11 @@ export function mount(
       getParentOverwrite: null,
     });
   });
+
+  return () => {
+    disconnect();
+    shadowResult.remove();
+  };
 }
 
 export function createComponent<
