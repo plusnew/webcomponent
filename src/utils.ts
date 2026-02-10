@@ -37,7 +37,7 @@ export const parentsCacheSymbol = Symbol("parentsCache");
 
 export function connectedCallback(
   this: HTMLElement & { render: () => ShadowElement },
-  opt?: { shadowRootInit?: ShadowRootInit },
+  opt?: { shadowRootInit?: Partial<ShadowRootInit> },
 ) {
   if (this.shadowRoot === null) {
     this.attachShadow({ mode: "open", ...opt?.shadowRootInit });
