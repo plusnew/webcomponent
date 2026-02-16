@@ -5,7 +5,7 @@ import {
   type ShadowHostElement,
 } from "../types";
 import type { Reconciler } from "./index";
-import { arrayReconcileWithoutSorting } from "./utils";
+import { arrayReconcileWithoutSorting, getChildren } from "./utils";
 
 export function isFragmentElement(
   shadowElement: ShadowElement,
@@ -33,11 +33,18 @@ export const fragmentReconcile: Reconciler = (opt) => {
       };
     }
 
+    const children = getChildren(
+      opt.parentElement instanceof ShadowRoot
+        ? opt.parentElement.host
+        : (opt.parentElement as Element),
+      opt.shadowElement.children,
+    );
+
     return arrayReconcileWithoutSorting({
       parentElement: opt.parentElement,
       previousSibling: opt.previousSibling,
       shadowCache: opt.shadowCache,
-      shadowElement: opt.shadowElement.children.map((child) => child()),
+      shadowElement: children,
       getParentOverwrite: opt.getParentOverwrite,
     });
   } else {
