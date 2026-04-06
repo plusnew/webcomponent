@@ -10,11 +10,7 @@ module.exports = function (babel) {
         enter: (path, state) => {
           state.set(
             "id/jsx",
-            addNamed(
-              path,
-              "jsx",
-              "@plusnew/webcomponent/jsx-runtime",
-            ),
+            addNamed(path, "jsx", "@plusnew/webcomponent/jsx-runtime"),
           );
         },
       },
@@ -22,11 +18,7 @@ module.exports = function (babel) {
         if (!state.get("id/Fragment")) {
           state.set(
             "id/Fragment",
-            addNamed(
-              path,
-              "Fragment",
-              "@plusnew/webcomponent/jsx-runtime",
-            ),
+            addNamed(path, "Fragment", "@plusnew/webcomponent/jsx-runtime"),
           );
         }
 
@@ -36,7 +28,7 @@ module.exports = function (babel) {
             t.objectExpression([]),
             ...t.react
               .buildChildren(path.node)
-              .map((child) => t.arrowFunctionExpression([], child))
+              .map((child) => t.arrowFunctionExpression([], child)),
           ]),
         );
       },
@@ -45,7 +37,9 @@ module.exports = function (babel) {
 
         const typeValue = openingElement.node.name;
         const type = t.isJSXNamespacedName(typeValue)
-          ? t.stringLiteral(`${typeValue.namespace.name}:${typeValue.name.name}`)
+          ? t.stringLiteral(
+              `${typeValue.namespace.name}:${typeValue.name.name}`,
+            )
           : t.react.isCompatTag(typeValue.name)
             ? t.stringLiteral(typeValue.name)
             : t.identifier(typeValue.name);
@@ -55,51 +49,50 @@ module.exports = function (babel) {
 
         const properties = [];
         for (const attribute of openingElement.get("attributes")) {
-          if (
-            attribute.isJSXAttribute() &&
-            t.isJSXIdentifier(attribute.node.name)
-          ) {
-            const value = t.isJSXExpressionContainer(attribute.node.value)
-              ? attribute.node.value.expression
-              : attribute.node.value;
+          if (attribute.isJSXAttribute()) {
+            if (t.isJSXIdentifier(attribute.node.name) || t.isJSXNamespacedName(attribute.node.name)) {
+              const value = t.isJSXExpressionContainer(attribute.node.value)
+                ? attribute.node.value.expression
+                : attribute.node.value;
 
-            if (
-              t.isStringLiteral(value) &&
-              !t.isJSXExpressionContainer(attribute.node.value)
-            ) {
-              value.value = value.value.replace(/\n\s+/g, " ");
+              if (
+                t.isStringLiteral(value) &&
+                !t.isJSXExpressionContainer(attribute.node.value)
+              ) {
+                value.value = value.value.replace(/\n\s+/g, " ");
 
-              // "raw" JSXText should not be used from a StringLiteral because it needs to be escaped.
-              delete value.extra?.raw;
-            }
+                // "raw" JSXText should not be used from a StringLiteral because it needs to be escaped.
+                delete value.extra?.raw;
+              }
 
-            if (t.isJSXNamespacedName(attribute.node.name)) {
-              // @ts-expect-error mutating AST
-              attribute.node.name = t.stringLiteral(
-                `${attribute.node.name.namespace.name}:${attribute.node.name.name.name}`,
-              );
-            } else if (t.isValidIdentifier(attribute.node.name.name, false)) {
-              // @ts-expect-error mutating AST
-              attribute.node.name.type = "Identifier";
-            } else {
-              // @ts-expect-error mutating AST
-              attribute.node.name = t.stringLiteral(attribute.node.name.name);
-            }
+              if (t.isJSXNamespacedName(attribute.node.name)) {
+                // @ts-expect-error mutating AST
+                attribute.node.name = t.stringLiteral(
+                  `${attribute.node.name.namespace.name}:${attribute.node.name.name.name}`,
+                );
+              } else if (t.isValidIdentifier(attribute.node.name.name, false)) {
+                // @ts-expect-error mutating AST
+                attribute.node.name.type = "Identifier";
+              } else {
+                // @ts-expect-error mutating AST
+                attribute.node.name = t.stringLiteral(attribute.node.name.name);
+              }
 
-            properties.push(
-              t.inherits(
-                t.objectProperty(
-                  // @ts-expect-error The attribute.node.name is an Identifier now
-                  attribute.node.name,
-                  value,
+              properties.push(
+                t.inherits(
+                  t.objectProperty(
+                    // @ts-expect-error The attribute.node.name is an Identifier now
+                    attribute.node.name,
+                    value,
+                  ),
+                  attribute.node,
                 ),
-                attribute.node,
-              ),
-            );
-          } else if (t.isJSXSpreadAttribute(attribute.node.name)) {
-            throw new Error("not yet jmplemented");
+              );
+            } else {
+              throw new Error(`Unknown attriute-node-type ${attribute.node.name.type}`);
+            }
           } else {
-            throw new Error("Unknown type");
+            throw new Error(`Unknown attribute-type ${attribute.type}`);
           }
         }
 
@@ -113,4 +106,4 @@ module.exports = function (babel) {
       },
     },
   };
-}
+};

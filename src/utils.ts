@@ -37,12 +37,16 @@ export const parentsCacheSymbol = Symbol("parentsCache");
 
 export function connectedCallback(
   this: HTMLElement & { render: () => ShadowElement },
-) {
+  opt?: { shadowRootInit?: Partial<ShadowRootInit> },
+): ShadowRoot {
+  let shadowRoot: null | ShadowRoot = null;
   if (this.shadowRoot === null) {
-    this.attachShadow({ mode: "open" });
+    shadowRoot = this.attachShadow({ mode: "open", ...opt?.shadowRootInit });
 
     (this as any)[parentsCacheSymbol] = new Map();
     (this as any)[shadowCache] = new ShadowCache(false);
+  } else {
+    shadowRoot = this.shadowRoot;
   }
 
   (this as any)[disconnect] = effect(() => {
@@ -69,6 +73,8 @@ export function connectedCallback(
       });
     });
   });
+
+  return shadowRoot;
 }
 
 export function disconnectedCallback(

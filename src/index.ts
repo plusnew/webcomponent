@@ -61,13 +61,9 @@ export function createComponent<
       },
       | ReadonlyKeys<T>
       | ForbiddenHTMLProperties
-      | keyof {
-          [K in keyof T as T[K] extends Function
-            ? K extends `on${any}`
-              ? never
-              : K
-            : never]: K;
-        }
+      | "render"
+      | "connectedCallback"
+      | "disconnectedCallback"
     > & {
       children?: ShadowElement;
       onplusnewerror?: (evt: PlusnewErrorEvent) => void;

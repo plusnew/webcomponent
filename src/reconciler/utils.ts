@@ -1,5 +1,7 @@
 import type { ShadowElement } from "../types";
 import { reconcile } from "./index";
+import { active } from "../index";
+import { dispatchError } from "../utils";
 
 export class ShadowCache {
   value: ShadowElement;
@@ -37,6 +39,27 @@ export class ShadowCache {
       nestedShadow.unmount();
     }
   }
+}
+
+export function getChildren(
+  parent: Element,
+  childrenCallbacks: (() => ShadowElement)[],
+) {
+  const previousActiveElement = active.parentElement;
+  active.parentElement = parent;
+
+  const children: ShadowElement[] = [];
+  for (const childCallback of childrenCallbacks) {
+    try {
+      children.push(childCallback());
+    } catch (error) {
+      children.push(false);
+      dispatchError(parent, error);
+    }
+  }
+  active.parentElement = previousActiveElement;
+
+  return children;
 }
 
 export const arrayReconcileWithoutSorting = (opt: {
