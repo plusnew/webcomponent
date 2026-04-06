@@ -15,22 +15,31 @@
             npmlock2nix = import npmlock2nixSrc { inherit pkgs; };
 
         in {
-          devShells.default = npmlock2nix.v2.shell {
-            nodejs = pkgs.nodejs;
-            src = ./.;
-          };
-
-          checks.default = npmlock2nix.v2.build {
-            nodejs = pkgs.nodejs;
-            src = ./.;
-            buildCommands = [
-              "npm exec tsc -- --noEmit"
-              "CHROME_PATH=${pkgs.chromium}/bin/chromium XDG_CONFIG_HOME=$TMPDIR/chromium-config XDG_CACHE_HOME=$TMPDIR=/chromium-cache npm run test"
+          devShells.default = pkgs.mkShell (with pkgs; {
+            packages = [
+              importNpmLock.hooks.linkNodeModulesHook
+              nodejs
             ];
-            installPhase = ''
-              touch $out
-            '';
-          };
+
+            npmDeps = importNpmLock.buildNodeModules {
+              npmRoot = ./.;
+              inherit nodejs;
+            };
+          });
+
+          checks.default = pkgs.importNpmLock.buildNodeModules (with pkgs;  {
+            npmRoot = ./.;
+            inherit nodejs;
+            derivationArgs = {
+              buildCommands = [
+                "npm exec tsc -- --noEmit"
+                "CHROME_PATH=${pkgs.chromium}/bin/chromium XDG_CONFIG_HOME=$TMPDIR/chromium-config XDG_CACHE_HOME=$TMPDIR=/chromium-cache npm run test"
+              ];
+              installPhase = ''
+                touch $out
+              '';
+            };
+          });
         }
       );
 }
