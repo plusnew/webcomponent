@@ -163,18 +163,27 @@ export const hostReconcile: Reconciler = (opt) => {
               break;
             case "event":
               if (
-                propKey in (opt.shadowCache.value as ShadowHostElement).props
+                propKey in (opt.shadowCache.value as ShadowHostElement).props &&
+                typeof (opt.shadowCache.value as ShadowHostElement).props[
+                  propKey
+                ] === "function"
               ) {
                 (opt.shadowCache.node as Element).removeEventListener(
                   kind.key,
                   (opt.shadowCache.value as ShadowHostElement).props[propKey],
                 );
               }
-              (opt.shadowCache.node as Element).addEventListener(
-                kind.key,
-                (opt.shadowElement as ShadowHostElement).props[propKey],
-                { signal: opt.shadowCache.abortController?.signal },
-              );
+              if (
+                typeof (opt.shadowElement as ShadowHostElement).props[
+                  propKey
+                ] === "function"
+              ) {
+                (opt.shadowCache.node as Element).addEventListener(
+                  kind.key,
+                  (opt.shadowElement as ShadowHostElement).props[propKey],
+                  { signal: opt.shadowCache.abortController?.signal },
+                );
+              }
               break;
           }
         });
