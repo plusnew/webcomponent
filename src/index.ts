@@ -88,10 +88,10 @@ export function createComponent<
 
 export const getParentSymbol = Symbol("getParent");
 
-export function findParent<T = Element>(
+export function findParentOrNull<T = Element>(
   needle: { new (args: any): T } | string,
   haystack?: Element,
-): T {
+): T | null {
   function getParent(element: Element) {
     if (getParentSymbol in element) {
       return (element as any)[getParentSymbol]();
@@ -105,7 +105,7 @@ export function findParent<T = Element>(
         : element.assignedSlot;
 
     if (parentNode === null) {
-      throw new Error(`Could not find parent ${needle.toString()}`);
+      return null;
     }
 
     return parentNode;
@@ -138,6 +138,17 @@ export function findParent<T = Element>(
   } else {
     return findParent(needle, getParent(target));
   }
+}
+
+export function findParent<T = Element>(
+  needle: { new (args: any): T } | string,
+  haystack?: Element,
+): T {
+  const result = findParentOrNull(needle, haystack);
+  if (result === null) {
+    throw new Error(`Could not find parent ${needle.toString()}`);
+  }
+  return result;
 }
 
 export function dispatchEvent<
