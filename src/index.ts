@@ -132,11 +132,15 @@ export function findParentOrNull<T = Element>(
   if (parentsCacheSymbol in target) {
     const parentsCacheMap = target[parentsCacheSymbol] as any;
     if (parentsCacheMap.has(needle) === false) {
-      parentsCacheMap.set(needle, findParent(needle, getParent(target)));
+      parentsCacheMap.set(needle, findParentOrNull(needle, getParent(target)));
     }
     return parentsCacheMap.get(needle);
   } else {
-    return findParent(needle, getParent(target));
+    const parent = getParent(target);
+    if (parent === null) {
+      return null;
+    }
+    return findParentOrNull(needle, parent);
   }
 }
 
