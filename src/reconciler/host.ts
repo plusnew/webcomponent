@@ -220,6 +220,14 @@ export const hostReconcile: Reconciler = (opt) => {
     const previousActiveElement = active.parentElement;
     active.parentElement = opt.shadowCache.node as Element;
 
+    if (elementNeedsAppending) {
+      append(
+        opt.parentElement,
+        opt.previousSibling,
+        opt.shadowCache.node as Node,
+      );
+    }
+
     const children: ShadowElement[] = [];
     for (const childCallback of opt.shadowElement.children) {
       try {
@@ -238,14 +246,6 @@ export const hostReconcile: Reconciler = (opt) => {
       shadowElement: children,
       getParentOverwrite: null,
     });
-
-    if (elementNeedsAppending) {
-      append(
-        opt.parentElement,
-        opt.previousSibling,
-        opt.shadowCache.node as Node,
-      );
-    }
 
     return opt.shadowCache.node;
   } else {
