@@ -67,7 +67,6 @@ export const arrayReconcileWithoutSorting = (opt: {
   previousSibling: Node | null;
   shadowCache: ShadowCache;
   shadowElement: ShadowElement[];
-  getParentOverwrite: (() => Element) | null;
 }) => {
   let lastAddedSibling = opt.previousSibling;
 
@@ -81,7 +80,6 @@ export const arrayReconcileWithoutSorting = (opt: {
       previousSibling: lastAddedSibling,
       shadowCache: opt.shadowCache.nestedShadows[i],
       shadowElement: opt.shadowElement[i],
-      getParentOverwrite: opt.getParentOverwrite,
     });
     i++;
   }

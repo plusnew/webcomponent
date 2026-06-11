@@ -49,7 +49,6 @@ export const componentReconcile: Reconciler = (opt) => {
         opt.shadowCache.node === null ? null : opt.previousSibling,
       shadowCache: opt.shadowCache.nestedShadows[0],
       shadowElement: result,
-      getParentOverwrite: opt.shadowCache.getParentOverwrite,
     });
 
     return nextSibling;

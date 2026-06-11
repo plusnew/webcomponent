@@ -34,7 +34,6 @@ export function mount(
       previousSibling: null,
       shadowCache: shadowResult,
       shadowElement: render(),
-      getParentOverwrite: null,
     });
   });
 

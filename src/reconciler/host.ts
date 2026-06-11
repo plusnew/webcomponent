@@ -1,5 +1,5 @@
 import { untracked } from "@preact/signals-core";
-import { active, getParentSymbol } from "../index";
+import { active } from "../index";
 import {
   PLUSNEW_ELEMENT_TYPE,
   type ShadowElement,
@@ -124,10 +124,6 @@ export const hostReconcile: Reconciler = (opt) => {
       }
     }
 
-    if (opt.getParentOverwrite !== null) {
-      (opt.shadowCache.node as any)[getParentSymbol] = opt.getParentOverwrite;
-    }
-
     for (const propKey in opt.shadowElement.props) {
       // Only set value if changed
       if (
@@ -241,7 +237,6 @@ export const hostReconcile: Reconciler = (opt) => {
       previousSibling: null,
       shadowCache: opt.shadowCache,
       shadowElement: children,
-      getParentOverwrite: null,
     });
 
     return opt.shadowCache.node;

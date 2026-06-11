@@ -69,7 +69,6 @@ export function connectedCallback(
         previousSibling: null,
         shadowCache: (this as any)[shadowCache],
         shadowElement: result,
-        getParentOverwrite: null,
       });
     });
   });
