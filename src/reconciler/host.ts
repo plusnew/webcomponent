@@ -102,33 +102,30 @@ export const hostReconcile: Reconciler = (opt) => {
       };
 
       elementNeedsAppending = true;
+
+      const inputEvent = getPropertyKind(opt.shadowCache.value.type, "oninput");
+      if (inputEvent.type === "inputevent") {
+        opt.shadowCache.node.addEventListener(
+          inputEvent.key,
+          (evt: Event) => {
+            const shadowElement = opt.shadowCache.value as ShadowHostElement;
+            const newValue = (evt.currentTarget as HTMLInputElement).value;
+
+            shadowElement.props[`${EVENT_PREFIX}${inputEvent.key}`](evt);
+
+            if (shadowElement.props.value !== newValue) {
+              evt.preventDefault();
+              (evt.currentTarget as HTMLInputElement).value =
+                shadowElement.props.value;
+            }
+          },
+          { signal: opt.shadowCache.abortController?.signal },
+        );
+      }
     }
 
     if (opt.getParentOverwrite !== null) {
       (opt.shadowCache.node as any)[getParentSymbol] = opt.getParentOverwrite;
-    }
-
-    const inputEvent = getPropertyKind(
-      (opt.shadowCache.value as ShadowHostElement).type,
-      "oninput",
-    );
-    if (inputEvent.type === "inputevent") {
-      (opt.shadowCache.node as Element).addEventListener(
-        inputEvent.key,
-        (evt: Event) => {
-          const shadowElement = opt.shadowCache.value as ShadowHostElement;
-          const newValue = (evt.currentTarget as HTMLInputElement).value;
-
-          shadowElement.props[`${EVENT_PREFIX}${inputEvent.key}`](evt);
-
-          if (shadowElement.props.value !== newValue) {
-            evt.preventDefault();
-            (evt.currentTarget as HTMLInputElement).value =
-              shadowElement.props.value;
-          }
-        },
-        { signal: opt.shadowCache.abortController?.signal },
-      );
     }
 
     for (const propKey in opt.shadowElement.props) {
