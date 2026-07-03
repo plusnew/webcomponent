@@ -112,7 +112,7 @@ export function findParentOrNull<T = Element>(
 
   let target;
   if (haystack === undefined) {
-    target = active.eventElement ?? active.parentElement;
+    target = active.parentElement ?? active.eventElement;
     if (target === null) {
       throw new Error("No active context available");
     }
