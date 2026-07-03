@@ -7,6 +7,7 @@ const ERROR = "plusnewerror";
 
 export const active = {
   parentElement: null as null | Element,
+  eventElement: null as null | Element,
   eventPromises: null as null | Promise<unknown>[],
 };
 

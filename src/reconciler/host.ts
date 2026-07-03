@@ -111,7 +111,15 @@ export const hostReconcile: Reconciler = (opt) => {
             const shadowElement = opt.shadowCache.value as ShadowHostElement;
             const newValue = (evt.currentTarget as HTMLInputElement).value;
 
-            shadowElement.props[`${EVENT_PREFIX}${inputEvent.key}`](evt);
+            const previousEventElement = active.eventElement;
+            active.eventElement = evt.currentTarget as Element;
+            try {
+              shadowElement.props[`${EVENT_PREFIX}${inputEvent.key}`](evt);
+            } catch (error) {
+              active.eventElement = previousEventElement;
+              throw error;
+            }
+            active.eventElement = previousEventElement;
 
             if (shadowElement.props.value !== newValue) {
               evt.preventDefault();
@@ -171,6 +179,26 @@ export const hostReconcile: Reconciler = (opt) => {
                   propKey
                 ] === "function"
               ) {
+                const cb = (opt.shadowElement as ShadowHostElement).props[
+                  propKey
+                ];
+                (opt.shadowElement as ShadowHostElement).props[propKey] = (
+                  evt: Event,
+                ) => {
+                  const previousActiveElement = active.eventElement;
+                  active.eventElement = evt.currentTarget as Element;
+                  let result;
+                  try {
+                    result = cb(evt);
+                  } catch (error) {
+                    active.eventElement = previousActiveElement;
+                    throw error;
+                  }
+                  active.eventElement = previousActiveElement;
+
+                  return result;
+                };
+
                 (opt.shadowCache.node as Element).addEventListener(
                   kind.key,
                   (opt.shadowElement as ShadowHostElement).props[propKey],
