@@ -98,6 +98,39 @@ describe("webcomponent", () => {
     expect(providerElement.textContent).to.equal("baz");
   });
 
+  it("finds context in event", () => {
+    const Component = createComponent(
+      "test-event",
+      class Component extends HTMLElement {
+        render() {
+          return (
+            <Provider>
+              <span
+                onclick={() => {
+                  expect(findParent(Provider).foo.value).to.equal("bar");
+                }}
+              />
+            </Provider>
+          );
+        }
+      },
+    );
+
+    mount(() => <Component />, container);
+
+    expect(container.childNodes.length).to.equal(1);
+
+    const component = container.childNodes[0] as HTMLElement;
+    expect(component.innerHTML);
+
+    const providerElement = component.shadowRoot?.childNodes[0] as InstanceType<
+      typeof Provider
+    >;
+
+    const element = providerElement.childNodes[0] as HTMLSpanElement;
+    element.dispatchEvent(new MouseEvent("click"));
+  });
+
   it("no context", () => {
     mount(() => <Consumer />, container);
 
