@@ -27,6 +27,7 @@ export function mount(
   const shadowResult: ShadowCache = new ShadowCache(false);
 
   const disconnect = effect(() => {
+    const previousActiveElement = active.parentElement;
     active.parentElement = parent;
 
     reconcile({
@@ -35,6 +36,8 @@ export function mount(
       shadowCache: shadowResult,
       shadowElement: render(),
     });
+
+    active.parentElement = previousActiveElement;
   });
 
   return () => {
