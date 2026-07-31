@@ -80,6 +80,10 @@ export function createComponent<
     Component.prototype.disconnectedCallback = disconnectedCallback;
   }
 
+  if ("connectedMoveCallback" in Component.prototype === false) {
+    Component.prototype.connectedMoveCallback = () => {};
+  }
+
   Component.prototype.addEventListener = addEventListener;
   Component.prototype.removeEventListener = removeEventListener;
 
