@@ -42,12 +42,19 @@ export function connectedCallback(
 ): ShadowRoot {
   let shadowRoot: null | ShadowRoot = null;
   if (this.shadowRoot === null) {
+    console.log("no root");
     shadowRoot = this.attachShadow({ mode: "open", ...opt?.shadowRootInit });
 
     (this as any)[parentsCacheSymbol] = new Map();
     (this as any)[shadowCache] = new ShadowCache(false);
   } else {
+    console.log("has root");
     shadowRoot = this.shadowRoot;
+  }
+
+  if ((disconnect in this) as any) {
+    console.log("had disconnect");
+    (this as any)[disconnect]();
   }
 
   (this as any)[disconnect] = effect(() => {
