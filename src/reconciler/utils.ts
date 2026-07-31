@@ -20,8 +20,8 @@ export class ShadowCache {
       for (const nestedShadow of this.nestedShadows) {
         nestedShadow.remove();
       }
-    } else {
-      this.node.parentNode?.removeChild(this.node);
+    } else if (this.node.parentNode !== null) {
+      this.node.parentNode.removeChild(this.node);
     }
 
     this.node = null;
