@@ -51,27 +51,27 @@ export function connectedCallback(
   }
 
   (this as any)[disconnect] = effect(() => {
-    batch(() => {
-      const previousActiveElement = active.parentElement;
-      let result: ShadowElement;
-      try {
-        active.parentElement = this;
-        result = this.render();
-        active.parentElement = previousActiveElement;
-      } catch (error) {
-        active.parentElement = previousActiveElement;
-        untracked(() => dispatchError(this, error));
+    // batch(() => {
+    const previousActiveElement = active.parentElement;
+    let result: ShadowElement;
+    try {
+      active.parentElement = this;
+      result = this.render();
+      active.parentElement = previousActiveElement;
+    } catch (error) {
+      active.parentElement = previousActiveElement;
+      untracked(() => dispatchError(this, error));
 
-        return;
-      }
+      return;
+    }
 
-      reconcile({
-        parentElement: this.shadowRoot as ShadowRoot,
-        previousSibling: null,
-        shadowCache: (this as any)[shadowCache],
-        shadowElement: result,
-      });
+    reconcile({
+      parentElement: this.shadowRoot as ShadowRoot,
+      previousSibling: null,
+      shadowCache: (this as any)[shadowCache],
+      shadowElement: result,
     });
+    // });
   });
 
   return shadowRoot;
