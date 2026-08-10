@@ -91,6 +91,13 @@ module.exports = function (babel) {
             } else {
               throw new Error(`Unknown attriute-node-type ${attribute.node.name.type}`);
             }
+          } else if(attribute.isJSXSpreadAttribute()) {
+            if (t.isObjectExpression(attribute.node.argument)) {
+              properties.push(...attribute.node.argument.properties);
+            } else {
+              properties.push(t.spreadElement(attribute.node.argument));
+            }
+
           } else {
             throw new Error(`Unknown attribute-type ${attribute.type}`);
           }
