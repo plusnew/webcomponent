@@ -12,6 +12,7 @@ export function isFragmentElement(
 ): shadowElement is ShadowHostElement {
   return (
     typeof shadowElement === "object" &&
+    shadowElement !== null &&
     "$$typeof" in shadowElement &&
     shadowElement.$$typeof === PLUSNEW_ELEMENT_TYPE &&
     shadowElement.type === Fragment

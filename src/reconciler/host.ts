@@ -16,6 +16,7 @@ function isHostElement(
 ): shadowElement is ShadowHostElement {
   return (
     typeof shadowElement === "object" &&
+    shadowElement !== null &&
     "$$typeof" in shadowElement &&
     (typeof shadowElement.type === "string" ||
       Element.isPrototypeOf(shadowElement.type))

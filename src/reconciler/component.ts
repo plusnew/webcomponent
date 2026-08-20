@@ -11,6 +11,7 @@ export function isComponentElement(
 ): shadowElement is ShadowComponentElement<{}> {
   return (
     typeof shadowElement === "object" &&
+    shadowElement !== null &&
     "$$typeof" in shadowElement &&
     shadowElement.$$typeof === PLUSNEW_ELEMENT_TYPE &&
     typeof shadowElement.type === "function"
