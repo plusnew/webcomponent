@@ -28,7 +28,5 @@ export function reconcile(opt: Parameters<Reconciler>[0]): Node | null {
       return result;
     }
   }
-  throw new Error(
-    "Could not find fitting reconciler for " + opt.shadowElement.toString(),
-  );
+  throw new Error(`Could not find fitting reconciler for ${opt.shadowElement}`);
 }
