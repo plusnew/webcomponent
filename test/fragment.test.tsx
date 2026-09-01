@@ -1,5 +1,5 @@
 import { expect } from "@esm-bundle/chai";
-import { createComponent, mount, prop } from "@plusnew/webcomponent";
+import { createComponent, mount, prop, Webcomponent } from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
 describe("fragment", () => {
@@ -18,7 +18,7 @@ describe("fragment", () => {
     const baz = signal("foo");
     const Component = createComponent(
       "test-base",
-      class Component extends HTMLElement {
+      class Component extends Webcomponent {
         @prop() accessor foo: string;
 
         render() {

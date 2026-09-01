@@ -2,18 +2,10 @@ import { effect, Signal, signal } from "@preact/signals-core";
 import { reconcile } from "./reconciler/index";
 import { ShadowCache } from "./reconciler/utils";
 import type { CustomEvents, ForbiddenHTMLProperties, ReadonlyKeys, ShadowElement } from "./types";
-import {
-  connectedCallback,
-  disconnectedCallback,
-  parentsCacheSymbol,
-  PlusnewErrorEvent,
-  active,
-  addEventListener,
-  removeEventListener,
-} from "./utils";
+import { parentsCacheSymbol, PlusnewErrorEvent, active } from "./utils";
 
 export type { ShadowElement } from "./types";
-export { active, connectedCallback, disconnectedCallback } from "./utils";
+export { active, WebComponent as Webcomponent } from "./utils";
 
 export function mount(render: () => ShadowElement, parent: HTMLElement): () => void {
   const shadowResult: ShadowCache = new ShadowCache(false);
@@ -60,17 +52,6 @@ export function createComponent<T extends HTMLElement & { render: (this: T) => S
     },
   ): T;
 } {
-  if ("connectedCallback" in Component.prototype === false) {
-    Component.prototype.connectedCallback = connectedCallback;
-  }
-
-  if ("disconnectedCallback" in Component.prototype === false) {
-    Component.prototype.disconnectedCallback = disconnectedCallback;
-  }
-
-  Component.prototype.addEventListener = addEventListener;
-  Component.prototype.removeEventListener = removeEventListener;
-
   customElements.define(name, Component as any);
 
   return name as any;
