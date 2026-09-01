@@ -30,7 +30,7 @@ export function mount(render: () => ShadowElement, parent: HTMLElement): () => v
   };
 }
 
-export function createComponent<T extends HTMLElement & { render: (this: T) => ShadowElement }>(
+export function createComponent<T extends HTMLElement>(
   name: string,
   Component: { new (): T },
 ): {
