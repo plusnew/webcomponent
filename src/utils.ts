@@ -33,101 +33,102 @@ export function dispatchError(element: Element, error: unknown) {
 const disconnect = Symbol("disconnect");
 const shadowCache = Symbol("shadowCache");
 const eventListenerSymbol = Symbol("eventListner");
-
 export const parentsCacheSymbol = Symbol("parentsCache");
 
-export function connectedCallback(
-  this: HTMLElement & { render: () => ShadowElement },
-  opt?: { shadowRootInit?: Partial<ShadowRootInit> },
-): ShadowRoot {
-  let shadowRoot: null | ShadowRoot = null;
-  if (this.shadowRoot === null) {
-    shadowRoot = this.attachShadow({ mode: "open", ...opt?.shadowRootInit });
+export abstract class WebComponent extends HTMLElement {
+  abstract render(): ShadowElement;
 
-    (this as any)[parentsCacheSymbol] = new Map();
-    (this as any)[shadowCache] = new ShadowCache(false);
-  } else {
-    shadowRoot = this.shadowRoot;
-  }
+  connectedCallback(this: WebComponent, opt?: { shadowRootInit?: Partial<ShadowRootInit> }) {
+    let shadowRoot: null | ShadowRoot = null;
+    if (this.shadowRoot === null) {
+      shadowRoot = this.attachShadow({ mode: "open", ...opt?.shadowRootInit });
 
-  (this as any)[disconnect] = effect(() => {
-    batch(() => {
-      const previousActiveElement = active.parentElement;
-      let result: ShadowElement;
-      try {
-        active.parentElement = this;
-        result = this.render();
-        active.parentElement = previousActiveElement;
-      } catch (error) {
-        active.parentElement = previousActiveElement;
-        untracked(() => dispatchError(this, error));
+      (this as any)[parentsCacheSymbol] = new Map();
+      (this as any)[shadowCache] = new ShadowCache(false);
+    } else {
+      shadowRoot = this.shadowRoot;
+    }
 
-        return;
-      }
+    (this as any)[disconnect] = effect(() => {
+      batch(() => {
+        const previousActiveElement = active.parentElement;
+        let result: ShadowElement;
+        try {
+          active.parentElement = this;
+          result = this.render();
+          active.parentElement = previousActiveElement;
+        } catch (error) {
+          active.parentElement = previousActiveElement;
+          untracked(() => dispatchError(this, error));
 
-      reconcile({
-        parentElement: this.shadowRoot as ShadowRoot,
-        previousSibling: null,
-        shadowCache: (this as any)[shadowCache],
-        shadowElement: result,
+          return;
+        }
+
+        reconcile({
+          parentElement: this.shadowRoot as ShadowRoot,
+          previousSibling: null,
+          shadowCache: (this as any)[shadowCache],
+          shadowElement: result,
+        });
       });
     });
-  });
 
-  return shadowRoot;
-}
-
-export function disconnectedCallback(this: HTMLElement & { render: () => ShadowElement }) {
-  (this as any)[disconnect]();
-  (this as any)[parentsCacheSymbol].clear();
-  (this as any)[shadowCache].unmount();
-}
-
-export function addEventListener(
-  this: HTMLElement,
-  eventName: string,
-  listener: (event: Event) => unknown,
-  options?: boolean | AddEventListenerOptions,
-) {
-  if (eventListenerSymbol in this === false) {
-    (this as any)[eventListenerSymbol] = {};
-  }
-  if (eventName in (this as any)[eventListenerSymbol] === false) {
-    (this as any)[eventListenerSymbol][eventName] = new WeakMap();
+    return shadowRoot;
   }
 
-  const listenerOverwrite = (evt: Event) => {
-    if (typeof options === "object" && options !== null && options?.once === true) {
-      (this as any)[eventListenerSymbol]?.[eventName]?.delete(listener);
+  disconnectedCallback(this: WebComponent) {
+    if (disconnect in this) {
+      (this as any)[disconnect]();
     }
-
-    const result = listener(evt);
-
-    if (result instanceof Promise && active.eventPromises !== null) {
-      active.eventPromises.push(result);
+    if (parentsCacheSymbol in this) {
+      (this as any)[parentsCacheSymbol].clear();
     }
-  };
+    if (shadowCache in this) {
+      (this as any)[shadowCache].unmount();
+    }
+  }
 
-  (this as any)[eventListenerSymbol][eventName].set(listener, listenerOverwrite);
-
-  HTMLElement.prototype.addEventListener.call(this, eventName, listenerOverwrite, options);
-}
-
-export function removeEventListener(
-  this: HTMLElement,
-  eventName: string,
-  listener: (event: Event) => void,
-) {
-  if (
-    eventListenerSymbol in this === true &&
-    eventName in (this as any)[eventListenerSymbol] === true
+  addEventListener(
+    eventName: string,
+    listener: (event: Event) => unknown,
+    options?: boolean | AddEventListenerOptions,
   ) {
-    const listenerOverwrite = (this as any)[eventListenerSymbol][eventName].get(listener);
+    if (eventListenerSymbol in this === false) {
+      (this as any)[eventListenerSymbol] = {};
+    }
+    if (eventName in (this as any)[eventListenerSymbol] === false) {
+      (this as any)[eventListenerSymbol][eventName] = new WeakMap();
+    }
 
-    if (listenerOverwrite !== undefined) {
-      (this as any)[eventListenerSymbol][eventName].delete(listener);
+    const listenerOverwrite = (evt: Event) => {
+      if (typeof options === "object" && options !== null && options?.once === true) {
+        (this as any)[eventListenerSymbol]?.[eventName]?.delete(listener);
+      }
 
-      HTMLElement.prototype.removeEventListener.call(this, eventName, listenerOverwrite);
+      const result = listener(evt);
+
+      if (result instanceof Promise && active.eventPromises !== null) {
+        active.eventPromises.push(result);
+      }
+    };
+
+    (this as any)[eventListenerSymbol][eventName].set(listener, listenerOverwrite);
+
+    super.addEventListener(eventName, listenerOverwrite, options);
+  }
+
+  removeEventListener(this: HTMLElement, eventName: string, listener: (event: Event) => void) {
+    if (
+      eventListenerSymbol in this === true &&
+      eventName in (this as any)[eventListenerSymbol] === true
+    ) {
+      const listenerOverwrite = (this as any)[eventListenerSymbol][eventName].get(listener);
+
+      if (listenerOverwrite !== undefined) {
+        (this as any)[eventListenerSymbol][eventName].delete(listener);
+
+        super.removeEventListener(eventName, listenerOverwrite);
+      }
     }
   }
 }

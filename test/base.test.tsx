@@ -1,5 +1,5 @@
 import { expect } from "@esm-bundle/chai";
-import { createComponent, mount, prop } from "@plusnew/webcomponent";
+import { createComponent, mount, prop, WebComponent } from "@plusnew/webcomponent";
 import type { Signal } from "@preact/signals-core";
 import { signal } from "@preact/signals-core";
 
@@ -18,7 +18,7 @@ describe("webcomponent", () => {
   it("creates basic component and updating its props", () => {
     const Component = createComponent(
       "test-base",
-      class Component extends HTMLElement {
+      class Component extends WebComponent {
         @prop() accessor foo: string;
 
         #baz = signal("baz");
@@ -56,7 +56,7 @@ describe("webcomponent", () => {
   it("crates array based on given number", () => {
     const Component = createComponent(
       "test-array",
-      class Component extends HTMLElement {
+      class Component extends WebComponent {
         @prop() accessor amount: number;
 
         render() {
@@ -94,7 +94,7 @@ describe("webcomponent", () => {
   it("crates element if needed", () => {
     const Component = createComponent(
       "test-placeholder",
-      class Component extends HTMLElement {
+      class Component extends WebComponent {
         @prop() accessor show: boolean;
 
         render() {
@@ -135,7 +135,7 @@ describe("webcomponent", () => {
 
     const Component = createComponent(
       "test-container",
-      class Component extends HTMLElement {
+      class Component extends WebComponent {
         render() {
           containerRenderCount++;
           return <NestedComponent />;
@@ -145,7 +145,7 @@ describe("webcomponent", () => {
 
     const NestedComponent = createComponent(
       "test-nest",
-      class Component extends HTMLElement {
+      class Component extends WebComponent {
         render() {
           nestedRenderCount++;
           return `${foo.value}`;
@@ -180,7 +180,7 @@ describe("webcomponent", () => {
 
     const NestedComponent = createComponent(
       "test-counter-constructor",
-      class Component extends HTMLElement {
+      class Component extends WebComponent {
         #counter: Signal<number>;
         constructor() {
           super();
@@ -206,7 +206,7 @@ describe("webcomponent", () => {
 
     const Component = createComponent(
       "test-container-rerender",
-      class Component extends HTMLElement {
+      class Component extends WebComponent {
         render() {
           containerRenderCounter += 1;
           return <NestedComponent />;

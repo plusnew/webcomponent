@@ -1,5 +1,5 @@
 import { expect } from "@esm-bundle/chai";
-import { createComponent, mount } from "@plusnew/webcomponent";
+import { createComponent, mount, WebComponent } from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
 describe("webcomponent", () => {
@@ -19,7 +19,7 @@ describe("webcomponent", () => {
 
     const Component = createComponent(
       "test-property",
-      class Component extends HTMLElement {
+      class Component extends WebComponent {
         render() {
           return add.value ? <span className="foo" /> : <span />;
         }
@@ -46,7 +46,7 @@ describe("webcomponent", () => {
   it("registers click event", async () => {
     const Component = createComponent(
       "test-click",
-      class Component extends HTMLElement {
+      class Component extends WebComponent {
         #baz = signal(0);
 
         render() {
@@ -91,7 +91,7 @@ describe("webcomponent", () => {
   it("registers input event and updating", async () => {
     const Component = createComponent(
       "test-input-update",
-      class Component extends HTMLElement {
+      class Component extends WebComponent {
         #baz = signal("foo");
 
         render() {
@@ -130,7 +130,7 @@ describe("webcomponent", () => {
   it("registers input event without updating", async () => {
     const Component = createComponent(
       "test-input-reject",
-      class Component extends HTMLElement {
+      class Component extends WebComponent {
         #baz = signal("foo");
 
         render() {
@@ -167,7 +167,7 @@ describe("webcomponent", () => {
 
     const Component = createComponent(
       "test-style",
-      class Component extends HTMLElement {
+      class Component extends WebComponent {
         render() {
           return backgroundColor.value === null && fontColor.value === null ? (
             <span />
