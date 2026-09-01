@@ -1,12 +1,7 @@
 import { effect, Signal, signal } from "@preact/signals-core";
 import { reconcile } from "./reconciler/index";
 import { ShadowCache } from "./reconciler/utils";
-import type {
-  CustomEvents,
-  ForbiddenHTMLProperties,
-  ReadonlyKeys,
-  ShadowElement,
-} from "./types";
+import type { CustomEvents, ForbiddenHTMLProperties, ReadonlyKeys, ShadowElement } from "./types";
 import {
   connectedCallback,
   disconnectedCallback,
@@ -20,10 +15,7 @@ import {
 export type { ShadowElement } from "./types";
 export { active, connectedCallback, disconnectedCallback } from "./utils";
 
-export function mount(
-  render: () => ShadowElement,
-  parent: HTMLElement,
-): () => void {
+export function mount(render: () => ShadowElement, parent: HTMLElement): () => void {
   const shadowResult: ShadowCache = new ShadowCache(false);
 
   const disconnect = effect(() => {
@@ -46,20 +38,16 @@ export function mount(
   };
 }
 
-export function createComponent<
-  T extends HTMLElement & { render: (this: T) => ShadowElement },
->(
+export function createComponent<T extends HTMLElement & { render: (this: T) => ShadowElement }>(
   name: string,
   Component: { new (): T },
 ): {
   new (
     properties: Omit<
       { [K in keyof T]?: T[K] } & {
-        [K in keyof T as undefined extends T[K]
-          ? never
-          : K extends keyof HTMLElement
-            ? never
-            : K]-?: T[K];
+        [
+          K in keyof T as undefined extends T[K] ? never : K extends keyof HTMLElement ? never : K
+        ]-?: T[K];
       },
       | ReadonlyKeys<T>
       | ForbiddenHTMLProperties
@@ -156,10 +144,7 @@ export function findParent<T = Element>(
   return result;
 }
 
-export function dispatchEvent<
-  T extends HTMLElement,
-  U extends keyof CustomEvents<T>,
->(
+export function dispatchEvent<T extends HTMLElement, U extends keyof CustomEvents<T>>(
   target: T,
   eventName: U,
   customEventInit: CustomEventInit<CustomEvents<T>[U]>,

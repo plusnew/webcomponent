@@ -67,41 +67,25 @@ describe("webcomponent", () => {
 
     expect(component.tagName).to.equal("TEST-CLICK");
     expect(component.shadowRoot?.childNodes.length).to.equal(1);
-    expect(
-      (component.shadowRoot?.childNodes[0] as HTMLElement).tagName,
-    ).to.equal("BUTTON");
+    expect((component.shadowRoot?.childNodes[0] as HTMLElement).tagName).to.equal("BUTTON");
 
-    expect(
-      (component.shadowRoot?.childNodes[0] as HTMLElement).textContent,
-    ).to.equal("0");
+    expect((component.shadowRoot?.childNodes[0] as HTMLElement).textContent).to.equal("0");
 
-    (component.shadowRoot?.childNodes[0] as HTMLElement).dispatchEvent(
-      new MouseEvent("click"),
-    );
+    (component.shadowRoot?.childNodes[0] as HTMLElement).dispatchEvent(new MouseEvent("click"));
 
     expect(component.shadowRoot?.childNodes.length).to.equal(1);
-    expect(
-      (component.shadowRoot?.childNodes[0] as HTMLElement).tagName,
-    ).to.equal("BUTTON");
+    expect((component.shadowRoot?.childNodes[0] as HTMLElement).tagName).to.equal("BUTTON");
 
-    expect(
-      (component.shadowRoot?.childNodes[0] as HTMLElement).textContent,
-    ).to.equal("1");
+    expect((component.shadowRoot?.childNodes[0] as HTMLElement).textContent).to.equal("1");
 
     component.remove();
 
-    (component.shadowRoot?.childNodes[0] as HTMLElement).dispatchEvent(
-      new MouseEvent("click"),
-    );
+    (component.shadowRoot?.childNodes[0] as HTMLElement).dispatchEvent(new MouseEvent("click"));
 
     expect(component.shadowRoot?.childNodes.length).to.equal(1);
-    expect(
-      (component.shadowRoot?.childNodes[0] as HTMLElement).tagName,
-    ).to.equal("BUTTON");
+    expect((component.shadowRoot?.childNodes[0] as HTMLElement).tagName).to.equal("BUTTON");
 
-    expect(
-      (component.shadowRoot?.childNodes[0] as HTMLElement).textContent,
-    ).to.equal("1");
+    expect((component.shadowRoot?.childNodes[0] as HTMLElement).textContent).to.equal("1");
   });
 
   it("registers input event and updating", async () => {
@@ -113,11 +97,7 @@ describe("webcomponent", () => {
         render() {
           return (
             <input
-              oninput={(evt) =>
-                (this.#baz.value = (
-                  evt.currentTarget as HTMLInputElement
-                ).value)
-              }
+              oninput={(evt) => (this.#baz.value = (evt.currentTarget as HTMLInputElement).value)}
               value={this.#baz.value}
             />
           );
@@ -133,28 +113,18 @@ describe("webcomponent", () => {
 
     expect(component.tagName).to.equal("TEST-INPUT-UPDATE");
     expect(component.shadowRoot?.childNodes.length).to.equal(1);
-    expect(
-      (component.shadowRoot?.childNodes[0] as HTMLElement).tagName,
-    ).to.equal("INPUT");
+    expect((component.shadowRoot?.childNodes[0] as HTMLElement).tagName).to.equal("INPUT");
 
-    expect(
-      (component.shadowRoot?.childNodes[0] as HTMLInputElement).value,
-    ).to.equal("foo");
+    expect((component.shadowRoot?.childNodes[0] as HTMLInputElement).value).to.equal("foo");
 
     (component.shadowRoot?.childNodes[0] as HTMLInputElement).value = "foobar";
 
-    (component.shadowRoot?.childNodes[0] as HTMLElement).dispatchEvent(
-      new KeyboardEvent("input"),
-    );
+    (component.shadowRoot?.childNodes[0] as HTMLElement).dispatchEvent(new KeyboardEvent("input"));
 
     expect(component.shadowRoot?.childNodes.length).to.equal(1);
-    expect(
-      (component.shadowRoot?.childNodes[0] as HTMLElement).tagName,
-    ).to.equal("INPUT");
+    expect((component.shadowRoot?.childNodes[0] as HTMLElement).tagName).to.equal("INPUT");
 
-    expect(
-      (component.shadowRoot?.childNodes[0] as HTMLInputElement).value,
-    ).to.equal("foobar");
+    expect((component.shadowRoot?.childNodes[0] as HTMLInputElement).value).to.equal("foobar");
   });
 
   it("registers input event without updating", async () => {
@@ -177,28 +147,18 @@ describe("webcomponent", () => {
 
     expect(component.tagName).to.equal("TEST-INPUT-REJECT");
     expect(component.shadowRoot?.childNodes.length).to.equal(1);
-    expect(
-      (component.shadowRoot?.childNodes[0] as HTMLElement).tagName,
-    ).to.equal("INPUT");
+    expect((component.shadowRoot?.childNodes[0] as HTMLElement).tagName).to.equal("INPUT");
 
-    expect(
-      (component.shadowRoot?.childNodes[0] as HTMLInputElement).value,
-    ).to.equal("foo");
+    expect((component.shadowRoot?.childNodes[0] as HTMLInputElement).value).to.equal("foo");
 
     (component.shadowRoot?.childNodes[0] as HTMLInputElement).value = "foobar";
 
-    (component.shadowRoot?.childNodes[0] as HTMLElement).dispatchEvent(
-      new KeyboardEvent("input"),
-    );
+    (component.shadowRoot?.childNodes[0] as HTMLElement).dispatchEvent(new KeyboardEvent("input"));
 
     expect(component.shadowRoot?.childNodes.length).to.equal(1);
-    expect(
-      (component.shadowRoot?.childNodes[0] as HTMLElement).tagName,
-    ).to.equal("INPUT");
+    expect((component.shadowRoot?.childNodes[0] as HTMLElement).tagName).to.equal("INPUT");
 
-    expect(
-      (component.shadowRoot?.childNodes[0] as HTMLInputElement).value,
-    ).to.equal("foo");
+    expect((component.shadowRoot?.childNodes[0] as HTMLInputElement).value).to.equal("foo");
   });
 
   it("adds style attribute", async () => {
@@ -216,8 +176,7 @@ describe("webcomponent", () => {
               style={{
                 ...(backgroundColor.value !== null &&
                   ({ "background-color": backgroundColor.value } as any)),
-                ...(fontColor.value !== null &&
-                  ({ color: fontColor.value } as any)),
+                ...(fontColor.value !== null && ({ color: fontColor.value } as any)),
               }}
             />
           );

@@ -8,18 +8,12 @@ module.exports = function (babel) {
     visitor: {
       Program: {
         enter: (path, state) => {
-          state.set(
-            "id/jsx",
-            addNamed(path, "jsx", "@plusnew/webcomponent/jsx-runtime"),
-          );
+          state.set("id/jsx", addNamed(path, "jsx", "@plusnew/webcomponent/jsx-runtime"));
         },
       },
       JSXFragment(path, state) {
         if (!state.get("id/Fragment")) {
-          state.set(
-            "id/Fragment",
-            addNamed(path, "Fragment", "@plusnew/webcomponent/jsx-runtime"),
-          );
+          state.set("id/Fragment", addNamed(path, "Fragment", "@plusnew/webcomponent/jsx-runtime"));
         }
 
         path.replaceWith(
@@ -37,9 +31,7 @@ module.exports = function (babel) {
 
         const typeValue = openingElement.node.name;
         const type = t.isJSXNamespacedName(typeValue)
-          ? t.stringLiteral(
-              `${typeValue.namespace.name}:${typeValue.name.name}`,
-            )
+          ? t.stringLiteral(`${typeValue.namespace.name}:${typeValue.name.name}`)
           : t.react.isCompatTag(typeValue.name)
             ? t.stringLiteral(typeValue.name)
             : t.identifier(typeValue.name);
@@ -50,15 +42,15 @@ module.exports = function (babel) {
         const properties = [];
         for (const attribute of openingElement.get("attributes")) {
           if (attribute.isJSXAttribute()) {
-            if (t.isJSXIdentifier(attribute.node.name) || t.isJSXNamespacedName(attribute.node.name)) {
+            if (
+              t.isJSXIdentifier(attribute.node.name) ||
+              t.isJSXNamespacedName(attribute.node.name)
+            ) {
               const value = t.isJSXExpressionContainer(attribute.node.value)
                 ? attribute.node.value.expression
                 : attribute.node.value;
 
-              if (
-                t.isStringLiteral(value) &&
-                !t.isJSXExpressionContainer(attribute.node.value)
-              ) {
+              if (t.isStringLiteral(value) && !t.isJSXExpressionContainer(attribute.node.value)) {
                 value.value = value.value.replace(/\n\s+/g, " ");
 
                 // "raw" JSXText should not be used from a StringLiteral because it needs to be escaped.
@@ -91,13 +83,12 @@ module.exports = function (babel) {
             } else {
               throw new Error(`Unknown attriute-node-type ${attribute.node.name.type}`);
             }
-          } else if(attribute.isJSXSpreadAttribute()) {
+          } else if (attribute.isJSXSpreadAttribute()) {
             if (t.isObjectExpression(attribute.node.argument)) {
               properties.push(...attribute.node.argument.properties);
             } else {
               properties.push(t.spreadElement(attribute.node.argument));
             }
-
           } else {
             throw new Error(`Unknown attribute-type ${attribute.type}`);
           }

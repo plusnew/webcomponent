@@ -1,8 +1,4 @@
-import {
-  type ShadowComponentElement,
-  type ShadowElement,
-  PLUSNEW_ELEMENT_TYPE,
-} from "../types";
+import { type ShadowComponentElement, type ShadowElement, PLUSNEW_ELEMENT_TYPE } from "../types";
 import { reconcile, type Reconciler } from "./index";
 import { ShadowCache } from "./utils";
 
@@ -44,10 +40,8 @@ export const componentReconcile: Reconciler = (opt) => {
     );
 
     let nextSibling = reconcile({
-      parentElement:
-        (opt.shadowCache.node as ParentNode | null) ?? opt.parentElement,
-      previousSibling:
-        opt.shadowCache.node === null ? null : opt.previousSibling,
+      parentElement: (opt.shadowCache.node as ParentNode | null) ?? opt.parentElement,
+      previousSibling: opt.shadowCache.node === null ? null : opt.previousSibling,
       shadowCache: opt.shadowCache.nestedShadows[0],
       shadowElement: result,
     });

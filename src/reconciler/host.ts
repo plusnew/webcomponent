@@ -1,25 +1,18 @@
 import { untracked } from "@preact/signals-core";
 import { active } from "../index";
-import {
-  PLUSNEW_ELEMENT_TYPE,
-  type ShadowElement,
-  type ShadowHostElement,
-} from "../types";
+import { PLUSNEW_ELEMENT_TYPE, type ShadowElement, type ShadowHostElement } from "../types";
 import type { Reconciler } from "./index";
 import { append, arrayReconcileWithoutSorting } from "./utils";
 import { dispatchError } from "../utils";
 
 const EVENT_PREFIX = "on";
 
-function isHostElement(
-  shadowElement: ShadowElement,
-): shadowElement is ShadowHostElement {
+function isHostElement(shadowElement: ShadowElement): shadowElement is ShadowHostElement {
   return (
     typeof shadowElement === "object" &&
     shadowElement !== null &&
     "$$typeof" in shadowElement &&
-    (typeof shadowElement.type === "string" ||
-      Element.isPrototypeOf(shadowElement.type))
+    (typeof shadowElement.type === "string" || Element.isPrototypeOf(shadowElement.type))
   );
 }
 
@@ -124,8 +117,7 @@ export const hostReconcile: Reconciler = (opt) => {
 
             if (shadowElement.props.value !== newValue) {
               evt.preventDefault();
-              (evt.currentTarget as HTMLInputElement).value =
-                shadowElement.props.value;
+              (evt.currentTarget as HTMLInputElement).value = shadowElement.props.value;
             }
           },
           { signal: opt.shadowCache.abortController?.signal },
@@ -139,10 +131,7 @@ export const hostReconcile: Reconciler = (opt) => {
         (opt.shadowCache.value as ShadowHostElement).props[propKey] !==
         opt.shadowElement.props[propKey]
       ) {
-        const kind = getPropertyKind(
-          (opt.shadowCache.value as ShadowHostElement).type,
-          propKey,
-        );
+        const kind = getPropertyKind((opt.shadowCache.value as ShadowHostElement).type, propKey);
 
         untracked(() => {
           switch (kind.type) {
@@ -150,9 +139,7 @@ export const hostReconcile: Reconciler = (opt) => {
               (opt.shadowCache.node as Element).setAttribute(
                 kind.key,
                 kind.key === "style"
-                  ? Object.entries(
-                      (opt.shadowElement as ShadowHostElement).props[propKey],
-                    )
+                  ? Object.entries((opt.shadowElement as ShadowHostElement).props[propKey])
                       .map(([key, value]) => `${key}: ${value}`)
                       .join(";")
                   : (opt.shadowElement as ShadowHostElement).props[propKey],
@@ -166,26 +153,16 @@ export const hostReconcile: Reconciler = (opt) => {
             case "event":
               if (
                 propKey in (opt.shadowCache.value as ShadowHostElement).props &&
-                typeof (opt.shadowCache.value as ShadowHostElement).props[
-                  propKey
-                ] === "function"
+                typeof (opt.shadowCache.value as ShadowHostElement).props[propKey] === "function"
               ) {
                 (opt.shadowCache.node as Element).removeEventListener(
                   kind.key,
                   (opt.shadowCache.value as ShadowHostElement).props[propKey],
                 );
               }
-              if (
-                typeof (opt.shadowElement as ShadowHostElement).props[
-                  propKey
-                ] === "function"
-              ) {
-                const cb = (opt.shadowElement as ShadowHostElement).props[
-                  propKey
-                ];
-                (opt.shadowElement as ShadowHostElement).props[propKey] = (
-                  evt: Event,
-                ) => {
+              if (typeof (opt.shadowElement as ShadowHostElement).props[propKey] === "function") {
+                const cb = (opt.shadowElement as ShadowHostElement).props[propKey];
+                (opt.shadowElement as ShadowHostElement).props[propKey] = (evt: Event) => {
                   const previousActiveElement = active.eventElement;
                   active.eventElement = evt.currentTarget as Element;
                   let result;
@@ -217,10 +194,7 @@ export const hostReconcile: Reconciler = (opt) => {
 
     for (const propKey in (opt.shadowCache.value as ShadowHostElement).props) {
       if (propKey in opt.shadowElement.props === false) {
-        const kind = getPropertyKind(
-          (opt.shadowCache.value as ShadowHostElement).type,
-          propKey,
-        );
+        const kind = getPropertyKind((opt.shadowCache.value as ShadowHostElement).type, propKey);
 
         untracked(() => {
           switch (kind.type) {
@@ -243,11 +217,7 @@ export const hostReconcile: Reconciler = (opt) => {
     active.parentElement = opt.shadowCache.node as Element;
 
     if (elementNeedsAppending) {
-      append(
-        opt.parentElement,
-        opt.previousSibling,
-        opt.shadowCache.node as Node,
-      );
+      append(opt.parentElement, opt.previousSibling, opt.shadowCache.node as Node);
     }
 
     const children: ShadowElement[] = [];

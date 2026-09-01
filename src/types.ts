@@ -9,17 +9,10 @@ export function Fragment(props: { children: ShadowElement }) {
 // type Expect<T extends true> = T;
 
 type IsEqual<CheckA, CheckB, Then, Else> =
-  (<T>() => T extends CheckA ? 1 : 2) extends <T>() => T extends CheckB ? 1 : 2
-    ? Then
-    : Else;
+  (<T>() => T extends CheckA ? 1 : 2) extends <T>() => T extends CheckB ? 1 : 2 ? Then : Else;
 
 export type ReadonlyKeys<T> = {
-  [P in keyof T]-?: IsEqual<
-    { [Q in P]: T[P] },
-    { -readonly [Q in P]: T[P] },
-    never,
-    P
-  >;
+  [P in keyof T]-?: IsEqual<{ [Q in P]: T[P] }, { -readonly [Q in P]: T[P] }, never, P>;
 }[keyof T];
 
 // type FunctionKeys<T> = {
@@ -55,11 +48,7 @@ export type ReadonlyKeys<T> = {
 //   >
 // >;
 
-export type ForbiddenHTMLProperties =
-  | "innerHTML"
-  | "outerHTML"
-  | "innerText"
-  | "outerText";
+export type ForbiddenHTMLProperties = "innerHTML" | "outerHTML" | "innerText" | "outerText";
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace JSX {
@@ -77,16 +66,14 @@ export namespace JSX {
    * All the DOM Nodes are here
    */
   export type IntrinsicElements = {
-    [Tag in keyof HTMLElementTagNameMap]: IntrinsicElementAttributes<
-      HTMLElementTagNameMap[Tag]
-    > & {
+    [Tag in keyof HTMLElementTagNameMap]: IntrinsicElementAttributes<HTMLElementTagNameMap[Tag]> & {
       children?: ShadowElement;
       onplusnewerror?: (evt: PlusnewErrorEvent) => void;
     };
   } & {
-    [Tag in keyof SVGElementTagNameMap as Tag extends "svg"
-      ? Tag
-      : `svg:${Tag}`]: { [key: string]: any } & {
+    [Tag in keyof SVGElementTagNameMap as Tag extends "svg" ? Tag : `svg:${Tag}`]: {
+      [key: string]: any;
+    } & {
       children?: ShadowElement;
       className?: string;
       onplusnewerror?: (evt: PlusnewErrorEvent) => void;
@@ -99,15 +86,17 @@ export namespace JSX {
 }
 
 export type IntrinsicElementAttributes<T> = {
-  [Prop in keyof T as Prop extends ReadonlyKeys<T>
-    ? never
-    : Prop extends ForbiddenHTMLProperties
+  [
+    Prop in keyof T as Prop extends ReadonlyKeys<T>
       ? never
-      : Prop extends `on${any}`
-        ? Prop
-        : T[Prop] extends () => any
-          ? never
-          : Prop]?: T[Prop] | null;
+      : Prop extends ForbiddenHTMLProperties
+        ? never
+        : Prop extends `on${any}`
+          ? Prop
+          : T[Prop] extends () => any
+            ? never
+            : Prop
+  ]?: T[Prop] | null;
 };
 
 export type ShadowHostElement = {
@@ -140,9 +129,11 @@ export type ShadowElement =
   | ShadowElement[];
 
 export type CustomEvents<C> = {
-  [Key in keyof C as Key extends `on${infer Event}`
-    ? ((evt: CustomEvent<any>) => any) extends C[Key]
-      ? Event
+  [
+    Key in keyof C as Key extends `on${infer Event}`
+      ? ((evt: CustomEvent<any>) => any) extends C[Key]
+        ? Event
+        : never
       : never
-    : never]: C[Key] extends (evt: CustomEvent<infer R>) => void ? R : never;
+  ]: C[Key] extends (evt: CustomEvent<infer R>) => void ? R : never;
 };

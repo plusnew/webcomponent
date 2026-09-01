@@ -77,9 +77,7 @@ export function connectedCallback(
   return shadowRoot;
 }
 
-export function disconnectedCallback(
-  this: HTMLElement & { render: () => ShadowElement },
-) {
+export function disconnectedCallback(this: HTMLElement & { render: () => ShadowElement }) {
   (this as any)[disconnect]();
   (this as any)[parentsCacheSymbol].clear();
   (this as any)[shadowCache].unmount();
@@ -99,11 +97,7 @@ export function addEventListener(
   }
 
   const listenerOverwrite = (evt: Event) => {
-    if (
-      typeof options === "object" &&
-      options !== null &&
-      options?.once === true
-    ) {
+    if (typeof options === "object" && options !== null && options?.once === true) {
       (this as any)[eventListenerSymbol]?.[eventName]?.delete(listener);
     }
 
@@ -114,17 +108,9 @@ export function addEventListener(
     }
   };
 
-  (this as any)[eventListenerSymbol][eventName].set(
-    listener,
-    listenerOverwrite,
-  );
+  (this as any)[eventListenerSymbol][eventName].set(listener, listenerOverwrite);
 
-  HTMLElement.prototype.addEventListener.call(
-    this,
-    eventName,
-    listenerOverwrite,
-    options,
-  );
+  HTMLElement.prototype.addEventListener.call(this, eventName, listenerOverwrite, options);
 }
 
 export function removeEventListener(
@@ -136,18 +122,12 @@ export function removeEventListener(
     eventListenerSymbol in this === true &&
     eventName in (this as any)[eventListenerSymbol] === true
   ) {
-    const listenerOverwrite = (this as any)[eventListenerSymbol][eventName].get(
-      listener,
-    );
+    const listenerOverwrite = (this as any)[eventListenerSymbol][eventName].get(listener);
 
     if (listenerOverwrite !== undefined) {
       (this as any)[eventListenerSymbol][eventName].delete(listener);
 
-      HTMLElement.prototype.removeEventListener.call(
-        this,
-        eventName,
-        listenerOverwrite,
-      );
+      HTMLElement.prototype.removeEventListener.call(this, eventName, listenerOverwrite);
     }
   }
 }

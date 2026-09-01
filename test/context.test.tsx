@@ -51,9 +51,7 @@ describe("webcomponent", () => {
 
     expect(container.childNodes.length).to.equal(1);
 
-    const providerElement = container.childNodes[0] as InstanceType<
-      typeof Provider
-    >;
+    const providerElement = container.childNodes[0] as InstanceType<typeof Provider>;
 
     expect(providerElement.tagName).to.equal("TEST-PROVIDER");
 
@@ -87,9 +85,7 @@ describe("webcomponent", () => {
     const component = container.childNodes[0] as HTMLElement;
     expect(component.innerHTML);
 
-    const providerElement = component.shadowRoot?.childNodes[0] as InstanceType<
-      typeof Provider
-    >;
+    const providerElement = component.shadowRoot?.childNodes[0] as InstanceType<typeof Provider>;
 
     expect(providerElement.textContent).to.equal("bar");
 
@@ -123,9 +119,7 @@ describe("webcomponent", () => {
     const component = container.childNodes[0] as HTMLElement;
     expect(component.innerHTML);
 
-    const providerElement = component.shadowRoot?.childNodes[0] as InstanceType<
-      typeof Provider
-    >;
+    const providerElement = component.shadowRoot?.childNodes[0] as InstanceType<typeof Provider>;
 
     const element = providerElement.childNodes[0] as HTMLSpanElement;
     element.dispatchEvent(new MouseEvent("click"));
@@ -135,12 +129,8 @@ describe("webcomponent", () => {
     mount(() => <Consumer />, container);
 
     expect(container.childNodes.length).to.equal(1);
-    expect((container.childNodes[0] as HTMLElement).tagName).to.equal(
-      "TEST-CONSUMER",
-    );
-    expect(
-      (container.childNodes[0] as HTMLElement).shadowRoot?.textContent,
-    ).to.equal("not-found");
+    expect((container.childNodes[0] as HTMLElement).tagName).to.equal("TEST-CONSUMER");
+    expect((container.childNodes[0] as HTMLElement).shadowRoot?.textContent).to.equal("not-found");
   });
 
   it("no context", () => {
@@ -168,9 +158,7 @@ describe("webcomponent", () => {
 
     expect(container.childNodes.length).to.equal(1);
 
-    const injectionElement = container.childNodes[0] as InstanceType<
-      typeof Provider
-    >;
+    const injectionElement = container.childNodes[0] as InstanceType<typeof Provider>;
 
     expect(injectionElement.tagName).to.equal("TEST-INJECTION");
 
@@ -180,11 +168,7 @@ describe("webcomponent", () => {
     expect(component.shadowRoot?.childNodes.length).to.equal(1);
     expect(component.shadowRoot?.textContent).to.equal("bar");
 
-    (
-      injectionElement.shadowRoot?.childNodes[0] as InstanceType<
-        typeof Provider
-      >
-    ).foo.value = "baz";
+    (injectionElement.shadowRoot?.childNodes[0] as InstanceType<typeof Provider>).foo.value = "baz";
 
     expect(component.tagName).to.equal("TEST-CONSUMER");
     expect(component.shadowRoot?.childNodes.length).to.equal(1);

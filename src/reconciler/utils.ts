@@ -41,10 +41,7 @@ export class ShadowCache {
   }
 }
 
-export function getChildren(
-  parent: Element,
-  childrenCallbacks: (() => ShadowElement)[],
-) {
+export function getChildren(parent: Element, childrenCallbacks: (() => ShadowElement)[]) {
   const previousActiveElement = active.parentElement;
   active.parentElement = parent;
 
@@ -90,11 +87,7 @@ export const arrayReconcileWithoutSorting = (opt: {
   return lastAddedSibling;
 };
 
-export function append(
-  parentElement: ParentNode,
-  previousSibling: Node | null,
-  target: Node,
-) {
+export function append(parentElement: ParentNode, previousSibling: Node | null, target: Node) {
   if (previousSibling === null) {
     parentElement.insertBefore(target, parentElement.firstChild);
   } else {

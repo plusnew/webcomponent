@@ -44,15 +44,11 @@ describe("fragment", () => {
     expect(component.shadowRoot?.childNodes.length).to.equal(2);
     expect(buttonElement.tagName).to.equal("DIV");
     expect(buttonElement.textContent).to.equal("foo");
-    expect(
-      (component.shadowRoot?.childNodes[1] as HTMLElement).tagName,
-    ).to.equal("SPAN");
+    expect((component.shadowRoot?.childNodes[1] as HTMLElement).tagName).to.equal("SPAN");
 
     baz.value = "bar";
 
-    expect(component.shadowRoot?.childNodes[0] === buttonElement).to.equal(
-      true,
-    );
+    expect(component.shadowRoot?.childNodes[0] === buttonElement).to.equal(true);
     expect(buttonElement.textContent).to.equal("bar");
   });
 });

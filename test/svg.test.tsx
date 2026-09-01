@@ -37,8 +37,6 @@ describe("svg", () => {
     expect(element.tagName).to.eql("svg");
     expect(element.namespaceURI).to.eql("http://www.w3.org/2000/svg");
     expect((element.childNodes[0] as Element).tagName).to.eql("circle");
-    expect((element.childNodes[0] as Element).namespaceURI).to.eql(
-      "http://www.w3.org/2000/svg",
-    );
+    expect((element.childNodes[0] as Element).namespaceURI).to.eql("http://www.w3.org/2000/svg");
   });
 });

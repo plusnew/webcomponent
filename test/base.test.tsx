@@ -60,9 +60,7 @@ describe("webcomponent", () => {
         @prop() accessor amount: number;
 
         render() {
-          return [...Array(this.amount).keys()].map((value) => (
-            <div>{value.toString()}</div>
-          ));
+          return [...Array(this.amount).keys()].map((value) => <div>{value.toString()}</div>);
         }
       },
     );
@@ -79,26 +77,14 @@ describe("webcomponent", () => {
     (component as any).amount = 3;
 
     expect(component.shadowRoot?.childNodes.length).to.equal(3);
-    expect(
-      (component.shadowRoot?.childNodes[0] as HTMLElement).tagName,
-    ).to.equal("DIV");
-    expect(
-      (component.shadowRoot?.childNodes[0] as HTMLElement).textContent,
-    ).to.equal("0");
+    expect((component.shadowRoot?.childNodes[0] as HTMLElement).tagName).to.equal("DIV");
+    expect((component.shadowRoot?.childNodes[0] as HTMLElement).textContent).to.equal("0");
 
-    expect(
-      (component.shadowRoot?.childNodes[1] as HTMLElement).tagName,
-    ).to.equal("DIV");
-    expect(
-      (component.shadowRoot?.childNodes[1] as HTMLElement).textContent,
-    ).to.equal("1");
+    expect((component.shadowRoot?.childNodes[1] as HTMLElement).tagName).to.equal("DIV");
+    expect((component.shadowRoot?.childNodes[1] as HTMLElement).textContent).to.equal("1");
 
-    expect(
-      (component.shadowRoot?.childNodes[2] as HTMLElement).tagName,
-    ).to.equal("DIV");
-    expect(
-      (component.shadowRoot?.childNodes[2] as HTMLElement).textContent,
-    ).to.equal("2");
+    expect((component.shadowRoot?.childNodes[2] as HTMLElement).tagName).to.equal("DIV");
+    expect((component.shadowRoot?.childNodes[2] as HTMLElement).textContent).to.equal("2");
 
     (component as any).amount = 0;
 
@@ -130,9 +116,7 @@ describe("webcomponent", () => {
 
     expect(component.shadowRoot?.childNodes.length).to.equal(1);
 
-    expect(
-      (component.shadowRoot?.childNodes[0] as HTMLElement).tagName,
-    ).to.equal("DIV");
+    expect((component.shadowRoot?.childNodes[0] as HTMLElement).tagName).to.equal("DIV");
 
     (component as any).show = false;
 
@@ -179,17 +163,13 @@ describe("webcomponent", () => {
 
     expect(containerComponent.tagName).to.equal("TEST-CONTAINER");
     expect(nestedComponent.tagName).to.equal("TEST-NEST");
-    expect((nestedComponent.shadowRoot as ShadowRoot).textContent).to.equal(
-      "0",
-    );
+    expect((nestedComponent.shadowRoot as ShadowRoot).textContent).to.equal("0");
     expect(containerRenderCount).to.equal(1);
     expect(nestedRenderCount).to.equal(1);
 
     foo.value = 1;
 
-    expect((nestedComponent.shadowRoot as ShadowRoot).textContent).to.equal(
-      "1",
-    );
+    expect((nestedComponent.shadowRoot as ShadowRoot).textContent).to.equal("1");
     expect(containerRenderCount).to.equal(1);
     expect(nestedRenderCount).to.equal(2);
   });
@@ -240,8 +220,7 @@ describe("webcomponent", () => {
 
     const component = container.childNodes[0] as HTMLElement;
     const nestedComponent = component.shadowRoot?.childNodes[0] as HTMLElement;
-    const buttonElement = nestedComponent.shadowRoot
-      ?.childNodes[0] as ChildNode;
+    const buttonElement = nestedComponent.shadowRoot?.childNodes[0] as ChildNode;
 
     expect(component.tagName).to.equal("TEST-CONTAINER-RERENDER");
     expect(component.childNodes.length).to.equal(0);
@@ -251,9 +230,7 @@ describe("webcomponent", () => {
 
     buttonElement.dispatchEvent(new Event("click"));
 
-    expect(
-      nestedComponent.shadowRoot?.childNodes[0] === buttonElement,
-    ).to.equal(true);
+    expect(nestedComponent.shadowRoot?.childNodes[0] === buttonElement).to.equal(true);
     expect(buttonElement.textContent).to.equal("1");
     expect(containerRenderCounter).to.equal(1);
     expect(nestedRenderCounter).to.equal(2);

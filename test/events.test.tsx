@@ -1,10 +1,5 @@
 import { expect } from "@esm-bundle/chai";
-import {
-  createComponent,
-  dispatchEvent,
-  mount,
-  prop,
-} from "@plusnew/webcomponent";
+import { createComponent, dispatchEvent, mount, prop } from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
 describe("webcomponent", () => {
@@ -42,11 +37,7 @@ describe("webcomponent", () => {
       class NestedComponent extends HTMLElement {
         onfoo: (evt: CustomEvent<string>) => void;
         render(this: NestedComponent) {
-          return (
-            <button
-              onclick={() => dispatchEvent(this, "foo", { detail: "mep" })}
-            />
-          );
+          return <button onclick={() => dispatchEvent(this, "foo", { detail: "mep" })} />;
         }
       },
     );
@@ -54,16 +45,16 @@ describe("webcomponent", () => {
     mount(() => <Component />, container);
 
     const component = container.childNodes[0] as HTMLElement;
-    (
-      component.shadowRoot?.childNodes[0] as HTMLElement
-    ).shadowRoot?.childNodes[0].dispatchEvent(new MouseEvent("click"));
+    (component.shadowRoot?.childNodes[0] as HTMLElement).shadowRoot?.childNodes[0].dispatchEvent(
+      new MouseEvent("click"),
+    );
 
     expect(counter).to.equal(1);
 
     component.remove();
-    (
-      component.shadowRoot?.childNodes[0] as HTMLElement
-    ).shadowRoot?.childNodes[0].dispatchEvent(new MouseEvent("click"));
+    (component.shadowRoot?.childNodes[0] as HTMLElement).shadowRoot?.childNodes[0].dispatchEvent(
+      new MouseEvent("click"),
+    );
 
     expect(counter).to.equal(1);
   });
@@ -96,9 +87,7 @@ describe("webcomponent", () => {
         onfoo: (evt: CustomEvent<number>) => void;
         render(this: NestedComponent) {
           const derefence = (value: number) => (
-            <button
-              onclick={() => dispatchEvent(this, "foo", { detail: value + 1 })}
-            >
+            <button onclick={() => dispatchEvent(this, "foo", { detail: value + 1 })}>
               {value.toString()}
             </button>
           );
