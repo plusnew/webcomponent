@@ -5,7 +5,7 @@ import type { CustomEvents, ForbiddenHTMLProperties, ReadonlyKeys, ShadowElement
 import { parentsCacheSymbol, PlusnewErrorEvent, active } from "./utils";
 
 export type { ShadowElement } from "./types";
-export { active, WebComponent as Webcomponent } from "./utils";
+export { active, WebComponent } from "./utils";
 
 export function mount(render: () => ShadowElement, parent: HTMLElement): () => void {
   const shadowResult: ShadowCache = new ShadowCache(false);

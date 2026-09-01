@@ -1,5 +1,5 @@
 import { expect } from "@esm-bundle/chai";
-import { createComponent, dispatchEvent, mount, prop, Webcomponent } from "@plusnew/webcomponent";
+import { createComponent, dispatchEvent, mount, prop, WebComponent } from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
 describe("webcomponent", () => {
@@ -18,7 +18,7 @@ describe("webcomponent", () => {
     let counter = 0;
     const Component = createComponent(
       "test-base",
-      class Component extends Webcomponent {
+      class Component extends WebComponent {
         render() {
           return (
             <NestedComponent
@@ -34,7 +34,7 @@ describe("webcomponent", () => {
 
     const NestedComponent = createComponent(
       "test-nested",
-      class NestedComponent extends Webcomponent {
+      class NestedComponent extends WebComponent {
         onfoo: (evt: CustomEvent<string>) => void;
         render(this: NestedComponent) {
           return <button onclick={() => dispatchEvent(this, "foo", { detail: "mep" })} />;
@@ -63,7 +63,7 @@ describe("webcomponent", () => {
     let counter = 0;
     const Component = createComponent(
       "test-dereference-container",
-      class Component extends Webcomponent {
+      class Component extends WebComponent {
         #counter = signal(0);
         render() {
           return (
@@ -82,7 +82,7 @@ describe("webcomponent", () => {
 
     const NestedComponent = createComponent(
       "test-deference",
-      class NestedComponent extends Webcomponent {
+      class NestedComponent extends WebComponent {
         @prop() accessor foo: number;
         onfoo: (evt: CustomEvent<number>) => void;
         render(this: NestedComponent) {
