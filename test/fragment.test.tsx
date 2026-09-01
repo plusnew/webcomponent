@@ -1,5 +1,5 @@
 import { expect } from "@esm-bundle/chai";
-import { createComponent, mount, prop, WebComponent } from "@plusnew/webcomponent";
+import { createComponent, mount, WebComponent } from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
 describe("fragment", () => {
@@ -16,11 +16,10 @@ describe("fragment", () => {
 
   it("creates basic component with fragment", () => {
     const baz = signal("foo");
+
     const Component = createComponent(
       "test-base",
-      class Component extends WebComponent {
-        @prop() accessor foo: string;
-
+      class Component extends WebComponent() {
         render() {
           return (
             <>
@@ -32,7 +31,7 @@ describe("fragment", () => {
       },
     );
 
-    mount(() => <Component foo="mep" className="some-class" />, container);
+    mount(() => <Component className="some-class" />, container);
 
     expect(container.childNodes.length).to.equal(1);
 

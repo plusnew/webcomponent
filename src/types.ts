@@ -11,7 +11,7 @@ export function Fragment(props: { children: ShadowElement }) {
 type IsEqual<CheckA, CheckB, Then, Else> =
   (<T>() => T extends CheckA ? 1 : 2) extends <T>() => T extends CheckB ? 1 : 2 ? Then : Else;
 
-export type ReadonlyKeys<T> = {
+type ReadonlyKeys<T> = {
   [P in keyof T]-?: IsEqual<{ [Q in P]: T[P] }, { -readonly [Q in P]: T[P] }, never, P>;
 }[keyof T];
 

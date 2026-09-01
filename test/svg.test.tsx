@@ -16,7 +16,7 @@ describe("svg", () => {
   it("async event dispatch", async () => {
     const Component = createComponent(
       "test-svg",
-      class Component extends WebComponent {
+      class Component extends WebComponent() {
         render(this: Component) {
           return (
             <svg>
@@ -31,7 +31,7 @@ describe("svg", () => {
 
     expect(container.childNodes.length).to.equal(1);
 
-    const component = container.childNodes[0] as HTMLElement;
+    const component = container.childNodes[0] as InstanceType<typeof Component>;
     const element = component.shadowRoot?.childNodes[0] as SVGElement;
 
     expect(element.tagName).to.eql("svg");

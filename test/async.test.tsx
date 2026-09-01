@@ -1,5 +1,5 @@
 import { expect } from "@esm-bundle/chai";
-import { createComponent, mount, dispatchEvent, WebComponent } from "@plusnew/webcomponent";
+import { createComponent, mount, dispatchEvent, WebComponent, prop } from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
 describe("webcomponent", () => {
@@ -19,9 +19,7 @@ describe("webcomponent", () => {
 
     const Component = createComponent(
       "test-async-dispatch",
-      class Component extends WebComponent {
-        onfoo: (evt: CustomEvent<null>) => void;
-
+      class Component extends WebComponent({ onfoo: prop<(evt: CustomEvent<null>) => void>() }) {
         #loading = signal(false);
         render(this: Component) {
           return (
