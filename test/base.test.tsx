@@ -1,6 +1,5 @@
 import { expect } from "@esm-bundle/chai";
-import { createComponent, mount, prop, WebComponent } from "@plusnew/webcomponent";
-import type { Signal } from "@preact/signals-core";
+import { define, mount, prop, WebComponent } from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
 describe("webcomponent", () => {
@@ -16,16 +15,14 @@ describe("webcomponent", () => {
   });
 
   it("creates basic component and updating its props", () => {
-    const Component = createComponent(
-      "test-base",
-      class Component extends WebComponent({ foo: prop<string>() }) {
-        #baz = signal("baz");
+    @define("test-base")
+    class Component extends WebComponent({ foo: prop<string>() }) {
+      #baz = signal("baz");
 
-        render() {
-          return `${this.foo}-${this.#baz.value}`;
-        }
-      },
-    );
+      render() {
+        return `${this.foo}-${this.#baz.value}`;
+      }
+    }
 
     // @ts-expect-error component with no props given, should be an error
     <Component />;
@@ -52,16 +49,14 @@ describe("webcomponent", () => {
   });
 
   it("crates array based on given number", () => {
-    const Component = createComponent(
-      "test-array",
-      class Component extends WebComponent({
-        amount: prop<number>(),
-      }) {
-        render() {
-          return [...Array(this.amount).keys()].map((value) => <div>{value.toString()}</div>);
-        }
-      },
-    );
+    @define("test-array")
+    class Component extends WebComponent({
+      amount: prop<number>(),
+    }) {
+      render() {
+        return [...Array(this.amount).keys()].map((value) => <div>{value.toString()}</div>);
+      }
+    }
 
     mount(() => <Component amount={0} />, container);
 
@@ -90,14 +85,12 @@ describe("webcomponent", () => {
   });
 
   it("crates element if needed", () => {
-    const Component = createComponent(
-      "test-placeholder",
-      class Component extends WebComponent({ show: prop<boolean>() }) {
-        render() {
-          return this.show === true && <div />;
-        }
-      },
-    );
+    @define("test-placeholder")
+    class Component extends WebComponent({ show: prop<boolean>() }) {
+      render() {
+        return this.show === true && <div />;
+      }
+    }
 
     mount(() => <Component show={false} />, container);
 
@@ -129,25 +122,21 @@ describe("webcomponent", () => {
     let containerRenderCount = 0;
     let nestedRenderCount = 0;
 
-    const Component = createComponent(
-      "test-container",
-      class Component extends WebComponent() {
-        render() {
-          containerRenderCount++;
-          return <NestedComponent />;
-        }
-      },
-    );
+    @define("test-container")
+    class Component extends WebComponent() {
+      render() {
+        containerRenderCount++;
+        return <NestedComponent />;
+      }
+    }
 
-    const NestedComponent = createComponent(
-      "test-nest",
-      class Component extends WebComponent() {
-        render() {
-          nestedRenderCount++;
-          return `${foo.value}`;
-        }
-      },
-    );
+    @define("test-nest")
+    class NestedComponent extends WebComponent() {
+      render() {
+        nestedRenderCount++;
+        return `${foo.value}`;
+      }
+    }
 
     mount(() => <Component />, container);
 
@@ -174,35 +163,31 @@ describe("webcomponent", () => {
     let containerRenderCounter = 0;
     let nestedRenderCounter = 0;
 
-    const NestedComponent = createComponent(
-      "test-counter-constructor",
-      class Component extends WebComponent() {
-        #counter = signal(0);
+    @define("test-counter-constructor")
+    class NestedComponent extends WebComponent() {
+      #counter = signal(0);
 
-        render() {
-          nestedRenderCounter += 1;
-          return (
-            <button
-              onclick={() => {
-                this.#counter.value = this.#counter.value + 1;
-              }}
-            >
-              {this.#counter.value.toString()}
-            </button>
-          );
-        }
-      },
-    );
+      render() {
+        nestedRenderCounter += 1;
+        return (
+          <button
+            onclick={() => {
+              this.#counter.value = this.#counter.value + 1;
+            }}
+          >
+            {this.#counter.value.toString()}
+          </button>
+        );
+      }
+    }
 
-    const Component = createComponent(
-      "test-container-rerender",
-      class Component extends WebComponent() {
-        render() {
-          containerRenderCounter += 1;
-          return <NestedComponent />;
-        }
-      },
-    );
+    @define("test-container-rerender")
+    class Component extends WebComponent() {
+      render() {
+        containerRenderCounter += 1;
+        return <NestedComponent />;
+      }
+    }
 
     mount(() => <Component />, container);
 

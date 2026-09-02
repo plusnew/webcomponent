@@ -1,5 +1,12 @@
 import { expect } from "@esm-bundle/chai";
-import { createComponent, dispatchEvent, mount, prop, WebComponent } from "@plusnew/webcomponent";
+import {
+  createComponent,
+  define,
+  dispatchEvent,
+  mount,
+  prop,
+  WebComponent,
+} from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
 describe("webcomponent", () => {
@@ -16,30 +23,26 @@ describe("webcomponent", () => {
 
   it("creates basic component and updating its props", () => {
     let counter = 0;
-    const Component = createComponent(
-      "test-base",
-      class Component extends WebComponent() {
-        render() {
-          return (
-            <NestedComponent
-              onfoo={(evt) => {
-                counter++;
-                expect(evt.detail).to.equal("mep");
-              }}
-            />
-          );
-        }
-      },
-    );
+    @define("test-base")
+    class Component extends WebComponent() {
+      render() {
+        return (
+          <NestedComponent
+            onfoo={(evt) => {
+              counter++;
+              expect(evt.detail).to.equal("mep");
+            }}
+          />
+        );
+      }
+    }
 
-    const NestedComponent = createComponent(
-      "test-nested",
-      class NestedComponent extends WebComponent({ onfoo: prop<(evt: CustomEvent) => void>() }) {
-        render(this: NestedComponent) {
-          return <button onclick={() => dispatchEvent(this, "foo", { detail: "mep" })} />;
-        }
-      },
-    );
+    @define("test-nested")
+    class NestedComponent extends WebComponent({ onfoo: prop<(evt: CustomEvent) => void>() }) {
+      render(this: NestedComponent) {
+        return <button onclick={() => dispatchEvent(this, "foo", { detail: "mep" })} />;
+      }
+    }
 
     mount(() => <Component />, container);
 
@@ -60,41 +63,37 @@ describe("webcomponent", () => {
 
   it("updating eventListener reference", () => {
     let counter = 0;
-    const Component = createComponent(
-      "test-dereference-container",
-      class Component extends WebComponent() {
-        #counter = signal(0);
-        render() {
-          return (
-            <NestedComponent
-              foo={this.#counter.value}
-              onfoo={(evt) => {
-                counter++;
-                expect(evt.detail).to.eql(this.#counter.value + 1);
-                this.#counter.value = evt.detail;
-              }}
-            />
-          );
-        }
-      },
-    );
+    @define("test-dereference-container")
+    class Component extends WebComponent() {
+      #counter = signal(0);
+      render() {
+        return (
+          <NestedComponent
+            foo={this.#counter.value}
+            onfoo={(evt) => {
+              counter++;
+              expect(evt.detail).to.eql(this.#counter.value + 1);
+              this.#counter.value = evt.detail;
+            }}
+          />
+        );
+      }
+    }
 
-    const NestedComponent = createComponent(
-      "test-deference",
-      class NestedComponent extends WebComponent({
-        foo: prop<number>(),
-        onfoo: prop<(value: CustomEvent<number>) => void>(),
-      }) {
-        render(this: NestedComponent) {
-          const derefence = (value: number) => (
-            <button onclick={() => dispatchEvent(this, "foo", { detail: value + 1 })}>
-              {value.toString()}
-            </button>
-          );
-          return derefence(this.foo);
-        }
-      },
-    );
+    @define("test-deference")
+    class NestedComponent extends WebComponent({
+      foo: prop<number>(),
+      onfoo: prop<(value: CustomEvent<number>) => void>(),
+    }) {
+      render(this: NestedComponent) {
+        const derefence = (value: number) => (
+          <button onclick={() => dispatchEvent(this, "foo", { detail: value + 1 })}>
+            {value.toString()}
+          </button>
+        );
+        return derefence(this.foo);
+      }
+    }
 
     mount(() => <Component />, container);
 

@@ -1,5 +1,5 @@
 import { expect } from "@esm-bundle/chai";
-import { createComponent, mount, WebComponent } from "@plusnew/webcomponent";
+import { define, mount, WebComponent } from "@plusnew/webcomponent";
 
 describe("svg", () => {
   let container: HTMLElement;
@@ -14,18 +14,16 @@ describe("svg", () => {
   });
 
   it("async event dispatch", async () => {
-    const Component = createComponent(
-      "test-svg",
-      class Component extends WebComponent() {
-        render(this: Component) {
-          return (
-            <svg>
-              <svg:circle />
-            </svg>
-          );
-        }
-      },
-    );
+    @define("test-svg")
+    class Component extends WebComponent() {
+      render(this: Component) {
+        return (
+          <svg>
+            <svg:circle />
+          </svg>
+        );
+      }
+    }
 
     mount(() => <Component />, container);
 
