@@ -40,7 +40,14 @@ export type BasePropsType = Omit<Partial<HTMLElement>, ForbiddenHTMLProperties |
 };
 
 type PropType<T extends { [key: string]: () => Signal<any> }> = {
-  [Prop in keyof T]: ReturnType<T[Prop]>["value"];
+  [Prop in keyof T as undefined extends ReturnType<T[Prop]>["value"] ? Prop : never]?: Exclude<
+    ReturnType<T[Prop]>["value"],
+    undefined
+  >;
+} & {
+  [Prop in keyof T as undefined extends ReturnType<T[Prop]>["value"] ? never : Prop]: ReturnType<
+    T[Prop]
+  >["value"];
 };
 
 interface IComponent extends HTMLElement {

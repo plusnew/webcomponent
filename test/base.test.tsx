@@ -16,7 +16,7 @@ describe("webcomponent", () => {
 
   it("creates basic component and updating its props", () => {
     @define("test-base")
-    class Component extends WebComponent({ foo: prop<string>() }) {
+    class Component extends WebComponent({ foo: prop<string>(), bar: prop<string | undefined>() }) {
       #baz = signal("baz");
 
       render() {
