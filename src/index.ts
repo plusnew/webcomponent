@@ -1,7 +1,7 @@
 import { effect, Signal, signal } from "@preact/signals-core";
 import { reconcile } from "./reconciler/index";
 import { ShadowCache } from "./reconciler/utils";
-import type { CustomEvents, ShadowElement } from "./types";
+import type { CustomEvents, PropertyDescriptor, ShadowElement } from "./types";
 import { parentsCacheSymbol, active } from "./utils";
 
 export type { ShadowElement } from "./types";
@@ -131,6 +131,17 @@ export function dispatchEvent<T extends HTMLElement, U extends keyof CustomEvent
   return eventPromises;
 }
 
-export function prop<T>(): () => Signal<T> {
-  return () => signal<T | undefined>() as Signal<T>;
+export function prop<T>(): () => PropertyDescriptor<T> {
+  return () => {
+    const signalValue = signal<T>() as Signal<T>;
+
+    return {
+      get: () => {
+        return signalValue.value;
+      },
+      set: (value) => {
+        signalValue.value = value;
+      },
+    };
+  };
 }

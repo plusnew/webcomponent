@@ -1,6 +1,11 @@
 import { batch, effect, Signal, untracked } from "@preact/signals-core";
 import { ShadowCache } from "./reconciler/utils";
-import type { ForbiddenHTMLProperties, ShadowElement } from "./types";
+import type {
+  ForbiddenHTMLProperties,
+  PropertyDescriptor,
+  PropertyDescriptorType,
+  ShadowElement,
+} from "./types";
 import { reconcile } from "./reconciler";
 
 const ERROR = "plusnewerror";
@@ -39,15 +44,14 @@ export type BasePropsType = Omit<Partial<HTMLElement>, ForbiddenHTMLProperties |
   children?: ShadowElement;
 };
 
-type PropType<T extends { [key: string]: () => Signal<any> }> = {
-  [Prop in keyof T as undefined extends ReturnType<T[Prop]>["value"] ? Prop : never]?: Exclude<
-    ReturnType<T[Prop]>["value"],
-    undefined
-  >;
+type PropType<T extends { [key: string]: () => PropertyDescriptor<any> }> = {
+  [
+    Prop in keyof T as undefined extends PropertyDescriptorType<ReturnType<T[Prop]>> ? Prop : never
+  ]?: Exclude<PropertyDescriptorType<ReturnType<T[Prop]>>, undefined>;
 } & {
-  [Prop in keyof T as undefined extends ReturnType<T[Prop]>["value"] ? never : Prop]: ReturnType<
-    T[Prop]
-  >["value"];
+  [
+    Prop in keyof T as undefined extends PropertyDescriptorType<ReturnType<T[Prop]>> ? never : Prop
+  ]: PropertyDescriptorType<ReturnType<T[Prop]>>;
 };
 
 interface IComponent extends HTMLElement {
@@ -55,7 +59,7 @@ interface IComponent extends HTMLElement {
   disconnectedCallback(): void;
 }
 
-export function WebComponent<T extends { [key: string]: () => Signal<any> } = {}>(
+export function WebComponent<T extends { [key: string]: () => PropertyDescriptor<any> } = {}>(
   props?: T,
 ): abstract new (props: PropType<T> & BasePropsType) => PropType<T> & IComponent {
   abstract class Component extends HTMLElement implements IComponent {
@@ -65,21 +69,10 @@ export function WebComponent<T extends { [key: string]: () => Signal<any> } = {}
         Object.defineProperties(
           this,
           Object.fromEntries(
-            Object.entries(props).map(([key, init]) => {
-              const signal = init();
-
-              return [
-                key,
-                {
-                  get: () => {
-                    return signal.value;
-                  },
-                  set: (value) => {
-                    signal.value = value;
-                  },
-                },
-              ];
-            }),
+            Object.entries(props).map(([key, propertyDescriptorFactory]) => [
+              key,
+              propertyDescriptorFactory(),
+            ]),
           ),
         );
       }

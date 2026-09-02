@@ -6,6 +6,18 @@ export function Fragment(props: { children: ShadowElement }) {
   return props.children;
 }
 
+export interface PropertyDescriptor<T> {
+  configurable?: boolean;
+  enumerable?: boolean;
+  value?: T;
+  writable?: boolean;
+  get?(): T;
+  set?(v: T): void;
+}
+
+export type PropertyDescriptorType<T extends PropertyDescriptor<any>> =
+  T extends PropertyDescriptor<infer R> ? R : never;
+
 // type Expect<T extends true> = T;
 
 type IsEqual<CheckA, CheckB, Then, Else> =
