@@ -44,7 +44,7 @@ export type BasePropsType = Omit<Partial<HTMLElement>, ForbiddenHTMLProperties |
   children?: ShadowElement;
 };
 
-type PropType<T extends { [key: string]: () => PropertyDescriptor<any> }> = {
+export type PropType<T extends { [key: string]: () => PropertyDescriptor<any> }> = {
   [
     Prop in keyof T as undefined extends PropertyDescriptorType<ReturnType<T[Prop]>> ? Prop : never
   ]?: Exclude<PropertyDescriptorType<ReturnType<T[Prop]>>, undefined>;

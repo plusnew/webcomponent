@@ -4,8 +4,8 @@ import { ShadowCache } from "./reconciler/utils";
 import type { CustomEvents, PropertyDescriptor, ShadowElement } from "./types";
 import { parentsCacheSymbol, active } from "./utils";
 
-export type { ShadowElement } from "./types";
-export { active, WebComponent, type BasePropsType } from "./utils";
+export type { ShadowElement, PropertyDescriptor } from "./types";
+export { active, WebComponent, type BasePropsType, type PropType } from "./utils";
 
 export function mount(render: () => ShadowElement, parent: HTMLElement): () => void {
   const shadowResult: ShadowCache = new ShadowCache(false);
