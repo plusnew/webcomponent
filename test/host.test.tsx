@@ -1,5 +1,5 @@
 import { expect } from "@esm-bundle/chai";
-import { createComponent, mount, WebComponent } from "@plusnew/webcomponent";
+import { createComponent, define, mount, WebComponent } from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
 describe("webcomponent", () => {
@@ -17,14 +17,13 @@ describe("webcomponent", () => {
   xit("adds property and removes it", async () => {
     const add = signal(false);
 
-    const Component = createComponent(
-      "test-property",
-      class Component extends WebComponent() {
-        render() {
-          return add.value ? <span className="foo" /> : <span />;
-        }
-      },
-    );
+    define("test-property");
+    class Component extends WebComponent() {
+      render() {
+        return add.value ? <span className="foo" /> : <span />;
+      }
+    }
+
     mount(() => <Component />, container);
 
     expect(container.childNodes.length).to.equal(1);
@@ -44,20 +43,18 @@ describe("webcomponent", () => {
   });
 
   it("registers click event", async () => {
-    const Component = createComponent(
-      "test-click",
-      class Component extends WebComponent() {
-        #baz = signal(0);
+    @define("test-click")
+    class Component extends WebComponent() {
+      #baz = signal(0);
 
-        render() {
-          return (
-            <button onclick={() => (this.#baz.value = this.#baz.value + 1)}>
-              {this.#baz.value.toString()}
-            </button>
-          );
-        }
-      },
-    );
+      render() {
+        return (
+          <button onclick={() => (this.#baz.value = this.#baz.value + 1)}>
+            {this.#baz.value.toString()}
+          </button>
+        );
+      }
+    }
 
     mount(() => <Component />, container);
 

@@ -30,6 +30,14 @@ export function mount(render: () => ShadowElement, parent: HTMLElement): () => v
   };
 }
 
+export function define(name: string): ClassDecorator {
+  return (Component) => {
+    customElements.define(name, Component as any);
+
+    return Component;
+  };
+}
+
 export function createComponent<T extends new (...args: any[]) => HTMLElement>(
   name: string,
   Component: T,
