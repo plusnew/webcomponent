@@ -1,4 +1,4 @@
-import { batch, effect, Signal, untracked } from "@preact/signals-core";
+import { batch, effect, untracked } from "@preact/signals-core";
 import { ShadowCache } from "./reconciler/utils";
 import type {
   ForbiddenHTMLProperties,
