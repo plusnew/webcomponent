@@ -1,11 +1,11 @@
 import { effect, Signal, signal } from "@preact/signals-core";
 import { reconcile } from "./reconciler/index";
 import { ShadowCache } from "./reconciler/utils";
-import type { CustomEvents, ForbiddenHTMLProperties, ReadonlyKeys, ShadowElement } from "./types";
-import { parentsCacheSymbol, PlusnewErrorEvent, active } from "./utils";
+import type { CustomEvents, PropertyDescriptor, ShadowElement } from "./types";
+import { parentsCacheSymbol, active } from "./utils";
 
-export type { ShadowElement } from "./types";
-export { active, WebComponent } from "./utils";
+export type { ShadowElement, PropertyDescriptor } from "./types";
+export { active, WebComponent, type BasePropsType, type PropType } from "./utils";
 
 export function mount(render: () => ShadowElement, parent: HTMLElement): () => void {
   const shadowResult: ShadowCache = new ShadowCache(false);
@@ -30,28 +30,18 @@ export function mount(render: () => ShadowElement, parent: HTMLElement): () => v
   };
 }
 
-export function createComponent<T extends HTMLElement>(
+export function define(name: string): ClassDecorator {
+  return (Component) => {
+    customElements.define(name, Component as any);
+
+    return Component;
+  };
+}
+
+export function createComponent<T extends new (...args: any[]) => HTMLElement>(
   name: string,
-  Component: { new (): T },
-): {
-  new (
-    properties: Omit<
-      { [K in keyof T]?: T[K] } & {
-        [
-          K in keyof T as undefined extends T[K] ? never : K extends keyof HTMLElement ? never : K
-        ]-?: T[K];
-      },
-      | ReadonlyKeys<T>
-      | ForbiddenHTMLProperties
-      | "render"
-      | "connectedCallback"
-      | "disconnectedCallback"
-    > & {
-      children?: ShadowElement;
-      onplusnewerror?: (evt: PlusnewErrorEvent) => void;
-    },
-  ): T;
-} {
+  Component: T,
+): T {
   customElements.define(name, Component as any);
 
   return name as any;
@@ -141,24 +131,16 @@ export function dispatchEvent<T extends HTMLElement, U extends keyof CustomEvent
   return eventPromises;
 }
 
-export function prop() {
-  return <T, U>(
-    decoratorTarget: ClassAccessorDecoratorTarget<T, U>,
-    accessor: ClassAccessorDecoratorContext<T, U>,
-  ): ClassAccessorDecoratorResult<T, U> => {
+export function prop<T>(): () => PropertyDescriptor<T> {
+  return () => {
+    const signalValue = signal<T>() as Signal<T>;
+
     return {
-      set: function (value) {
-        if (accessor.access.has(this)) {
-          (decoratorTarget.get.call(this) as Signal<U>).value = value;
-        } else {
-          decoratorTarget.set.call(this, signal(value) as U);
-        }
+      get: () => {
+        return signalValue.value;
       },
-      get: function () {
-        return (decoratorTarget.get.call(this) as Signal<U>).value;
-      },
-      init(value) {
-        return signal(value) as U;
+      set: (value) => {
+        signalValue.value = value;
       },
     };
   };

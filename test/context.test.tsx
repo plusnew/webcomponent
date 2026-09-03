@@ -1,10 +1,10 @@
 import { expect } from "@esm-bundle/chai";
-import { mount, createComponent, findParent, WebComponent } from "@plusnew/webcomponent";
+import { mount, createComponent, findParent, WebComponent, define } from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
 const Provider = createComponent(
   "test-provider",
-  class Component extends WebComponent {
+  class Component extends WebComponent() {
     readonly foo = signal("bar");
 
     render() {
@@ -15,7 +15,7 @@ const Provider = createComponent(
 
 const Consumer = createComponent(
   "test-consumer",
-  class Component extends WebComponent {
+  class Component extends WebComponent() {
     render() {
       try {
         return findParent(Provider).foo.value;
@@ -69,14 +69,12 @@ describe("webcomponent", () => {
   });
 
   it("finds context inline", () => {
-    const Component = createComponent(
-      "test-inline",
-      class Component extends WebComponent {
-        render() {
-          return <Provider>{findParent(Provider).foo.value}</Provider>;
-        }
-      },
-    );
+    @define("test-inline")
+    class Component extends WebComponent() {
+      render() {
+        return <Provider>{findParent(Provider).foo.value}</Provider>;
+      }
+    }
 
     mount(() => <Component />, container);
 
@@ -95,22 +93,20 @@ describe("webcomponent", () => {
   });
 
   it("finds context in event", () => {
-    const Component = createComponent(
-      "test-event",
-      class Component extends WebComponent {
-        render() {
-          return (
-            <Provider>
-              <span
-                onclick={() => {
-                  expect(findParent(Provider).foo.value).to.equal("bar");
-                }}
-              />
-            </Provider>
-          );
-        }
-      },
-    );
+    @define("test-event")
+    class Component extends WebComponent() {
+      render() {
+        return (
+          <Provider>
+            <span
+              onclick={() => {
+                expect(findParent(Provider).foo.value).to.equal("bar");
+              }}
+            />
+          </Provider>
+        );
+      }
+    }
 
     mount(() => <Component />, container);
 
@@ -136,7 +132,7 @@ describe("webcomponent", () => {
   it("no context", () => {
     const Injection = createComponent(
       "test-injection",
-      class Component extends WebComponent {
+      class Component extends WebComponent() {
         render() {
           return (
             <Provider>

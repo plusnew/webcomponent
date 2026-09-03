@@ -1,5 +1,12 @@
 import { expect } from "@esm-bundle/chai";
-import { createComponent, mount, dispatchEvent, WebComponent } from "@plusnew/webcomponent";
+import {
+  createComponent,
+  mount,
+  dispatchEvent,
+  WebComponent,
+  prop,
+  define,
+} from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
 describe("webcomponent", () => {
@@ -17,28 +24,24 @@ describe("webcomponent", () => {
   it("async event dispatch", async () => {
     const { promise, resolve } = Promise.withResolvers<void>();
 
-    const Component = createComponent(
-      "test-async-dispatch",
-      class Component extends WebComponent {
-        onfoo: (evt: CustomEvent<null>) => void;
-
-        #loading = signal(false);
-        render(this: Component) {
-          return (
-            <span
-              className={this.#loading.value === true ? "loading" : ""}
-              onclick={async () => {
-                this.#loading.value = true;
-                try {
-                  await Promise.all(dispatchEvent(this, "foo", { detail: null }));
-                } catch (_err) {}
-                this.#loading.value = false;
-              }}
-            />
-          );
-        }
-      },
-    );
+    @define("test-async-dispatch")
+    class Component extends WebComponent({ onfoo: prop<(evt: CustomEvent<null>) => void>() }) {
+      #loading = signal(false);
+      render(this: Component) {
+        return (
+          <span
+            className={this.#loading.value === true ? "loading" : ""}
+            onclick={async () => {
+              this.#loading.value = true;
+              try {
+                await Promise.all(dispatchEvent(this, "foo", { detail: null }));
+              } catch (_err) {}
+              this.#loading.value = false;
+            }}
+          />
+        );
+      }
+    }
 
     mount(() => <Component onfoo={() => promise} />, container);
 

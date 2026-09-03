@@ -1,6 +1,11 @@
 import { batch, effect, untracked } from "@preact/signals-core";
 import { ShadowCache } from "./reconciler/utils";
-import type { ShadowElement } from "./types";
+import type {
+  ForbiddenHTMLProperties,
+  PropertyDescriptor,
+  PropertyDescriptorType,
+  ShadowElement,
+} from "./types";
 import { reconcile } from "./reconciler";
 
 const ERROR = "plusnewerror";
@@ -35,100 +40,140 @@ const shadowCache = Symbol("shadowCache");
 const eventListenerSymbol = Symbol("eventListner");
 export const parentsCacheSymbol = Symbol("parentsCache");
 
-export abstract class WebComponent extends HTMLElement {
-  abstract render(): ShadowElement;
+export type BasePropsType = Omit<Partial<HTMLElement>, ForbiddenHTMLProperties | "children"> & {
+  children?: ShadowElement;
+};
 
-  connectedCallback(this: WebComponent, opt?: { shadowRootInit?: Partial<ShadowRootInit> }) {
-    let shadowRoot: null | ShadowRoot = null;
-    if (this.shadowRoot === null) {
-      shadowRoot = this.attachShadow({ mode: "open", ...opt?.shadowRootInit });
+export type PropType<T extends { [key: string]: () => PropertyDescriptor<any> }> = {
+  [
+    Prop in keyof T as undefined extends PropertyDescriptorType<ReturnType<T[Prop]>> ? Prop : never
+  ]?: Exclude<PropertyDescriptorType<ReturnType<T[Prop]>>, undefined>;
+} & {
+  [
+    Prop in keyof T as undefined extends PropertyDescriptorType<ReturnType<T[Prop]>> ? never : Prop
+  ]: PropertyDescriptorType<ReturnType<T[Prop]>>;
+};
 
-      (this as any)[parentsCacheSymbol] = new Map();
-      (this as any)[shadowCache] = new ShadowCache(false);
-    } else {
-      shadowRoot = this.shadowRoot;
+interface IComponent extends HTMLElement {
+  connectedCallback(opt?: { shadowRootInit: Partial<ShadowRootInit> }): ShadowRoot;
+  disconnectedCallback(): void;
+}
+
+export function WebComponent<T extends { [key: string]: () => PropertyDescriptor<any> } = {}>(
+  props?: T,
+): abstract new (props: PropType<T> & BasePropsType) => PropType<T> & IComponent {
+  abstract class Component extends HTMLElement implements IComponent {
+    constructor(_props: PropType<T> & BasePropsType) {
+      super();
+      if (props !== undefined) {
+        Object.defineProperties(
+          this,
+          Object.fromEntries(
+            Object.entries(props).map(([key, propertyDescriptorFactory]) => [
+              key,
+              propertyDescriptorFactory(),
+            ]),
+          ),
+        );
+      }
     }
 
-    (this as any)[disconnect] = effect(() => {
-      batch(() => {
-        const previousActiveElement = active.parentElement;
-        let result: ShadowElement;
-        try {
-          active.parentElement = this;
-          result = this.render();
-          active.parentElement = previousActiveElement;
-        } catch (error) {
-          active.parentElement = previousActiveElement;
-          untracked(() => dispatchError(this, error));
+    abstract render(): ShadowElement;
 
-          return;
-        }
+    connectedCallback(opt?: { shadowRootInit?: Partial<ShadowRootInit> }) {
+      let shadowRoot: null | ShadowRoot = null;
+      if (this.shadowRoot === null) {
+        shadowRoot = this.attachShadow({ mode: "open", ...opt?.shadowRootInit });
 
-        reconcile({
-          parentElement: this.shadowRoot as ShadowRoot,
-          previousSibling: null,
-          shadowCache: (this as any)[shadowCache],
-          shadowElement: result,
+        (this as any)[parentsCacheSymbol] = new Map();
+        (this as any)[shadowCache] = new ShadowCache(false);
+      } else {
+        shadowRoot = this.shadowRoot;
+      }
+
+      (this as any)[disconnect] = effect(() => {
+        batch(() => {
+          const previousActiveElement = active.parentElement;
+          let result: ShadowElement;
+          try {
+            active.parentElement = this;
+            result = this.render();
+            active.parentElement = previousActiveElement;
+          } catch (error) {
+            active.parentElement = previousActiveElement;
+            untracked(() => dispatchError(this, error));
+
+            return;
+          }
+
+          reconcile({
+            parentElement: this.shadowRoot as ShadowRoot,
+            previousSibling: null,
+            shadowCache: (this as any)[shadowCache],
+            shadowElement: result,
+          });
         });
       });
-    });
 
-    return shadowRoot;
-  }
-
-  disconnectedCallback(this: WebComponent) {
-    if (disconnect in this) {
-      (this as any)[disconnect]();
-    }
-    if (parentsCacheSymbol in this) {
-      (this as any)[parentsCacheSymbol].clear();
-    }
-    if (shadowCache in this) {
-      (this as any)[shadowCache].unmount();
-    }
-  }
-
-  addEventListener(
-    eventName: string,
-    listener: (event: Event) => unknown,
-    options?: boolean | AddEventListenerOptions,
-  ) {
-    if (eventListenerSymbol in this === false) {
-      (this as any)[eventListenerSymbol] = {};
-    }
-    if (eventName in (this as any)[eventListenerSymbol] === false) {
-      (this as any)[eventListenerSymbol][eventName] = new WeakMap();
+      return shadowRoot;
     }
 
-    const listenerOverwrite = (evt: Event) => {
-      if (typeof options === "object" && options !== null && options?.once === true) {
-        (this as any)[eventListenerSymbol]?.[eventName]?.delete(listener);
+    disconnectedCallback() {
+      if (disconnect in this) {
+        (this as any)[disconnect]();
       }
-
-      const result = listener(evt);
-
-      if (result instanceof Promise && active.eventPromises !== null) {
-        active.eventPromises.push(result);
+      if (parentsCacheSymbol in this) {
+        (this as any)[parentsCacheSymbol].clear();
       }
-    };
+      if (shadowCache in this) {
+        (this as any)[shadowCache].unmount();
+      }
+    }
 
-    (this as any)[eventListenerSymbol][eventName].set(listener, listenerOverwrite);
-
-    super.addEventListener(eventName, listenerOverwrite, options);
-  }
-
-  removeEventListener(this: HTMLElement, eventName: string, listener: (event: Event) => void) {
-    if (
-      eventListenerSymbol in this === true &&
-      eventName in (this as any)[eventListenerSymbol] === true
+    addEventListener(
+      eventName: string,
+      listener: (event: Event) => unknown,
+      options?: boolean | AddEventListenerOptions,
     ) {
-      const listenerOverwrite = (this as any)[eventListenerSymbol][eventName].get(listener);
+      if (eventListenerSymbol in this === false) {
+        (this as any)[eventListenerSymbol] = {};
+      }
+      if (eventName in (this as any)[eventListenerSymbol] === false) {
+        (this as any)[eventListenerSymbol][eventName] = new WeakMap();
+      }
 
-      if (listenerOverwrite !== undefined) {
-        (this as any)[eventListenerSymbol][eventName].delete(listener);
+      const listenerOverwrite = (evt: Event) => {
+        if (typeof options === "object" && options !== null && options?.once === true) {
+          (this as any)[eventListenerSymbol]?.[eventName]?.delete(listener);
+        }
 
-        super.removeEventListener(eventName, listenerOverwrite);
+        const result = listener(evt);
+
+        if (result instanceof Promise && active.eventPromises !== null) {
+          active.eventPromises.push(result);
+        }
+      };
+
+      (this as any)[eventListenerSymbol][eventName].set(listener, listenerOverwrite);
+
+      super.addEventListener(eventName, listenerOverwrite, options);
+    }
+
+    removeEventListener(this: HTMLElement, eventName: string, listener: (event: Event) => void) {
+      if (
+        eventListenerSymbol in this === true &&
+        eventName in (this as any)[eventListenerSymbol] === true
+      ) {
+        const listenerOverwrite = (this as any)[eventListenerSymbol][eventName].get(listener);
+
+        if (listenerOverwrite !== undefined) {
+          (this as any)[eventListenerSymbol][eventName].delete(listener);
+
+          super.removeEventListener(eventName, listenerOverwrite);
+        }
       }
     }
   }
+
+  return Component as any;
 }

@@ -1,5 +1,5 @@
 import { expect } from "@esm-bundle/chai";
-import { createComponent, mount, WebComponent } from "@plusnew/webcomponent";
+import { define, mount, WebComponent } from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
 describe("webcomponent", () => {
@@ -17,14 +17,13 @@ describe("webcomponent", () => {
   xit("adds property and removes it", async () => {
     const add = signal(false);
 
-    const Component = createComponent(
-      "test-property",
-      class Component extends WebComponent {
-        render() {
-          return add.value ? <span className="foo" /> : <span />;
-        }
-      },
-    );
+    define("test-property");
+    class Component extends WebComponent() {
+      render() {
+        return add.value ? <span className="foo" /> : <span />;
+      }
+    }
+
     mount(() => <Component />, container);
 
     expect(container.childNodes.length).to.equal(1);
@@ -44,20 +43,18 @@ describe("webcomponent", () => {
   });
 
   it("registers click event", async () => {
-    const Component = createComponent(
-      "test-click",
-      class Component extends WebComponent {
-        #baz = signal(0);
+    @define("test-click")
+    class Component extends WebComponent() {
+      #baz = signal(0);
 
-        render() {
-          return (
-            <button onclick={() => (this.#baz.value = this.#baz.value + 1)}>
-              {this.#baz.value.toString()}
-            </button>
-          );
-        }
-      },
-    );
+      render() {
+        return (
+          <button onclick={() => (this.#baz.value = this.#baz.value + 1)}>
+            {this.#baz.value.toString()}
+          </button>
+        );
+      }
+    }
 
     mount(() => <Component />, container);
 
@@ -89,21 +86,19 @@ describe("webcomponent", () => {
   });
 
   it("registers input event and updating", async () => {
-    const Component = createComponent(
-      "test-input-update",
-      class Component extends WebComponent {
-        #baz = signal("foo");
+    @define("test-input-update")
+    class Component extends WebComponent() {
+      #baz = signal("foo");
 
-        render() {
-          return (
-            <input
-              oninput={(evt) => (this.#baz.value = (evt.currentTarget as HTMLInputElement).value)}
-              value={this.#baz.value}
-            />
-          );
-        }
-      },
-    );
+      render() {
+        return (
+          <input
+            oninput={(evt) => (this.#baz.value = (evt.currentTarget as HTMLInputElement).value)}
+            value={this.#baz.value}
+          />
+        );
+      }
+    }
 
     mount(() => <Component />, container);
 
@@ -128,16 +123,14 @@ describe("webcomponent", () => {
   });
 
   it("registers input event without updating", async () => {
-    const Component = createComponent(
-      "test-input-reject",
-      class Component extends WebComponent {
-        #baz = signal("foo");
+    @define("test-input-reject")
+    class Component extends WebComponent() {
+      #baz = signal("foo");
 
-        render() {
-          return <input oninput={() => null} value={this.#baz.value} />;
-        }
-      },
-    );
+      render() {
+        return <input oninput={() => null} value={this.#baz.value} />;
+      }
+    }
 
     mount(() => <Component />, container);
 
@@ -165,24 +158,22 @@ describe("webcomponent", () => {
     const backgroundColor = signal<null | string>(null);
     const fontColor = signal<null | string>(null);
 
-    const Component = createComponent(
-      "test-style",
-      class Component extends WebComponent {
-        render() {
-          return backgroundColor.value === null && fontColor.value === null ? (
-            <span />
-          ) : (
-            <span
-              style={{
-                ...(backgroundColor.value !== null &&
-                  ({ "background-color": backgroundColor.value } as any)),
-                ...(fontColor.value !== null && ({ color: fontColor.value } as any)),
-              }}
-            />
-          );
-        }
-      },
-    );
+    @define("test-style")
+    class Component extends WebComponent() {
+      render() {
+        return backgroundColor.value === null && fontColor.value === null ? (
+          <span />
+        ) : (
+          <span
+            style={{
+              ...(backgroundColor.value !== null &&
+                ({ "background-color": backgroundColor.value } as any)),
+              ...(fontColor.value !== null && ({ color: fontColor.value } as any)),
+            }}
+          />
+        );
+      }
+    }
 
     mount(() => <Component />, container);
 
