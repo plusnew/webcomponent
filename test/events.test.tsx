@@ -1,12 +1,5 @@
 import { expect } from "@esm-bundle/chai";
-import {
-  createComponent,
-  define,
-  dispatchEvent,
-  mount,
-  prop,
-  WebComponent,
-} from "@plusnew/webcomponent";
+import { define, mount, prop, WebComponent } from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
 describe("webcomponent", () => {
@@ -38,9 +31,11 @@ describe("webcomponent", () => {
     }
 
     @define("test-nested")
-    class NestedComponent extends WebComponent({ onfoo: prop<(evt: CustomEvent) => void>() }) {
+    class NestedComponent extends WebComponent({
+      onfoo: prop<(evt: CustomEvent<string>) => void>(),
+    }) {
       render(this: NestedComponent) {
-        return <button onclick={() => dispatchEvent(this, "foo", { detail: "mep" })} />;
+        return <button onclick={() => this.fireEvent("foo", { detail: "mep" })} />;
       }
     }
 
@@ -87,7 +82,7 @@ describe("webcomponent", () => {
     }) {
       render(this: NestedComponent) {
         const derefence = (value: number) => (
-          <button onclick={() => dispatchEvent(this, "foo", { detail: value + 1 })}>
+          <button onclick={() => this.fireEvent("foo", { detail: value + 1 })}>
             {value.toString()}
           </button>
         );

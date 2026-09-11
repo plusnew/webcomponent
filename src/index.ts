@@ -1,7 +1,7 @@
 import { effect, Signal, signal } from "@preact/signals-core";
 import { reconcile } from "./reconciler/index";
 import { ShadowCache } from "./reconciler/utils";
-import type { CustomEvents, PropertyDescriptor, ShadowElement } from "./types";
+import type { PropertyDescriptor, ShadowElement } from "./types";
 import { parentsCacheSymbol, active } from "./utils";
 
 export type { ShadowElement, PropertyDescriptor } from "./types";
@@ -113,22 +113,6 @@ export function findParent<T = Element>(
     throw new Error(`Could not find parent ${needle.toString()}`);
   }
   return result;
-}
-
-export function dispatchEvent<T extends HTMLElement, U extends keyof CustomEvents<T>>(
-  target: T,
-  eventName: U,
-  customEventInit: CustomEventInit<CustomEvents<T>[U]>,
-): Promise<unknown>[] {
-  const previousEventPromises = active.eventPromises;
-  const eventPromises: Promise<unknown>[] = [];
-  active.eventPromises = eventPromises;
-  const customEvent = new CustomEvent(eventName as string, customEventInit);
-  target.dispatchEvent(customEvent);
-
-  active.eventPromises = previousEventPromises;
-
-  return eventPromises;
 }
 
 export function prop<T>(): () => PropertyDescriptor<T> {

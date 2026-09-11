@@ -1,6 +1,7 @@
 import { batch, effect, untracked } from "@preact/signals-core";
 import { ShadowCache } from "./reconciler/utils";
 import type {
+  CustomEvents,
   ForbiddenHTMLProperties,
   PropertyDescriptor,
   PropertyDescriptorType,
@@ -61,7 +62,13 @@ interface IComponent extends HTMLElement {
 
 export function WebComponent<T extends { [key: string]: () => PropertyDescriptor<any> } = {}>(
   props?: T,
-): abstract new (props: PropType<T> & BasePropsType) => PropType<T> & IComponent {
+): abstract new (props: PropType<T> & BasePropsType) => PropType<T> &
+  IComponent & {
+    fireEvent<E extends keyof CustomEvents<PropType<T>>>(
+      eventName: E,
+      customEventInit: CustomEventInit<CustomEvents<PropType<T>>[E]>,
+    ): Promise<unknown>[];
+  } {
   abstract class Component extends HTMLElement implements IComponent {
     constructor(_props: PropType<T> & BasePropsType) {
       super();
@@ -128,6 +135,18 @@ export function WebComponent<T extends { [key: string]: () => PropertyDescriptor
       if (shadowCache in this) {
         (this as any)[shadowCache].unmount();
       }
+    }
+
+    fireEvent(eventName: string, customEventInit: CustomEventInit<any>) {
+      const previousEventPromises = active.eventPromises;
+      const eventPromises: Promise<unknown>[] = [];
+      active.eventPromises = eventPromises;
+      const customEvent = new CustomEvent(eventName as string, customEventInit);
+      this.dispatchEvent(customEvent);
+
+      active.eventPromises = previousEventPromises;
+
+      return eventPromises;
     }
 
     addEventListener(
