@@ -1,12 +1,5 @@
 import { expect } from "@esm-bundle/chai";
-import {
-  createComponent,
-  mount,
-  dispatchEvent,
-  WebComponent,
-  prop,
-  define,
-} from "@plusnew/webcomponent";
+import { mount, WebComponent, prop, define } from "@plusnew/webcomponent";
 import { signal } from "@preact/signals-core";
 
 describe("webcomponent", () => {
@@ -34,7 +27,7 @@ describe("webcomponent", () => {
             onclick={async () => {
               this.#loading.value = true;
               try {
-                await Promise.all(dispatchEvent(this, "foo", { detail: null }));
+                await Promise.all(this.fireEvent("foo", { detail: null }));
               } catch (_err) {}
               this.#loading.value = false;
             }}
