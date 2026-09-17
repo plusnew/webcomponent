@@ -49,10 +49,10 @@ export function createComponent<T extends new (...args: any[]) => HTMLElement>(
 
 export const getParentSymbol = Symbol("getParent");
 
-export function findParentOrNull<T = Element>(
+export function findParent<T = Element>(
   needle: { new (args: any): T } | string,
   haystack?: Element,
-): T | null {
+): T {
   function getParent(element: Element) {
     if (getParentSymbol in element) {
       return (element as any)[getParentSymbol]();
@@ -92,27 +92,16 @@ export function findParentOrNull<T = Element>(
   if (parentsCacheSymbol in target) {
     const parentsCacheMap = target[parentsCacheSymbol] as any;
     if (parentsCacheMap.has(needle) === false) {
-      parentsCacheMap.set(needle, findParentOrNull(needle, getParent(target)));
+      parentsCacheMap.set(needle, findParent(needle, getParent(target)));
     }
     return parentsCacheMap.get(needle);
   } else {
     const parent = getParent(target);
     if (parent === null) {
-      return null;
+      throw new Error(`Could not find parent ${needle.toString()}`);
     }
-    return findParentOrNull(needle, parent);
+    return findParent(needle, parent);
   }
-}
-
-export function findParent<T = Element>(
-  needle: { new (args: any): T } | string,
-  haystack?: Element,
-): T {
-  const result = findParentOrNull(needle, haystack);
-  if (result === null) {
-    throw new Error(`Could not find parent ${needle.toString()}`);
-  }
-  return result;
 }
 
 export function prop<T>(): () => PropertyDescriptor<T> {
