@@ -60,7 +60,12 @@ type ReadonlyKeys<T> = {
 //   >
 // >;
 
-export type ForbiddenHTMLProperties = "innerHTML" | "outerHTML" | "innerText" | "outerText";
+export type ForbiddenHTMLProperties =
+  | "innerHTML"
+  | "outerHTML"
+  | "innerText"
+  | "outerText"
+  | "style";
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace JSX {
@@ -81,6 +86,7 @@ export namespace JSX {
     [Tag in keyof HTMLElementTagNameMap]: IntrinsicElementAttributes<HTMLElementTagNameMap[Tag]> & {
       children?: ShadowElement;
       onplusnewerror?: (evt: PlusnewErrorEvent) => void;
+      style?: { [key: string]: any };
     };
   } & {
     [Tag in keyof SVGElementTagNameMap as Tag extends "svg" ? Tag : `svg:${Tag}`]: {
@@ -89,6 +95,7 @@ export namespace JSX {
       children?: ShadowElement;
       className?: string;
       onplusnewerror?: (evt: PlusnewErrorEvent) => void;
+      style?: { [key: string]: any };
     };
   };
 
