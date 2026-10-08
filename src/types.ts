@@ -95,7 +95,7 @@ export namespace JSX {
       children?: ShadowElement;
       className?: string;
       onplusnewerror?: (evt: PlusnewErrorEvent) => void;
-      style?: { [key: string]: any };
+      style?: { [key: string]: string };
     };
   };
 
