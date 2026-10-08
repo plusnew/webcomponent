@@ -43,6 +43,8 @@ export const parentsCacheSymbol = Symbol("parentsCache");
 
 export type BasePropsType = Omit<Partial<HTMLElement>, ForbiddenHTMLProperties | "children"> & {
   children?: ShadowElement;
+  onplusnewerror?: (evt: PlusnewErrorEvent) => void;
+  style?: { [key: string]: string };
 };
 
 export type PropType<T extends { [key: string]: () => PropertyDescriptor<any> }> = {
