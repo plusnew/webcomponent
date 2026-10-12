@@ -64,6 +64,7 @@ interface IComponent extends HTMLElement {
 
 export function WebComponent<T extends { [key: string]: () => PropertyDescriptor<any> } = {}>(
   props?: T,
+  opt?: { styleSheets?: CSSStyleSheet[] },
 ): abstract new (props: PropType<T> & BasePropsType) => PropType<T> &
   IComponent & {
     fireEvent<E extends keyof CustomEvents<PropType<T>>>(
@@ -89,13 +90,17 @@ export function WebComponent<T extends { [key: string]: () => PropertyDescriptor
 
     abstract render(): ShadowElement;
 
-    connectedCallback(opt?: { shadowRootInit?: Partial<ShadowRootInit> }) {
+    connectedCallback(connectedOpt?: { shadowRootInit?: Partial<ShadowRootInit> }) {
       let shadowRoot: null | ShadowRoot = null;
       if (this.shadowRoot === null) {
-        shadowRoot = this.attachShadow({ mode: "open", ...opt?.shadowRootInit });
+        shadowRoot = this.attachShadow({ mode: "open", ...connectedOpt?.shadowRootInit });
 
         (this as any)[parentsCacheSymbol] = new Map();
         (this as any)[shadowCache] = new ShadowCache(false);
+
+        if (opt?.styleSheets?.length) {
+          shadowRoot.adoptedStyleSheets.push(...opt.styleSheets);
+        }
       } else {
         shadowRoot = this.shadowRoot;
       }
