@@ -96,6 +96,11 @@ export function WebComponent<T extends { [key: string]: () => PropertyDescriptor
 
         (this as any)[parentsCacheSymbol] = new Map();
         (this as any)[shadowCache] = new ShadowCache(false);
+
+        const Class = Object.getPrototypeOf(this);
+        if ("styleSheets" in Class) {
+          shadowRoot.adoptedStyleSheets.push(...Class.styleSheets);
+        }
       } else {
         shadowRoot = this.shadowRoot;
       }
