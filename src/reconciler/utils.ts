@@ -33,8 +33,6 @@ export class ShadowCache {
       this.abortController = null;
     }
 
-    this.value = false;
-
     for (const nestedShadow of this.nestedShadows) {
       nestedShadow.unmount();
     }

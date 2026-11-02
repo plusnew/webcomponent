@@ -105,31 +105,29 @@ export function WebComponent<T extends { [key: string]: () => PropertyDescriptor
         shadowRoot = this.shadowRoot;
       }
 
-      if ((this as any)[disconnect] === undefined) {
-        (this as any)[disconnect] = effect(() => {
-          batch(() => {
-            const previousActiveElement = active.parentElement;
-            let result: ShadowElement;
-            try {
-              active.parentElement = this;
-              result = this.render();
-              active.parentElement = previousActiveElement;
-            } catch (error) {
-              active.parentElement = previousActiveElement;
-              untracked(() => dispatchError(this, error));
+      (this as any)[disconnect] = effect(() => {
+        batch(() => {
+          const previousActiveElement = active.parentElement;
+          let result: ShadowElement;
+          try {
+            active.parentElement = this;
+            result = this.render();
+            active.parentElement = previousActiveElement;
+          } catch (error) {
+            active.parentElement = previousActiveElement;
+            untracked(() => dispatchError(this, error));
 
-              return;
-            }
+            return;
+          }
 
-            reconcile({
-              parentElement: this.shadowRoot as ShadowRoot,
-              previousSibling: null,
-              shadowCache: (this as any)[shadowCache],
-              shadowElement: result,
-            });
+          reconcile({
+            parentElement: this.shadowRoot as ShadowRoot,
+            previousSibling: null,
+            shadowCache: (this as any)[shadowCache],
+            shadowElement: result,
           });
         });
-      }
+      });
 
       return shadowRoot;
     }
@@ -138,14 +136,11 @@ export function WebComponent<T extends { [key: string]: () => PropertyDescriptor
       if (parentsCacheSymbol in this) {
         (this as any)[parentsCacheSymbol].clear();
       }
-      // Cleanup should only happen when element got actually removed
-      if (this.parentElement === null) {
-        if (disconnect in this) {
-          (this as any)[disconnect]();
-        }
-        if (shadowCache in this) {
-          (this as any)[shadowCache].unmount();
-        }
+      if (disconnect in this) {
+        (this as any)[disconnect]();
+      }
+      if (shadowCache in this) {
+        (this as any)[shadowCache].unmount();
       }
     }
 
