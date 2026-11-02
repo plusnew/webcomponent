@@ -144,6 +144,8 @@ export function WebComponent<T extends { [key: string]: () => PropertyDescriptor
       }
     }
 
+    connectedMoveCallback() {}
+
     fireEvent(eventName: string, customEventInit: CustomEventInit<any>) {
       const previousEventPromises = active.eventPromises;
       const eventPromises: Promise<unknown>[] = [];
