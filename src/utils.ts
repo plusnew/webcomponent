@@ -144,7 +144,12 @@ export function WebComponent<T extends { [key: string]: () => PropertyDescriptor
       }
     }
 
-    connectedMoveCallback() {}
+    // Add this empty function so that disconnectedCallback and connectedCallback are not called for moving
+    connectedMoveCallback() {
+      if (parentsCacheSymbol in this) {
+        (this as any)[parentsCacheSymbol].clear();
+      }
+    }
 
     fireEvent(eventName: string, customEventInit: CustomEventInit<any>) {
       const previousEventPromises = active.eventPromises;
